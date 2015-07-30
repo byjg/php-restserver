@@ -1,0 +1,24 @@
+{
+    "name": "byjg/webrequest",
+    "description": "Enable to create RESTFull services with strong model schema. The main goal is to abstract the class transformation into JSON/XML and encapsulate the server commands.",
+    "authors": [
+        {
+            "name": "João Gilberto Magalhães",
+            "email": "joao@byjg.com.br"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "ByJG\\RestServer\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {
+		"php": ">=5.4.0",
+		"byjg/xmlutil": "~1.0",
+		"byjg/anydataset": "~1.0",
+        "nikic/fast-route": "v0.6.0",
+        "filp/whoops": "1.7.0"
+	},
+    "license": "MIT"
+}

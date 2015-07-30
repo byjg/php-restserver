@@ -1,0 +1,42 @@
+<?php
+
+namespace ByJG\RestServer;
+
+use ByJG\AnyDataset\Model\ObjectHandler;
+use ByJG\RestServer\Exception\HttpResponseException;
+use ByJG\Util\XmlUtil;
+use DOMNode;
+
+class ResponseBag
+{
+    protected $collection;
+
+    public function add($object)
+    {
+        if (!is_object($object) || !is_array($object))
+        {
+            throw new HttpResponseException('You can add only object');
+        }
+        $this->collection[] = $object;
+    }
+
+    public function process(DOMNode $current = null)
+    {
+        if (is_null($current))
+        {
+            $xmlDoc = XmlUtil::CreateXmlDocument();
+            $current = XmlUtil::CreateChild($xmlDoc, "root" );
+        }
+
+        foreach ($this->collection as $object)
+        {
+            if ($object instanceof ResponseBag) {
+                $object->process($current);
+            }
+            else {
+                $objHandler = new ObjectHandler($current, $object, "object");
+                $objHandler->CreateObjectFromModel();
+            }
+        }
+    }
+}
