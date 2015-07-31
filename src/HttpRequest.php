@@ -92,7 +92,7 @@ class HttpRequest
 			$this->payload = file_get_contents("php://input");
 		}
 
-		return $this->payload();
+		return $this->payload;
     }
 
 	/**
