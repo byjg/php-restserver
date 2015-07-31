@@ -20,6 +20,11 @@ class ResponseBag
         $this->collection[] = $object;
     }
 
+    /**
+     *
+     * @param DOMNode $current
+     * @return \DOMDocument XML Node
+     */
     public function process(DOMNode $current = null)
     {
         if (is_null($current))
@@ -38,5 +43,7 @@ class ResponseBag
                 $objHandler->CreateObjectFromModel();
             }
         }
+
+        return $current;
     }
 }

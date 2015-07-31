@@ -19,4 +19,15 @@ class ServiceAbstract
         $this->request = new HttpRequest($_GET, $_POST, $_SERVER, $_SESSION, $_COOKIE);
         $this->response = new HttpResponse();
     }
+
+    public function getRequest()
+    {
+        return $this->request;
+    }
+
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
 }

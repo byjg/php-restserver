@@ -7,7 +7,7 @@ use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use InvalidArgumentException;
 
-class Route
+class RouteHandler
 {
 	use \ByJG\DesignPattern\Singleton;
 
@@ -72,6 +72,9 @@ class Route
 
 	public function process()
 	{
+        // Initialize ErrorHandler with default error handler
+        ErrorHandler::getInstance()->register();
+
 		// Get the URL parameters
 		$httpMethod = $_SERVER['REQUEST_METHOD'];
 		$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -96,18 +99,15 @@ class Route
 		{
 			case Dispatcher::NOT_FOUND:
 
-				// ... 404 Not Found
-				return self::NOT_FOUND;
+                throw new Exception\Error404Exception('404 Not found');
 
 			case Dispatcher::METHOD_NOT_ALLOWED:
 
-				// ... 405 Method Not Allowed
-				return self::METHOD_NOT_ALLOWED;
+                throw new Exception\Error405Exception('405 Method Not Allowed');
 
 			case Dispatcher::FOUND:
 
 				// ... 200 Process:
-				$handler = $routeInfo[1];
 				$vars = array_merge($routeInfo[2], $queryStr);
 
 				// Check Alias
@@ -116,17 +116,19 @@ class Route
 				{
 					$vars['module'] = $moduleAlias[$vars['module']];
 				}
+                $var['module'] = '\\' . str_replace('.', '\\', $vars['module']);
 
 				// Define output
 				if (!isset($vars['output']))
 				{
-					$vars['output'] = 'json';
+					$vars['output'] = Output::JSON;
 				}
+                ErrorHandler::getInstance()->setErrorHandler($vars['output']);
 
 				// Check if output is set
-				if ($vars['output'] != 'json' && $vars['output'] != 'xml')
+				if ($vars['output'] != Output::JSON && $vars['output'] != Output::XML && $vars['output'] != Output::CSV)
 				{
-					throw new Exception('Invalid output format. Valid are XML and JSON');
+					throw new Exception('Invalid output format. Valid are XML, JSON or CSV');
 				}
 
 				// Set all default values
@@ -134,9 +136,8 @@ class Route
 				{
 					$_REQUEST[$key] = $_GET[$key] = $vars[$key];
 				}
-				$_REQUEST['raw'] = $_GET['raw'] = isset($vars['output']) ? $vars['output'] : 'json';
 
-				return self::OK;
+                return [ $vars['module'], $vars['output'] ];
 		}
 	}
 

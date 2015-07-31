@@ -1,5 +1,8 @@
 <?php
 
+use ByJG\RestServer\RouteHandler;
+use ByJG\RestServer\ServiceHandler;
+
 //// -------------------------------------------------------------------
 //// CORS - Better do that in your http server, but you can enable here
 //// -------------------------------------------------------------------
@@ -12,15 +15,13 @@
 //}
 //// -------------------------------------------------------------------
 
-use Xmlnuke\Core\Wrapper\HtmlWrapper;
-use Xmlnuke\Core\Wrapper\RouteWrapper;
 
 require "../vendor/autoload.php";
 
 /**
  * @var RouteWrapper
  */
-$route = Route::getInstance();
+$route = RouteHandler::getInstance();
 
 /**
  * Module Alias contains the alias for full namespace class.
@@ -69,35 +70,9 @@ $route = Route::getInstance();
 // You do not need change from this point
 // --------------------------------------------------------------------------
 
-$process = $route->Process();
+list($class, $output) = $process = $route->process();
 
-switch ($process)
-{
-    case RouteWrapper::NOT_FOUND:
-
-        // ... 404 Not Found
-		header('HTTP/1.0 404 Not Found', true, 404);
-		echo "<h1>Not Found</h1>";
-
-        break;
-
-    case RouteWrapper::METHOD_NOT_ALLOWED:
-
-        // ... 405 Method Not Allowed
-		header('HTTP/1.0 405 Method Not Allowed', true, 405);
-		echo "<h1>Method Not allowed</h1>";
-		echo "Allowed methods: " . print_r($routeInfo[1], true);
-        break;
-
-    case RouteWrapper::OK:
-
-		// ... 200 Process:
-
-		HtmlWrapper::getInstance()->Process();
-        break;
-
-	default:
-		throw new \Exception('Unexpected error');
-}
+$handler = new ServiceHandler($output);
+$handler->execute($class);
 
 

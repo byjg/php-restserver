@@ -72,6 +72,11 @@ class HttpResponse
 		unset($_COOKIE[$name]);
 	}
 
+    public function getResponseBag()
+    {
+        return $this->response;
+    }
+
     public function write($object)
     {
         $this->response->add($object);
