@@ -140,6 +140,9 @@ class RouteHandler
 				}
 
                 return [ $vars['module'], $vars['output'] ];
+
+            default:
+                throw new \Exception('Unknown');
 		}
 	}
 
