@@ -7,6 +7,7 @@
 namespace ByJG\RestServer\Whoops;
 
 use Whoops\Exception\Formatter;
+use Whoops\Handler\Handler;
 
 /**
  * Catches an exception and converts it to a JSON
@@ -39,8 +40,8 @@ class PlainResponseHandler extends Handler
      */
     public function handle()
     {
-        $response = Formatter::formatException(
-                $this->getInspector()
+        $response = Formatter::formatExceptionPlain(
+            $this->getInspector()
         );
 
         echo $response;

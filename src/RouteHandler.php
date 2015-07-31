@@ -125,7 +125,7 @@ class RouteHandler
 				{
 					$vars['output'] = Output::JSON;
 				}
-                ErrorHandler::getInstance()->setErrorHandler($vars['output']);
+                ErrorHandler::getInstance()->setHandler($vars['output']);
 
 				// Check if output is set
 				if ($vars['output'] != Output::JSON && $vars['output'] != Output::XML && $vars['output'] != Output::CSV)
