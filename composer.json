@@ -1,5 +1,5 @@
 {
-    "name": "byjg/webrequest",
+    "name": "byjg/restserver",
     "description": "Enable to create RESTFull services with strong model schema. The main goal is to abstract the class transformation into JSON/XML and encapsulate the server commands.",
     "authors": [
         {
