@@ -118,7 +118,7 @@ class RouteHandler
 				{
 					$vars['module'] = $moduleAlias[$vars['module']];
 				}
-                $var['module'] = '\\' . str_replace('.', '\\', $vars['module']);
+                $vars['module'] = '\\' . str_replace('.', '\\', $vars['module']);
 
 				// Define output
 				if (!isset($vars['output']))
