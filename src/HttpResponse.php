@@ -89,7 +89,7 @@ class HttpResponse
             $this->responseDebug = new ResponseBag();
             $this->response->add($this->responseDebug);
         }
-        $this->responseDebug->add(['debug' => $string]);
+        $this->responseDebug->add(['debug' => [ $key => $string]]);
         ErrorHandler::getInstance()->addExtraInfo($key, serialize($string));
     }
 }

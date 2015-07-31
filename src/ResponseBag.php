@@ -27,6 +27,7 @@ class ResponseBag
      */
     public function process(DOMNode $current = null)
     {
+        $xmlDoc = null;
         if (is_null($current))
         {
             $xmlDoc = XmlUtil::CreateXmlDocument();
