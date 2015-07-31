@@ -2,9 +2,9 @@
 
 namespace ByJG\RestServer;
 
+use ByJG\RestServer\Whoops\PlainResponseHandler;
 use Whoops\Handler\Handler;
 use Whoops\Handler\JsonResponseHandler;
-use Whoops\Handler\PlainTextHandler;
 use Whoops\Handler\XmlResponseHandler;
 use Whoops\Run;
 
@@ -49,7 +49,7 @@ class ErrorHandler
 		}
 		else
 		{
-			$this->_handler = new PlainTextHandler();
+			$this->_handler = new PlainResponseHandler();
 		}
 
 		$this->_whoops->pushHandler($this->_handler);
