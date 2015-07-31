@@ -56,24 +56,24 @@ class ServiceHandler
         switch ($this->getOutput())
         {
             case Output::JSON:
-                echo ObjectHandler::xml2json($dom);
-                break;
+                return ObjectHandler::xml2json($dom);
 
             case Output::XML:
-                echo $dom->saveXML();
-                break;
+                return $dom->saveXML();
 
             case Output::CSV:
                 $array = XmlUtil::xml2Array($dom);
-                foreach ($array as $line)
+
+                $return = "";
+                foreach ((array)$array as $line)
                 {
-                    foreach($line as $field)
+                    foreach((array)$line as $field)
                     {
-                        echo "\"$field\";";
+                        $return .= "\"" . str_replace('"', '\\"', (is_array($field) ? json_encode($field) : $field)) . "\";";
                     }
-                    echo "\n";
+                    $return .= "\n";
                 }
-                break;
+                return $return;
 
         }
     }

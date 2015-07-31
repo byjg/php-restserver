@@ -101,6 +101,6 @@ $route = RouteHandler::getInstance();
 list($class, $output) = $process = $route->process();
 
 $handler = new ServiceHandler($output);
-$handler->execute($class);
+echo $handler->execute($class);
 
 
