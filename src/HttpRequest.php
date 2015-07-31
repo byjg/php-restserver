@@ -12,6 +12,14 @@ class HttpRequest
 
     protected $request;
 
+    /**
+     *
+     * @param array $get
+     * @param array $post
+     * @param array $server
+     * @param array $session
+     * @param array $cookie
+     */
     public function __construct($get, $post, $server, $session, $cookie)
     {
         $this->get = $get;
@@ -23,6 +31,12 @@ class HttpRequest
         $this->request = array_merge($get, $post, $server, $session, $cookie);
     }
 
+    /**
+     * Get a parameter passed by GET (the same as $_GET). If not found return false.
+     *
+     * @param string $value
+     * @return string|boolean
+     */
     public function get($value)
     {
         if (!isset($this->get[$value])) {
@@ -33,6 +47,12 @@ class HttpRequest
         }
     }
 
+    /**
+     * Get a parameter passed by POST (the same as $_POST). If not found return false.
+     *
+     * @param string $value
+     * @return string|boolean
+     */
     public function post($value)
     {
         if (!isset($this->post[$value])) {
@@ -43,6 +63,12 @@ class HttpRequest
         }
     }
 
+    /**
+     * Get the parameters sent by server (the same as $_SERVER). If not found return false.
+     *
+     * @param string $value
+     * @return string|boolean
+     */
     public function server($value)
     {
         if (!isset($this->server[$value])) {
@@ -53,6 +79,12 @@ class HttpRequest
         }
     }
 
+    /**
+     * Get a server session value(the same as $_SESSION). If not found return false.
+     *
+     * @param string $value
+     * @return string|boolean
+     */
     public function session($value)
     {
         if (!isset($this->session[$value])) {
@@ -63,6 +95,12 @@ class HttpRequest
         }
     }
 
+    /**
+     * Get the cookie sent by the client (the same as $_COOKIE). If not found return false.
+     *
+     * @param string $value
+     * @return string|boolean
+     */
     public function cookie($value)
     {
         if (!isset($this->cookie[$value])) {
@@ -73,6 +111,12 @@ class HttpRequest
         }
     }
 
+    /**
+     * Get a value from any of get, post, server, cookie or session. If not found return false.
+     *
+     * @param string $value
+     * @return string|boolean
+     */
     public function request($value)
     {
         if (!isset($this->request[$value])) {
@@ -85,6 +129,11 @@ class HttpRequest
 
     private $payload;
 
+    /**
+     * Get the payload passed during the request(the same as php://input). If not found return empty.
+     *
+     * @return string
+     */
     public function payload()
     {
 		if (is_null($this->payload))

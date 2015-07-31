@@ -20,37 +20,34 @@ class HttpResponse
     }
 
 	/**
-	* @access public
-	* @param string $name
-	* @param string $value
-	* @return string
-	* @desc Add a value in session
-	*/
+     * Add a value in session
+     *
+     * @param string $name
+     * @param string $value
+     */
 	public function setSession($name, $value)
 	{
 		$_SESSION[$name] = $value;
 	}
 
 	/**
-	* @access public
-	* @param string $name
-	* @return void
-	* @desc Remove a value in this session
-	*/
+     * Remove a value in this session
+     *
+     * @param string $name
+	 */
 	public function removeSession($name)
 	{
 		unset($_SESSION[$name]);
 	}
 
 	/**
-	* @access public
-	* @param string $name
-	* @param string $value
-	* @param int $expire (seconds from now)
-	* @param int $path (directory into domain in which the cookie will be available on )
-	* @return void
-	* @desc Add a value in cookie
-	*/
+     * Add a cookie value
+     *
+     * @param string $name
+     * @param string $value
+     * @param int $expire (seconds from now)
+     * @param int $path (directory into domain in which the cookie will be available on )
+     */
 	public function addCookie($name, $value, $expire = null, $path = null, $domain = null)
 	{
 		if (!is_null($expire))
@@ -61,27 +58,43 @@ class HttpResponse
 	}
 
 	/**
-	* @access public
-	* @param string $name
-	* @return void
-	* @desc Remove a cookie
-	*/
-	public function removeCookie($name)
+     * Delete a cookie
+     *
+     * @param string $name
+     */
+    public function removeCookie($name)
 	{
 		setcookie($name, null, time() - 3600);
 		unset($_COOKIE[$name]);
 	}
 
+    /**
+     * ResponseBag is a collection of objects will be returned to the  client. RestServer call handle the ResponseBag to
+     * return the proper output. Avoid to use it directly here. Prefer the methods write or writeDebug;
+     *
+     * @return ResponseBag
+     */
     public function getResponseBag()
     {
         return $this->response;
     }
 
+    /**
+     * Add an array, model or stdClass to be processed.
+     *
+     * @param mixed $object
+     */
     public function write($object)
     {
         $this->response->add($object);
     }
 
+    /**
+     * Added informations for debug purposes only. In case the error it will showed and the result a node called "debug" will be added.
+     *
+     * @param string $key
+     * @param mixed $string
+     */
     public function writeDebug($key, $string)
     {
         if (is_null($this->responseDebug))
