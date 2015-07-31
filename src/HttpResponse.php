@@ -82,7 +82,7 @@ class HttpResponse
         $this->response->add($object);
     }
 
-    public function writeDebug($string)
+    public function writeDebug($key, $string)
     {
         if (is_null($this->responseDebug))
         {
@@ -90,6 +90,6 @@ class HttpResponse
             $this->response->add($this->responseDebug);
         }
         $this->responseDebug->add(['debug' => $string]);
-        ErrorHandler::getInstance()->addExtraInfo(serialize($string));
+        ErrorHandler::getInstance()->addExtraInfo($key, serialize($string));
     }
 }

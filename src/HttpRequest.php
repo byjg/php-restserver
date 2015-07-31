@@ -12,7 +12,7 @@ class HttpRequest
 
     protected $request;
 
-    protected function __construct($get, $post, $server, $session, $cookie)
+    public function __construct($get, $post, $server, $session, $cookie)
     {
         $this->get = $get;
         $this->post = $post;
@@ -91,17 +91,17 @@ class HttpRequest
 	public function getRequestIp()
 	{
 		$ipaddress = '';
-		if (isset($this->server('HTTP_CLIENT_IP'))) {
+		if ($this->server('HTTP_CLIENT_IP') !== false) {
             $ipaddress = $this->server('HTTP_CLIENT_IP');
-        } else if (isset($this->server('HTTP_X_FORWARDED_FOR'))) {
+        } else if ($this->server('HTTP_X_FORWARDED_FOR') !== false) {
             $ipaddress = $this->server('HTTP_X_FORWARDED_FOR');
-        } else if (isset($this->server('HTTP_X_FORWARDED'))) {
+        } else if ($this->server('HTTP_X_FORWARDED') !== false) {
             $ipaddress = $this->server('HTTP_X_FORWARDED');
-        } else if (isset($this->server('HTTP_FORWARDED_FOR'))) {
+        } else if ($this->server('HTTP_FORWARDED_FOR') !== false) {
             $ipaddress = $this->server('HTTP_FORWARDED_FOR');
-        } else if (isset($this->server('HTTP_FORWARDED'))) {
+        } else if ($this->server('HTTP_FORWARDED') !== false) {
             $ipaddress = $this->server('HTTP_FORWARDED');
-        } else if (isset($this->server('REMOTE_ADDR'))) {
+        } else if ($this->server('REMOTE_ADDR') !== false) {
             $ipaddress = $this->server('REMOTE_ADDR');
         } else {
             $ipaddress = 'UNKNOWN';
@@ -117,20 +117,20 @@ class HttpRequest
 	public function getRequestServer($port = false, $protocol = false)
 	{
 		$servername = '';
-		if (isset($this->server('SERVER_NAME')) && !empty($this->server('SERVER_NAME'))) {
+		if ($this->server('SERVER_NAME') !== false) {
             $servername = $this->server('SERVER_NAME');
-        } else if (isset($this->server('HTTP_HOST')) && !empty($this->server('HTTP_HOST'))) {
+        } else if ($this->server('HTTP_HOST' !== false)) {
             $servername = $this->server('HTTP_HOST');
         } else {
             $servername = $this->server('SERVER_ADDR');
         }
 
-        if ($port && isset($this->server('SERVER_PORT'))) {
+        if ($port && $this->server('SERVER_PORT' !== false)) {
             $servername .= ':' . $this->server('SERVER_PORT');
         }
 
         if ($protocol) {
-            $servername = ((!empty($this->server('HTTPS')) && $this->server('HTTPS') !== 'off' || $this->server('SERVER_PORT') == 443) ? "https://" : "http://") . $servername;
+            $servername = (($this->server('HTTPS') !== 'off' || $this->server('SERVER_PORT') == 443) ? "https://" : "http://") . $servername;
         }
 
         return $servername;

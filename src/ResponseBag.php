@@ -13,7 +13,7 @@ class ResponseBag
 
     public function add($object)
     {
-        if (!is_object($object) || !is_array($object))
+        if (!is_object($object) && !is_array($object))
         {
             throw new HttpResponseException('You can add only object');
         }
@@ -33,7 +33,7 @@ class ResponseBag
             $current = XmlUtil::CreateChild($xmlDoc, "root" );
         }
 
-        foreach ($this->collection as $object)
+        foreach ((array)$this->collection as $object)
         {
             if ($object instanceof ResponseBag) {
                 $object->process($current);
@@ -44,6 +44,6 @@ class ResponseBag
             }
         }
 
-        return $current;
+        return $xmlDoc;
     }
 }
