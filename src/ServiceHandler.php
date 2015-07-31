@@ -2,6 +2,12 @@
 
 namespace ByJG\RestServer;
 
+use BadMethodCallException;
+use ByJG\AnyDataset\Model\ObjectHandler;
+use ByJG\RestServer\Exception\ClassNotFoundException;
+use ByJG\RestServer\Exception\InvalidClassException;
+use ByJG\Util\XmlUtil;
+
 class ServiceHandler
 {
     protected $output = Output::JSON;
@@ -25,14 +31,14 @@ class ServiceHandler
     {
         if (!class_exists($class))
         {
-            throw new Exception\ClassNotFoundException("Class $class not found");
+            throw new ClassNotFoundException("Class $class not found");
         }
 
         $instance = new $class();
 
         if (!($instance instanceof ServiceAbstract))
         {
-            throw new Exception\InvalidClassException("Class $class is not instance of ServiceAbstract");
+            throw new InvalidClassException("Class $class is not instance of ServiceAbstract");
         }
 
 		$method = strtolower($instance->getRequest()->server("REQUEST_METHOD"));
@@ -50,7 +56,7 @@ class ServiceHandler
         switch ($this->getOutput())
         {
             case Output::JSON:
-                echo \ByJG\AnyDataset\Model\ObjectHandler::xml2json($dom);
+                echo ObjectHandler::xml2json($dom);
                 break;
 
             case Output::XML:
@@ -58,12 +64,12 @@ class ServiceHandler
                 break;
 
             case Output::CSV:
-                $array = \ByJG\Util\XmlUtil::xml2Array($dom);
+                $array = XmlUtil::xml2Array($dom);
                 foreach ($array as $line)
                 {
                     foreach($line as $field)
                     {
-                        echo "\"$field\";"
+                        echo "\"$field\";";
                     }
                     echo "\n";
                 }

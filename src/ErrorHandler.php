@@ -7,7 +7,6 @@ use Whoops\Handler\JsonResponseHandler;
 use Whoops\Handler\PlainTextHandler;
 use Whoops\Handler\XmlResponseHandler;
 use Whoops\Run;
-use Xmlnuke\Core\Enum\OutputData;
 
 class ErrorHandler
 {

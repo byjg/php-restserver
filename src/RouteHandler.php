@@ -6,6 +6,8 @@ use Exception;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use InvalidArgumentException;
+use ByJG\RestServer\Exception\Error404Exception;
+use ByJG\RestServer\Exception\Error405Exception;
 
 class RouteHandler
 {
@@ -99,11 +101,11 @@ class RouteHandler
 		{
 			case Dispatcher::NOT_FOUND:
 
-                throw new Exception\Error404Exception('404 Not found');
+                throw new Error404Exception('404 Not found');
 
 			case Dispatcher::METHOD_NOT_ALLOWED:
 
-                throw new Exception\Error405Exception('405 Method Not Allowed');
+                throw new Error405Exception('405 Method Not Allowed');
 
 			case Dispatcher::FOUND:
 

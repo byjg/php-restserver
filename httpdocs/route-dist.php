@@ -15,8 +15,25 @@ use ByJG\RestServer\ServiceHandler;
 //}
 //// -------------------------------------------------------------------
 
+$autoloadDir = [
+    __DIR__ . "/../vendor/autoload.php", // In a sub-folder in the same level of 'vendor'
+    __DIR__ . "/../../../autoload.php",  // Symbolic link to composer requirement
+    __DIR__ . "vendor/autoload.php"      // In the same folder of router.
+];
+$loaded = false;
+foreach ($autoloadDir as $autoload)
+{
+    if (file_exists($autoload))
+    {
+        require_once $autoload;
+        $loaded = true;
+        break;
+    }
+}
+if (!$loaded) {
+    throw new \Exception('Autoload not found. Did you run `composer dump-autload`?');
+}
 
-require "../vendor/autoload.php";
 
 /**
  * @var RouteWrapper
