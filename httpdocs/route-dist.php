@@ -3,18 +3,6 @@
 use ByJG\RestServer\RouteHandler;
 use ByJG\RestServer\ServiceHandler;
 
-//// -------------------------------------------------------------------
-//// CORS - Better do that in your http server, but you can enable here
-//// -------------------------------------------------------------------
-//header('Access-Control-Allow-Origin: *');
-//header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
-//header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
-//$method = $_SERVER['REQUEST_METHOD'];
-//if($method == "OPTIONS") {
-//	die();
-//}
-//// -------------------------------------------------------------------
-
 ob_start();
 session_start();
 
@@ -60,7 +48,7 @@ $route = RouteHandler::getInstance();
  * you can request only:
  * http://somehost/module/somealias
  */
-//$routeWraper->addModuleAlias('somealias', 'Full.NameSpace.To.Module');
+//$route->addModuleAlias('somealias', 'Full.NameSpace.To.Module');
 
 /**
  * You can create RESTFul compliant URL by adding the version.
@@ -72,7 +60,7 @@ $route = RouteHandler::getInstance();
  *
  * The default value is "1.0"
  */
-//$routeWraper->setDefaultRestVersion('1.0');
+//$route->setDefaultRestVersion('1.0');
 
 /**
  * There are a couple of basic routes pattern for the default parameters
@@ -84,7 +72,7 @@ $route = RouteHandler::getInstance();
  *
  * You can create your own route pattern by define the methods here
  */
-//$routeWraper->setDefaultMethods([
+//$route->setDefaultMethods([
 //	// Service
 //	[ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}', "handler" => 'service' ],
 //	[ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}.{output}', "handler" => 'service' ],
@@ -101,6 +89,9 @@ $route = RouteHandler::getInstance();
 list($class, $output) = $process = $route->process();
 
 $handler = new ServiceHandler($output);
-echo $handler->execute($class);
+$handler->setHeader();
+//if ($handler->setHeaderCors()) {
+    echo $handler->execute($class);
+//}
 
 

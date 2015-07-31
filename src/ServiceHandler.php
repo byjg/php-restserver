@@ -27,6 +27,39 @@ class ServiceHandler
         $this->setOutput($output);
     }
 
+    public function setHeader()
+    {
+        switch ($this->getOutput())
+        {
+            case Output::JSON:
+                header('Content-Type: application/json');
+                break;
+
+            case Output::XML:
+                header('Content-Type: text/xml');
+                break;
+
+            default:
+                header('Content-Type: text/plain');
+                break;
+        }
+    }
+
+    /**
+     * CORS - Better do that in your http server, but you can enable calling this
+     */
+    public function setHeaderCors()
+    {
+        header('Access-Control-Allow-Origin: *');
+        header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+        $method = $_SERVER['REQUEST_METHOD'];
+        if($method == "OPTIONS") {
+            return false;
+        }
+        return true;
+    }
+
     public function execute($class)
     {
         if (!class_exists($class))
