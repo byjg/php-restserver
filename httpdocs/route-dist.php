@@ -3,36 +3,8 @@
 use ByJG\RestServer\RouteHandler;
 use ByJG\RestServer\ServiceHandler;
 
-ob_start();
-session_start();
 
-// Try to autoload class
-$autoloadDir = [
-    __DIR__ . "/../vendor/autoload.php", // In a sub-folder in the same level of 'vendor'
-    __DIR__ . "/../../../autoload.php",  // Symbolic link to composer requirement
-    __DIR__ . "vendor/autoload.php"      // In the same folder of router.
-];
-$loaded = false;
-foreach ($autoloadDir as $autoload)
-{
-    if (file_exists($autoload))
-    {
-        require_once $autoload;
-        $loaded = true;
-        break;
-    }
-}
-if (!$loaded) {
-    throw new \Exception('Autoload not found. Did you run `composer dump-autload`?');
-}
-
-// If request is a valid PHP file, load it instead process on Route;
-$request = "." . $_SERVER['REQUEST_URI'];
-if (file_exists($request))
-{
-    require $request;
-    return;
-}
+autoload();
 
 /**
  * @var RouteWrapper
@@ -95,3 +67,36 @@ $handler->setHeader();
 //}
 
 
+function autoload()
+{
+    ob_start();
+    session_start();
+
+    // Try to autoload class
+    $autoloadDir = [
+        __DIR__ . "/../vendor/autoload.php", // In a sub-folder in the same level of 'vendor'
+        __DIR__ . "/../../../autoload.php",  // Symbolic link to composer requirement
+        __DIR__ . "vendor/autoload.php"      // In the same folder of router.
+    ];
+    $loaded = false;
+    foreach ($autoloadDir as $autoload)
+    {
+        if (file_exists($autoload))
+        {
+            require_once $autoload;
+            $loaded = true;
+            break;
+        }
+    }
+    if (!$loaded) {
+        throw new \Exception('Autoload not found. Did you run `composer dump-autload`?');
+    }
+
+    // If request is a valid PHP file, load it instead process on Route;
+    $request = "." . $_SERVER['REQUEST_URI'];
+    if (file_exists($request))
+    {
+        require $request;
+        return;
+    }
+}
