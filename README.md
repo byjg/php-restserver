@@ -1,4 +1,5 @@
 # PHP Rest Server
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/40968662-27b2-4a31-9872-a29bdd68da2b/mini.png)](https://insight.sensiolabs.com/projects/40968662-27b2-4a31-9872-a29bdd68da2b)
 
 ## Description
 
@@ -52,7 +53,7 @@ The available options are:
 * session('key') - Get a server session value(the same as $_SESSION). If not found return false.
 * request('key') - Get a value from any of get, post, server, cookie or session. If not found return false.
 * payload() - Get the payload passed during the request(the same as php://input). If not found return empty.
-* getRequestIP() - Get the client request IP. It handles proxies and firewalls to get the corret IP;
+* getRequestIP() - Get the client request IP. It handles proxies and firewalls to get the correct IP;
 * getRequestServer() - Get the sername. It handles the different environments;
 
 
@@ -82,7 +83,8 @@ class MyClass extends \ByJG\RestServer\ServiceAbstract
         // Model  
         // Can be an object :
         //    - with public properties 
-        //    - with getter and setters
+        //    - with getters and setters
+        //    - with mixed public properties and getters and setters
         // See more about object transformations in the project https://github.com/byjg/anydataset
         // For this example, assume that Model have two properties: prop1 and prop2
         $model = new Model('tests', 'another test');
@@ -109,23 +111,83 @@ The result will be something like:
 ```
 
 
-### Combining HTTP Method with ACTION
+### Combining HTTP Methods with ACTION
 
-If you pass a parameter called action you can combine the HTTP Request and the action for create a specific method for
+If you pass a query parameter called action you can combine the HTTP Request and the action for create a specific method for
 handle this specific action. Some examples below:
 
 
-| HTTP Method  | Action      | Method in the class  |
-|--------------|-------------|----------------------|
-| GET          | account     | getAccount()         |
-| POST         | account     | postAccount()        |
-| PUT          | account     | putAccount()         |
-| DELETE       | account     | deleteAccount()      |
-| PUT          | -           | put()                |
+| HTTP Method  | Action Parameter | Method in the class  |
+|--------------|------------------|----------------------|
+| GET          | -                | get()                |
+| POST         | -                | post()               |
+| DELETE       | -                | delete()             |
+| PUT          | -                | put()                |
+| GET          | someaction       | getSomeaction()      |
+| POST         | someaction       | postSomeaction()     |
+| PUT          | someaction       | putSomeaction()      |
+| DELETE       | someactiom       | deleteSomeaction()   |
 
 
 ### Routing
 
+RestServer ByJG uses the Nikic/FastRoute project to do the routing. Yout need copy the file httpdocs/route-dist.php as route.php
+into the root of your public folder accessible throught the web.
+
+This file setup all routing process and handle the execution of the proper rest class.
+
+There some pre-defined routes as you can see below but you can change it any time you want.
+
+The pre-defined routes are:
+
+| Pattern                                                        | Exeample                                 |
+|----------------------------------------------------------------|------------------------------------------|
+| /{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}   | /1.0/MyNameSpace.Module/list/1/2345.json |
+| /{version}/{module}/{action}/{id:[0-9]+}.{output}              | /1.0/MyNameSpace.Module/list/1.json      |
+| /{version}/{module}/{id:[0-9]+}/{action}.{output}              | /1.0/MyNameSpace.Module/1/list.json      |
+| /{version}/{module}/{id:[0-9]+}.{output}                       | /1.0/MyNameSpace.Module/1.json           |
+| /{version}/{module}/{action}.{output}                          | /1.0/MyNameSpace.Module/list.json        |
+| /{version}/{module}.{output}                                   | /1.0/MyNameSpace.Module.json             |
+
+All variables defined above will be available throught the $_GET. The variables output, module and version having a special
+meaning into the system:
+
+- **output** will be define the output. Can be "json", "xml" or "csv"
+- **module** will be the full namespace to your class. You have to separate the namespaces with "period" (.). Do not use back slash (\);
+- **vesion** have a symbolic version for your rest server.
+
+##### Creating Module Alias
+
+Instead to pass the full namespace class you can create a module alias. Just add in the route.php file the follow code:
+
+```php
+$route->addModuleAlias('somealias', 'Full.NameSpace.To.Module');
+```
+
+In the example above if the parameter "module" matches with the value "somealias" will be mapped to the class "\Full\NameSpace\To\Module"
+
+
+#### Versioning your rest service
+
+You can define a version to yout rest service and create a EOL for changes in the services that breaking the interface. Just set in the "route.php" file the follow line:
+
+```php
+$route->setDefaultRestVersion('2.0');
+```
+
+This will populate de variable "version".
+
+#### Creating your own routes
+
+You can override the default route values and create your own.
+
+```php
+$route->setDefaultMethods([
+	[ "method" => ['GET'], "pattern" => '/{module}/{action}/{id:[0-9]+}.{output}', "handler" => 'service' ],
+]);
+```
+
+This will override all previous routes and setup the one defined above.
 
 ## Install
 
@@ -133,3 +195,6 @@ Just type: `composer install "byjg/restserver=~1.0"`
 
 ## Running Tests
 
+
+----
+[![Opensource ByJG](http://opensource.byjg.com/images/2_corporate/logo.png)](http://opensource.byjg.com)
