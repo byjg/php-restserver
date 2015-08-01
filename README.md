@@ -197,4 +197,4 @@ Just type: `composer install "byjg/restserver=~1.0"`
 
 
 ----
-[![Opensource ByJG](http://opensource.byjg.com/images/2_corporate/logo.png)](http://opensource.byjg.com)
+[Open source ByJG](http://opensource.byjg.com)
