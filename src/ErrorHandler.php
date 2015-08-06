@@ -2,10 +2,10 @@
 
 namespace ByJG\RestServer;
 
+use ByJG\RestServer\Whoops\JsonResponseHandler;
 use ByJG\RestServer\Whoops\PlainResponseHandler;
+use ByJG\RestServer\Whoops\XmlResponseHandler;
 use Whoops\Handler\Handler;
-use Whoops\Handler\JsonResponseHandler;
-use Whoops\Handler\XmlResponseHandler;
 use Whoops\Run;
 
 class ErrorHandler
@@ -80,7 +80,8 @@ class ErrorHandler
 	public function addExtraInfo($name, $value)
 	{
 		if (method_exists($this->_handler, 'addDataTable')) {
-            $this->_handler->addDataTable('Rest Server Debug', array($name => $value));
+            $data = $this->_handler->getDataTable();
+            $this->_handler->addDataTable('Info #' . (count($data) + 1), array($name => $value));
         }
     }
 

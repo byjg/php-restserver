@@ -16,6 +16,8 @@ use Whoops\Handler\Handler;
  */
 class PlainResponseHandler extends Handler
 {
+    use \ByJG\RestServer\Whoops\WhoopsDebugTrait;
+    
     /**
      * @var bool
      */
@@ -44,6 +46,11 @@ class PlainResponseHandler extends Handler
             $this->getInspector()
         );
 
+        $debug = $this->getDataTable();
+        if (count($debug) > 0) {
+            $response .= "\n\n" . json_encode(["debug" => $debug]);
+        }
+        
         echo $response;
         return Handler::QUIT;
     }
