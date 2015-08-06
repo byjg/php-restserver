@@ -16,7 +16,7 @@ class HttpResponse
 
     public function __construct()
     {
-        $this->response = new ResponseBag();
+        $this->emptyResponse();
     }
 
 	/**
@@ -104,5 +104,10 @@ class HttpResponse
         }
         $this->responseDebug->add(['debug' => [ $key => $string]]);
         ErrorHandler::getInstance()->addExtraInfo($key, serialize($string));
+    }
+
+    public function emptyResponse()
+    {
+        $this->response = new ResponseBag();
     }
 }
