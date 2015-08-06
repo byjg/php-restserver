@@ -4,7 +4,7 @@ namespace ByJG\RestServer;
 
 use ByJG\RestServer\Whoops\JsonResponseHandler;
 use ByJG\RestServer\Whoops\PlainResponseHandler;
-use ByJG\RestServer\Whoops\XmlResponseHandler;
+use Whoops\Handler\XmlResponseHandler;
 use Whoops\Handler\Handler;
 use Whoops\Run;
 

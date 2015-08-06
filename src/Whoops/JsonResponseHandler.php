@@ -8,7 +8,7 @@ namespace ByJG\RestServer\Whoops;
 
 use Whoops\Exception\Formatter;
 use Whoops\Handler\Handler;
-use Whoops\Handler\JsonResponseHandler;
+use Whoops\Handler\JsonResponseHandler as OriginalJsonHandler;
 use Whoops\Util\Misc;
 
 /**
@@ -16,7 +16,7 @@ use Whoops\Util\Misc;
  * response. Additionally can also return exception
  * frames for consumption by an API.
  */
-class JsonResponseHandler extends JsonResponseHandler
+class JsonResponseHandler extends OriginalJsonHandler
 {
     use \ByJG\RestServer\Whoops\WhoopsDebugTrait;
 
