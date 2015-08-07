@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Restserver by byjg</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Restserver</h1>
+      <h2 class="project-tagline">Enable to create RESTFull services with strong model schema. The main goal is to abstract the class transformation into JSON/XML and encapsulate the server commands.</h2>
+      <a href="https://github.com/byjg/restserver" class="btn">View on GitHub</a>
+      <a href="https://github.com/byjg/restserver/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/byjg/restserver/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="php-rest-server" class="anchor" href="#php-rest-server" aria-hidden="true"><span class="octicon octicon-link"></span></a>PHP Rest Server</h1>
+
+<p><a href="https://insight.sensiolabs.com/projects/40968662-27b2-4a31-9872-a29bdd68da2b"><img src="https://insight.sensiolabs.com/projects/40968662-27b2-4a31-9872-a29bdd68da2b/mini.png" alt="SensioLabsInsight"></a></p>
+
+<h2>
+<a id="description" class="anchor" href="#description" aria-hidden="true"><span class="octicon octicon-link"></span></a>Description</h2>
+
+<p>Enable to create RESTFull services with strong model schema. The main goal is to abstract the class transformation 
+into JSON/XML and encapsulate the server commands.</p>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>The main purpose of this package is abstract all complexity to process a RESTFull request and handle the object response. </p>
+
+<p>The quick guide is:</p>
+
+<ul>
+<li>Create an empty class exteding from \ByJG\RestServer\ServiceAbstract</li>
+<li>Implement the methods that will handle the HTTP METHODS (Get, Post, Delete or Put);</li>
+</ul>
+
+<p>For example, if you want to process the HTTP method POST you have to do:</p>
+
+<div class="highlight highlight-php"><pre><span class="pl-s1"><span class="pl-k">namespace</span> <span class="pl-en">Sample</span></span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">MyClass</span> <span class="pl-k">extends</span> <span class="pl-c1">\ByJG\RestServer\</span><span class="pl-e">ServiceAbstract</span></span>
+<span class="pl-s1">{</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">post</span>()</span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">        <span class="pl-smi">$id</span> <span class="pl-k">=</span> <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span>getRequest()<span class="pl-k">-&gt;</span>get(<span class="pl-s"><span class="pl-pds">'</span>id<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">        <span class="pl-c">// Do something here...</span></span>
+<span class="pl-s1"></span>
+<span class="pl-s1">        <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span>getResponse()<span class="pl-k">-&gt;</span>write( [ <span class="pl-s"><span class="pl-pds">'</span>result<span class="pl-pds">'</span></span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">'</span>ok<span class="pl-pds">'</span></span> ] );</span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1">}</span></pre></div>
+
+<p>The usual url for call this class is (see more in Routing below):</p>
+
+<pre><code>http://yourserver.com/1.0/Sample.MyClass/1234.json     # Or xml or csv
+</code></pre>
+
+<h3>
+<a id="processing-the-request" class="anchor" href="#processing-the-request" aria-hidden="true"><span class="octicon octicon-link"></span></a>Processing the request</h3>
+
+<p>All $_GET, $_SERVER, $_POST, etc are encapsulated in the HttpRequest object. Inside the ServiceAbstract class you just call
+<code>$this-&gt;getRequest()</code> method. </p>
+
+<p>The available options are:</p>
+
+<ul>
+<li>get('key') - Get a parameter passed by GET (the same as $_GET). If not found return false.</li>
+<li>post('key') - Get a parameter passed by POST (the same as $_POST). If not found return false.</li>
+<li>server('key') - Get the parameters sent by server (the same as $_SERVER). If not found return false.</li>
+<li>cookie('key') - Get the cookie sent by the client (the same as $_COOKIE). If not found return false.</li>
+<li>session('key') - Get a server session value(the same as $_SESSION). If not found return false.</li>
+<li>request('key') - Get a value from any of get, post, server, cookie or session. If not found return false.</li>
+<li>payload() - Get the payload passed during the request(the same as php://input). If not found return empty.</li>
+<li>getRequestIP() - Get the client request IP. It handles proxies and firewalls to get the correct IP;</li>
+<li>getRequestServer() - Get the sername. It handles the different environments;</li>
+</ul>
+
+<h3>
+<a id="output-your-data" class="anchor" href="#output-your-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Output your data</h3>
+
+<p>The main goal of the RestServer ByJG is work with the objects in your native form. The processing to the proper output like
+JSON, XML or CSV is done by the platform. See below some examples:</p>
+
+<div class="highlight highlight-php"><pre><span class="pl-s1"><span class="pl-k">namespace</span> <span class="pl-en">Sample</span></span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">class</span> <span class="pl-en">MyClass</span> <span class="pl-k">extends</span> <span class="pl-c1">\ByJG\RestServer\</span><span class="pl-e">ServiceAbstract</span></span>
+<span class="pl-s1">{</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">public</span> <span class="pl-k">function</span> <span class="pl-en">get</span>()</span>
+<span class="pl-s1">    {</span>
+<span class="pl-s1">        <span class="pl-c">// Output an array</span></span>
+<span class="pl-s1">        <span class="pl-smi">$array</span> <span class="pl-k">=</span> [<span class="pl-s"><span class="pl-pds">"</span>field<span class="pl-pds">"</span></span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">"</span>value<span class="pl-pds">"</span></span>];</span>
+<span class="pl-s1">        <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span>getResponse()<span class="pl-k">-&gt;</span>write(<span class="pl-smi">$array</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">        <span class="pl-c">// Output a stdClass</span></span>
+<span class="pl-s1">        <span class="pl-smi">$obj</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">\stdClass</span>();</span>
+<span class="pl-s1">        <span class="pl-smi">$obj</span><span class="pl-k">-&gt;</span><span class="pl-smi">MyField</span> <span class="pl-k">=</span> [ <span class="pl-s"><span class="pl-pds">"</span>teste1<span class="pl-pds">"</span></span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">"</span>value1<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>test2<span class="pl-pds">"</span></span> <span class="pl-k">=&gt;</span> [ <span class="pl-s"><span class="pl-pds">"</span>3<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>4<span class="pl-pds">"</span></span>]];</span>
+<span class="pl-s1">        <span class="pl-smi">$obj</span><span class="pl-k">-&gt;</span><span class="pl-smi">OtherField</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>OK<span class="pl-pds">"</span></span>;</span>
+<span class="pl-s1">        <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span>getResponse()<span class="pl-k">-&gt;</span>write(<span class="pl-smi">$obj</span>);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">        <span class="pl-c">// Model  </span></span>
+<span class="pl-s1">        <span class="pl-c">// Can be an object :</span></span>
+<span class="pl-s1">        <span class="pl-c">//    - with public properties </span></span>
+<span class="pl-s1">        <span class="pl-c">//    - with getters and setters</span></span>
+<span class="pl-s1">        <span class="pl-c">//    - with mixed public properties and getters and setters</span></span>
+<span class="pl-s1">        <span class="pl-c">// See more about object transformations in the project https://github.com/byjg/anydataset</span></span>
+<span class="pl-s1">        <span class="pl-c">// For this example, assume that Model have two properties: prop1 and prop2</span></span>
+<span class="pl-s1">        <span class="pl-smi">$model</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-c1">Model</span>(<span class="pl-s"><span class="pl-pds">'</span>tests<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>another test<span class="pl-pds">'</span></span>);</span>
+<span class="pl-s1">        <span class="pl-smi">$this</span><span class="pl-k">-&gt;</span>getResponse()<span class="pl-k">-&gt;</span>write(<span class="pl-smi">$model</span>);</span>
+<span class="pl-s1">    }</span>
+<span class="pl-s1">}</span></pre></div>
+
+<p>The result will be something like:</p>
+
+<div class="highlight highlight-json"><pre>{
+    <span class="pl-s"><span class="pl-pds">"</span>field<span class="pl-pds">"</span></span>:<span class="pl-s"><span class="pl-pds">"</span>value<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>MyField<span class="pl-pds">"</span></span>:{
+        <span class="pl-s"><span class="pl-pds">"</span>teste1<span class="pl-pds">"</span></span>:<span class="pl-s"><span class="pl-pds">"</span>value1<span class="pl-pds">"</span></span>,
+        <span class="pl-s"><span class="pl-pds">"</span>test2<span class="pl-pds">"</span></span>:[<span class="pl-s"><span class="pl-pds">"</span>3<span class="pl-pds">"</span></span>,<span class="pl-s"><span class="pl-pds">"</span>4<span class="pl-pds">"</span></span>]
+    },
+    <span class="pl-s"><span class="pl-pds">"</span>OtherField<span class="pl-pds">"</span></span>:<span class="pl-s"><span class="pl-pds">"</span>OK<span class="pl-pds">"</span></span>,
+    <span class="pl-s"><span class="pl-pds">"</span>Model<span class="pl-pds">"</span></span>:{
+        <span class="pl-s"><span class="pl-pds">"</span>prop1<span class="pl-pds">"</span></span>:<span class="pl-s"><span class="pl-pds">"</span>tests<span class="pl-pds">"</span></span>,
+        <span class="pl-s"><span class="pl-pds">"</span>prop2<span class="pl-pds">"</span></span>:<span class="pl-s"><span class="pl-pds">"</span>another test<span class="pl-pds">"</span></span>
+    }
+}</pre></div>
+
+<h3>
+<a id="combining-http-methods-with-action" class="anchor" href="#combining-http-methods-with-action" aria-hidden="true"><span class="octicon octicon-link"></span></a>Combining HTTP Methods with ACTION</h3>
+
+<p>If you pass a query parameter called action you can combine the HTTP Request and the action for create a specific method for
+handle this specific action. Some examples below:</p>
+
+<table>
+<thead>
+<tr>
+<th>HTTP Method</th>
+<th>Action Parameter</th>
+<th>Method in the class</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td>-</td>
+<td>get()</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>-</td>
+<td>post()</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>-</td>
+<td>delete()</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>-</td>
+<td>put()</td>
+</tr>
+<tr>
+<td>GET</td>
+<td>someaction</td>
+<td>getSomeaction()</td>
+</tr>
+<tr>
+<td>POST</td>
+<td>someaction</td>
+<td>postSomeaction()</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td>someaction</td>
+<td>putSomeaction()</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td>someactiom</td>
+<td>deleteSomeaction()</td>
+</tr>
+</tbody>
+</table>
+
+<h3>
+<a id="routing" class="anchor" href="#routing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Routing</h3>
+
+<p>RestServer ByJG uses the Nikic/FastRoute project to do the routing. Yout need copy the file httpdocs/route-dist.php as route.php
+into the root of your public folder accessible throught the web.</p>
+
+<p>This file setup all routing process and handle the execution of the proper rest class.</p>
+
+<p>There some pre-defined routes as you can see below but you can change it any time you want.</p>
+
+<p>The pre-defined routes are:</p>
+
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Exeample</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}</td>
+<td>/1.0/MyNameSpace.Module/list/1/2345.json</td>
+</tr>
+<tr>
+<td>/{version}/{module}/{action}/{id:[0-9]+}.{output}</td>
+<td>/1.0/MyNameSpace.Module/list/1.json</td>
+</tr>
+<tr>
+<td>/{version}/{module}/{id:[0-9]+}/{action}.{output}</td>
+<td>/1.0/MyNameSpace.Module/1/list.json</td>
+</tr>
+<tr>
+<td>/{version}/{module}/{id:[0-9]+}.{output}</td>
+<td>/1.0/MyNameSpace.Module/1.json</td>
+</tr>
+<tr>
+<td>/{version}/{module}/{action}.{output}</td>
+<td>/1.0/MyNameSpace.Module/list.json</td>
+</tr>
+<tr>
+<td>/{version}/{module}.{output}</td>
+<td>/1.0/MyNameSpace.Module.json</td>
+</tr>
+</tbody>
+</table>
+
+<p>All variables defined above will be available throught the $_GET. The variables output, module and version having a special
+meaning into the system:</p>
+
+<ul>
+<li>
+<strong>output</strong> will be define the output. Can be "json", "xml" or "csv"</li>
+<li>
+<strong>module</strong> will be the full namespace to your class. You have to separate the namespaces with "period" (.). Do not use back slash ();</li>
+<li>
+<strong>vesion</strong> have a symbolic version for your rest server.</li>
+</ul>
+
+<h5>
+<a id="creating-module-alias" class="anchor" href="#creating-module-alias" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating Module Alias</h5>
+
+<p>Instead to pass the full namespace class you can create a module alias. Just add in the route.php file the follow code:</p>
+
+<div class="highlight highlight-php"><pre><span class="pl-s1"><span class="pl-smi">$route</span><span class="pl-k">-&gt;</span>addModuleAlias(<span class="pl-s"><span class="pl-pds">'</span>somealias<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>Full.NameSpace.To.Module<span class="pl-pds">'</span></span>);</span></pre></div>
+
+<p>In the example above if the parameter "module" matches with the value "somealias" will be mapped to the class "\Full\NameSpace\To\Module"</p>
+
+<h4>
+<a id="versioning-your-rest-service" class="anchor" href="#versioning-your-rest-service" aria-hidden="true"><span class="octicon octicon-link"></span></a>Versioning your rest service</h4>
+
+<p>You can define a version to yout rest service and create a EOL for changes in the services that breaking the interface. Just set in the "route.php" file the follow line:</p>
+
+<div class="highlight highlight-php"><pre><span class="pl-s1"><span class="pl-smi">$route</span><span class="pl-k">-&gt;</span>setDefaultRestVersion(<span class="pl-s"><span class="pl-pds">'</span>2.0<span class="pl-pds">'</span></span>);</span></pre></div>
+
+<p>This will populate de variable "version".</p>
+
+<h4>
+<a id="creating-your-own-routes" class="anchor" href="#creating-your-own-routes" aria-hidden="true"><span class="octicon octicon-link"></span></a>Creating your own routes</h4>
+
+<p>You can override the default route values and create your own.</p>
+
+<div class="highlight highlight-php"><pre><span class="pl-s1"><span class="pl-smi">$route</span><span class="pl-k">-&gt;</span>setDefaultMethods([</span>
+<span class="pl-s1">    [ <span class="pl-s"><span class="pl-pds">"</span>method<span class="pl-pds">"</span></span> <span class="pl-k">=&gt;</span> [<span class="pl-s"><span class="pl-pds">'</span>GET<span class="pl-pds">'</span></span>], <span class="pl-s"><span class="pl-pds">"</span>pattern<span class="pl-pds">"</span></span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">'</span>/{module}/{action}/{id:[0-9]+}.{output}<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">"</span>handler<span class="pl-pds">"</span></span> <span class="pl-k">=&gt;</span> <span class="pl-s"><span class="pl-pds">'</span>service<span class="pl-pds">'</span></span> ],</span>
+<span class="pl-s1">]);</span></pre></div>
+
+<p>This will override all previous routes and setup the one defined above.</p>
+
+<h2>
+<a id="install" class="anchor" href="#install" aria-hidden="true"><span class="octicon octicon-link"></span></a>Install</h2>
+
+<p>Just type: <code>composer install "byjg/restserver=~1.0"</code></p>
+
+<h2>
+<a id="running-tests" class="anchor" href="#running-tests" aria-hidden="true"><span class="octicon octicon-link"></span></a>Running Tests</h2>
+
+<hr>
+
+<p><a href="http://opensource.byjg.com">Open source ByJG</a></p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/byjg/restserver">Restserver</a> is maintained by <a href="https://github.com/byjg">byjg</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
