@@ -8,6 +8,7 @@ use FastRoute\RouteCollector;
 use InvalidArgumentException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
+use ByJG\RestServer\ServiceHandler;
 
 class RouteHandler
 {
@@ -145,5 +146,80 @@ class RouteHandler
                 throw new \Exception('Unknown');
 		}
 	}
+
+    /**
+     * Process the ROUTE (see httpdocs/route-dist.php)
+     * 
+     * ModuleAlias needs to be an array like:
+     *  [ 'alias' => 'Full.Namespace.To.Class' ]  
+     * 
+     * RoutePattern needs to be an array like:
+     * [
+	 *		[ "method" => ['GET'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}', "handler" => 'service' ],
+     * ]
+     * 
+     * @param array $moduleAlias
+     * @param array $routePattern
+     * @param string $version
+     * @param bool $cors
+     */
+    public static function processRoute($moduleAlias = [], $routePattern = null, $version = '1.0', $cors = false)
+    {
+        /**
+         * @var RouteHandler
+         */
+        $route = RouteHandler::getInstance();
+
+        /**
+         * Module Alias contains the alias for full namespace class.
+         *
+         * For example, instead to request:
+         * http://somehost/module/Full.NameSpace.To.Module
+         *
+         * you can request only:
+         * http://somehost/module/somealias
+         */
+        foreach ((array) $moduleAlias as $alias => $module) {
+            $route->addModuleAlias($alias, $module);
+        }
+
+        /**
+         * You can create RESTFul compliant URL by adding the version.
+         *
+         * In the route pattern:
+         * /{version}/someurl
+         *
+         * Setting the value here XMLNuke route will automatically replace it.
+         *
+         * The default value is "1.0"
+         */
+        $route->setDefaultRestVersion($version);
+
+        /**
+         * There are a couple of basic routes pattern for the default parameters
+         *
+         * e.g.
+         *
+         * /1.0/command/1.json
+         * /1.0/command/1.xml
+         *
+         * You can create your own route pattern by define the methods here
+         */
+        if (!empty($routePattern)) {
+            $route->setDefaultMethods($routePattern);
+        }
+
+        // --------------------------------------------------------------------------
+        // You do not need change from this point
+        // --------------------------------------------------------------------------
+
+        list($class, $output) = $process = $route->process();
+
+        $handler = new ServiceHandler($output);
+        $handler->setHeader();
+        if (!$cors || ($cors && $handler->setHeaderCors())) {
+            echo $handler->execute($class);
+        }
+    }
 
 }
