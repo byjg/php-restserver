@@ -165,6 +165,9 @@ class RouteHandler
      */
     public static function processRoute($moduleAlias = [], $routePattern = null, $version = '1.0', $cors = false)
     {
+        ob_start();
+        session_start();
+
         /**
          * @var RouteHandler
          */
