@@ -128,7 +128,7 @@ class RouteHandler
                 ErrorHandler::getInstance()->setHandler($vars['output']);
 
 				// Check if output is set
-				if ($vars['output'] != Output::JSON && $vars['output'] != Output::XML && $vars['output'] != Output::CSV)
+				if ($vars['output'] != Output::JSON && $vars['output'] != Output::XML && $vars['output'] != Output::CSV && $vars['output'] != Output::RDF)
 				{
 					throw new Exception('Invalid output format. Valid are XML, JSON or CSV');
 				}

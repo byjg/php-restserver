@@ -25,7 +25,7 @@ class ResponseBag
      * @param DOMNode $current
      * @return \DOMDocument XML Node
      */
-    public function process(DOMNode $current = null)
+    public function process(DOMNode $current = null, $annotationPrefix = 'object')
     {
         $xmlDoc = null;
         if (is_null($current))
@@ -40,7 +40,7 @@ class ResponseBag
                 $object->process($current);
             }
             else {
-                $objHandler = new ObjectHandler($current, $object, "object");
+                $objHandler = new ObjectHandler($current, $object, $annotationPrefix);
                 $objHandler->CreateObjectFromModel();
             }
         }

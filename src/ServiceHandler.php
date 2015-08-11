@@ -35,6 +35,10 @@ class ServiceHandler
                 header('Content-Type: application/json');
                 break;
 
+            case Output::RDF:
+                header('Content-Type: application/rdf+xml');
+                break;
+
             case Output::XML:
                 header('Content-Type: text/xml');
                 break;
@@ -84,7 +88,16 @@ class ServiceHandler
             throw new BadMethodCallException("The method '$customAction' does not exists.");
         }
 
-        $dom = $instance->getResponse()->getResponseBag()->process();
+        $root = null;
+        $annotationPrefix = 'object';
+        if ($this->getOutput() == Output::RDF) {
+            $xmlDoc = XmlUtil::CreateXmlDocument();
+            $root = XmlUtil::CreateChild($xmlDoc, "rdf:RDF", "", "http://www.w3.org/1999/02/22-rdf-syntax-ns#" );
+            XmlUtil::AddNamespaceToDocument($root, "rdfs", "http://www.w3.org/2000/01/rdf-schema#");
+            $annotationPrefix = 'rdf';
+        }
+
+        $dom = $instance->getResponse()->getResponseBag()->process($root, $annotationPrefix);
 
         switch ($this->getOutput())
         {
@@ -92,6 +105,7 @@ class ServiceHandler
                 return ObjectHandler::xml2json($dom);
 
             case Output::XML:
+            case Output::RDF:
                 return $dom->saveXML();
 
             case Output::CSV:
