@@ -216,7 +216,8 @@ class RouteHandler
         // You do not need change from this point
         // --------------------------------------------------------------------------
 
-        if (!empty($_SERVER['SCRIPT_FILENAME']) && file_exists($_SERVER['SCRIPT_FILENAME'])) {
+        if (!empty($_SERVER['SCRIPT_FILENAME']) && file_exists($_SERVER['SCRIPT_FILENAME'])
+            && basename($_SERVER['SCRIPT_FILENAME']) !== "route.php") {
             $file = $_SERVER['SCRIPT_FILENAME'];
             if (strpos($file, '.php') !== false) {
                 require_once($file);
