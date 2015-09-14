@@ -10,80 +10,74 @@ use Whoops\Run;
 
 class ErrorHandler
 {
-	use \ByJG\DesignPattern\Singleton;
 
-	/**
-	 *
-	 * @var Run
-	 */
-	protected $_whoops = null;
+    use \ByJG\DesignPattern\Singleton;
 
-	/**
-	 *
-	 * @var Handler
-	 */
-	protected $_handler = null;
+    /**
+     *
+     * @var Run
+     */
+    protected $_whoops = null;
 
-	protected function __construct()
-	{
-		$this->_whoops = new Run();
-		$this->setHandler();
-	}
+    /**
+     *
+     * @var Handler
+     */
+    protected $_handler = null;
 
-	/**
-	 * Set the proper Error Handler based on the Output of the page
-	 *
-	 * @param string $output
-	 */
-	public function setHandler($output = null)
-	{
-		$this->_whoops->popHandler();
+    protected function __construct()
+    {
+        $this->_whoops = new Run();
+        $this->setHandler();
+    }
 
-		if ($output == Output::JSON)
-		{
-			$this->_handler = new JsonResponseHandler();
-		}
-		else if ($output == Output::XML)
-		{
-			$this->_handler = new XmlResponseHandler();
-		}
-		else
-		{
-			$this->_handler = new PlainResponseHandler();
-		}
+    /**
+     * Set the proper Error Handler based on the Output of the page
+     *
+     * @param string $output
+     */
+    public function setHandler($output = null)
+    {
+        $this->_whoops->popHandler();
 
-		$this->_whoops->pushHandler($this->_handler);
-	}
+        if ($output == Output::JSON) {
+            $this->_handler = new JsonResponseHandler();
+        } else if ($output == Output::XML) {
+            $this->_handler = new XmlResponseHandler();
+        } else {
+            $this->_handler = new PlainResponseHandler();
+        }
 
-	/**
-	 * Set Whoops as the default error and exception handler used by PHP:
-	 */
-	public function register()
-	{
-		$this->_whoops->register();
-	}
+        $this->_whoops->pushHandler($this->_handler);
+    }
 
-	/**
-	 * Disable Whoops as the default error and exception handler used by PHP:
-	 */
-	public function unregister()
-	{
-		$this->_whoops->unregister();
-	}
+    /**
+     * Set Whoops as the default error and exception handler used by PHP:
+     */
+    public function register()
+    {
+        $this->_whoops->register();
+    }
 
-	/**
-	 * Added extra information for debug purposes on the error handler screen
-	 *
-	 * @param string $name
-	 * @param value $value
-	 */
-	public function addExtraInfo($name, $value)
-	{
-		if (method_exists($this->_handler, 'addDataTable')) {
+    /**
+     * Disable Whoops as the default error and exception handler used by PHP:
+     */
+    public function unregister()
+    {
+        $this->_whoops->unregister();
+    }
+
+    /**
+     * Added extra information for debug purposes on the error handler screen
+     *
+     * @param string $name
+     * @param value $value
+     */
+    public function addExtraInfo($name, $value)
+    {
+        if (method_exists($this->_handler, 'addDataTable')) {
             $data = $this->_handler->getDataTable();
             $this->_handler->addDataTable('Info #' . (count($data) + 1), array($name => $value));
         }
     }
-
 }
-

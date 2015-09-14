@@ -4,12 +4,12 @@ namespace ByJG\RestServer;
 
 class HttpRequest
 {
+
     protected $get;
     protected $post;
     protected $server;
     protected $session;
     protected $cookie;
-
     protected $request;
 
     /**
@@ -41,8 +41,7 @@ class HttpRequest
     {
         if (!isset($this->get[$value])) {
             return false;
-        }
-        else {
+        } else {
             return $this->get[$value];
         }
     }
@@ -57,8 +56,7 @@ class HttpRequest
     {
         if (!isset($this->post[$value])) {
             return false;
-        }
-        else {
+        } else {
             return $this->post[$value];
         }
     }
@@ -73,8 +71,7 @@ class HttpRequest
     {
         if (!isset($this->server[$value])) {
             return false;
-        }
-        else {
+        } else {
             return $this->server[$value];
         }
     }
@@ -89,8 +86,7 @@ class HttpRequest
     {
         if (!isset($this->session[$value])) {
             return false;
-        }
-        else {
+        } else {
             return $this->session[$value];
         }
     }
@@ -105,8 +101,7 @@ class HttpRequest
     {
         if (!isset($this->cookie[$value])) {
             return false;
-        }
-        else {
+        } else {
             return $this->cookie[$value];
         }
     }
@@ -121,8 +116,7 @@ class HttpRequest
     {
         if (!isset($this->request[$value])) {
             return false;
-        }
-        else {
+        } else {
             return $this->request[$value];
         }
     }
@@ -136,23 +130,22 @@ class HttpRequest
      */
     public function payload()
     {
-		if (is_null($this->payload))
-		{
-			$this->payload = file_get_contents("php://input");
-		}
+        if (is_null($this->payload)) {
+            $this->payload = file_get_contents("php://input");
+        }
 
-		return $this->payload;
+        return $this->payload;
     }
 
-	/**
-	 * Use this method to get the CLIENT REQUEST IP.
-	 * Note that if you behing a Proxy, the variable REMOTE_ADDR will always have the same IP
-	 * @return string
-	 */
-	public function getRequestIp()
-	{
-		$ipaddress = '';
-		if ($this->server('HTTP_CLIENT_IP') !== false) {
+    /**
+     * Use this method to get the CLIENT REQUEST IP.
+     * Note that if you behing a Proxy, the variable REMOTE_ADDR will always have the same IP
+     * @return string
+     */
+    public function getRequestIp()
+    {
+        $ipaddress = '';
+        if ($this->server('HTTP_CLIENT_IP') !== false) {
             $ipaddress = $this->server('HTTP_CLIENT_IP');
         } else if ($this->server('HTTP_X_FORWARDED_FOR') !== false) {
             $ipaddress = $this->server('HTTP_X_FORWARDED_FOR');
@@ -169,16 +162,16 @@ class HttpRequest
         }
 
         return $ipaddress;
-	}
+    }
 
-	/**
-	 * Use this method to get the SERVER NAME.
-	 * @return string
-	 */
-	public function getRequestServer($port = false, $protocol = false)
-	{
-		$servername = '';
-		if ($this->server('SERVER_NAME') !== false) {
+    /**
+     * Use this method to get the SERVER NAME.
+     * @return string
+     */
+    public function getRequestServer($port = false, $protocol = false)
+    {
+        $servername = '';
+        if ($this->server('SERVER_NAME') !== false) {
             $servername = $this->server('SERVER_NAME');
         } else if ($this->server('HTTP_HOST' !== false)) {
             $servername = $this->server('HTTP_HOST');
@@ -195,5 +188,5 @@ class HttpRequest
         }
 
         return $servername;
-	}
+    }
 }

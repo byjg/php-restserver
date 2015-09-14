@@ -4,6 +4,7 @@ namespace ByJG\RestServer;
 
 class ServiceAbstract
 {
+
     /**
      * @var HttpRequest
      */
@@ -29,5 +30,4 @@ class ServiceAbstract
     {
         return $this->response;
     }
-
 }
