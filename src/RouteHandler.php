@@ -219,7 +219,7 @@ class RouteHandler
             return;
         }
 
-        list($class, $output) = $process = $route->process();
+        list($class, $output) = $route->process();
 
         $handler = new ServiceHandler($output);
         $handler->setHeader();
