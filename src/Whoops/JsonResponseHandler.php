@@ -18,8 +18,8 @@ use Whoops\Util\Misc;
  */
 class JsonResponseHandler extends OriginalJsonHandler
 {
-    use \ByJG\RestServer\Whoops\WhoopsDebugTrait;
 
+    use \ByJG\RestServer\Whoops\WhoopsDebugTrait;
 
     /**
      * @return int
@@ -32,7 +32,7 @@ class JsonResponseHandler extends OriginalJsonHandler
 
         $response = array(
             'error' => Formatter::formatExceptionAsDataArray(
-                $this->getInspector(),
+                $this->getInspector(), 
                 $this->addTraceToOutput()
             ),
         );

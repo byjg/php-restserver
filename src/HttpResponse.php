@@ -4,6 +4,7 @@ namespace ByJG\RestServer;
 
 class HttpResponse
 {
+
     /**
      * @var ResponseBag
      */
@@ -19,28 +20,28 @@ class HttpResponse
         $this->emptyResponse();
     }
 
-	/**
+    /**
      * Add a value in session
      *
      * @param string $name
      * @param string $value
      */
-	public function setSession($name, $value)
-	{
-		$_SESSION[$name] = $value;
-	}
+    public function setSession($name, $value)
+    {
+        $_SESSION[$name] = $value;
+    }
 
-	/**
+    /**
      * Remove a value in this session
      *
      * @param string $name
-	 */
-	public function removeSession($name)
-	{
-		unset($_SESSION[$name]);
-	}
+     */
+    public function removeSession($name)
+    {
+        unset($_SESSION[$name]);
+    }
 
-	/**
+    /**
      * Add a cookie value
      *
      * @param string $name
@@ -48,25 +49,24 @@ class HttpResponse
      * @param int $expire (seconds from now)
      * @param int $path (directory into domain in which the cookie will be available on )
      */
-	public function addCookie($name, $value, $expire = null, $path = null, $domain = null)
-	{
-		if (!is_null($expire))
-		{
-			$expire = time() + $expire;
-		}
-		setcookie($name, $value, $expire, $path, $domain);
-	}
+    public function addCookie($name, $value, $expire = null, $path = null, $domain = null)
+    {
+        if (!is_null($expire)) {
+            $expire = time() + $expire;
+        }
+        setcookie($name, $value, $expire, $path, $domain);
+    }
 
-	/**
+    /**
      * Delete a cookie
      *
      * @param string $name
      */
     public function removeCookie($name)
-	{
-		setcookie($name, null, time() - 3600);
-		unset($_COOKIE[$name]);
-	}
+    {
+        setcookie($name, null, time() - 3600);
+        unset($_COOKIE[$name]);
+    }
 
     /**
      * ResponseBag is a collection of objects will be returned to the  client. RestServer call handle the ResponseBag to
@@ -97,8 +97,7 @@ class HttpResponse
      */
     public function writeDebug($key, $string)
     {
-        if (is_null($this->responseDebug))
-        {
+        if (is_null($this->responseDebug)) {
             $this->responseDebug = new ResponseBag();
             $this->response->add($this->responseDebug);
         }

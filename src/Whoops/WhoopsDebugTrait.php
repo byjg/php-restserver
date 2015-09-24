@@ -1,5 +1,4 @@
 <?php
-
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -15,8 +14,9 @@ namespace ByJG\RestServer\Whoops;
  */
 trait WhoopsDebugTrait
 {
+
     protected $extraTables = [];
-    
+
     /**
      * Adds an entry to the list of tables displayed in the template.
      * The expected data is a simple associative array. Any nested arrays

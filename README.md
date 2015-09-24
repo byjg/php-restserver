@@ -134,6 +134,14 @@ handle this specific action. Some examples below:
 RestServer ByJG uses the Nikic/FastRoute project to do the routing. Yout need copy the file httpdocs/route-dist.php as route.php
 into the root of your public folder accessible throught the web.
 
+The route-dist is look like to:
+
+```php
+require_once __DIR__ . '/../vendor/autoload.php';
+
+\ByJG\RestServer\RouteHandler::processRoute();
+```
+
 This file setup all routing process and handle the execution of the proper rest class.
 
 There some pre-defined routes as you can see below but you can change it any time you want.
@@ -156,44 +164,62 @@ meaning into the system:
 - **module** will be the full namespace to your class. You have to separate the namespaces with "period" (.). Do not use back slash (\);
 - **vesion** have a symbolic version for your rest server.
 
-##### Creating Module Alias
+#### Customizing your route file
 
-Instead to pass the full namespace class you can create a module alias. Just add in the route.php file the follow code:
+The processRoute accepts 4 parameters:
+* $moduleAlias 
+* $routePattern
+* $version
+* $cors
+
+
+#### Creating Module Alias
+
+By default you have to call in the browser the URL with the full namespace separated by points. 
+Instead to pass the full namespace class you can create a module alias. 
+Just add in the route.php file the follow code:
 
 ```php
-$route->addModuleAlias('somealias', 'Full.NameSpace.To.Module');
+\ByJG\RestServer\RouteHandler::processRoute([ 'somealias' => 'Full.NameSpace.To.Module' ]);
 ```
 
 In the example above if the parameter "module" matches with the value "somealias" will be mapped to the class "\Full\NameSpace\To\Module"
-
-
-#### Versioning your rest service
-
-You can define a version to yout rest service and create a EOL for changes in the services that breaking the interface. Just set in the "route.php" file the follow line:
-
-```php
-$route->setDefaultRestVersion('2.0');
-```
-
-This will populate de variable "version".
 
 #### Creating your own routes
 
 You can override the default route values and create your own.
 
 ```php
-$route->setDefaultMethods([
-	[ "method" => ['GET'], "pattern" => '/{module}/{action}/{id:[0-9]+}.{output}', "handler" => 'service' ],
-]);
+\ByJG\RestServer\RouteHandler::processRoute(
+    null, 
+    [ [ "method" => ['GET'], "pattern" => '/{module}/{action}/{id:[0-9]+}.{output}', "handler" => 'service' ] ]
+);
 ```
 
-This will override all previous routes and setup the one defined above.
+#### Versioning your rest service
+
+You can define a version to yout rest service and create a EOL for changes in the services that breaking the interface. Just set in the "route.php" file the follow line:
+
+```php
+\ByJG\RestServer\RouteHandler::processRoute(null, null, '2.0');
+```
+
+This will populate the variable "version".
+
+#### Enable CORS on your requests
+
+If you want the rest server component add the necessary CORS headers on request just add **true** in the 
+last parameter as follow below
+
+```php
+\ByJG\RestServer\RouteHandler::processRoute(null, null, null, true);
+```
+
+Note: the better option is setup your web server instead to use this feature. 
 
 ## Install
 
-Just type: `composer install "byjg/restserver=~1.0"`
-
-## Running Tests
+Just type: `composer install "byjg/restserver=~1.1"`
 
 
 ----
