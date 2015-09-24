@@ -47,6 +47,8 @@ class RouteHandler
                 throw new InvalidArgumentException('Array has not the valid format');
             }
         }
+
+        $this->_defaultMethods = $methods;
     }
 
     public function getDefaultRestVersion()
