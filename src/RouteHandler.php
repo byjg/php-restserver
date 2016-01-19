@@ -155,7 +155,7 @@ class RouteHandler
      * @param string $version
      * @param bool $cors
      */
-    public static function processRoute($moduleAlias = [], $routePattern = null, $version = '1.0', $cors = false)
+    public static function processRoute($moduleAlias = [], $routePattern = null, $version = '1.0', $cors = false, $routeIndex = "index.php")
     {
         ob_start();
         session_start();
@@ -208,8 +208,11 @@ class RouteHandler
         // You do not need change from this point
         // --------------------------------------------------------------------------
 
-        if (!empty($_SERVER['SCRIPT_FILENAME']) && file_exists($_SERVER['SCRIPT_FILENAME']) 
-            && basename($_SERVER['SCRIPT_FILENAME']) !== "route.php") {
+        if (!empty($_SERVER['SCRIPT_FILENAME'])
+            && file_exists($_SERVER['SCRIPT_FILENAME'])
+            && basename($_SERVER['SCRIPT_FILENAME']) !== "route.php" 
+            && basename($_SERVER['SCRIPT_FILENAME']) !== $routeIndex
+        )  {
             $file = $_SERVER['SCRIPT_FILENAME'];
             if (strpos($file, '.php') !== false) {
                 require_once($file);

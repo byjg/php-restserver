@@ -166,11 +166,12 @@ meaning into the system:
 
 #### Customizing your route file
 
-The processRoute accepts 4 parameters:
+The processRoute accepts 5 parameters:
 * $moduleAlias 
 * $routePattern
 * $version
 * $cors
+* $routeIndex
 
 
 #### Creating Module Alias
@@ -192,7 +193,13 @@ You can override the default route values and create your own.
 ```php
 \ByJG\RestServer\RouteHandler::processRoute(
     null, 
-    [ [ "method" => ['GET'], "pattern" => '/{module}/{action}/{id:[0-9]+}.{output}', "handler" => 'service' ] ]
+    [ 
+        [ 
+            "method" => ['GET'], 
+            "pattern" => '/{module}/{action}/{id:[0-9]+}.{output}', 
+            "handler" => 'service' 
+        ] 
+    ]
 );
 ```
 
@@ -216,6 +223,17 @@ last parameter as follow below
 ```
 
 Note: the better option is setup your web server instead to use this feature. 
+
+#### Define a different route handler than index.php and route.php
+
+If you want the rest server component add the necessary CORS headers on request just add **true** in the 
+last parameter as follow below
+
+```php
+\ByJG\RestServer\RouteHandler::processRoute(null, null, null, null, 'acme.php');
+```
+
+Note: you have to configure your webserver to support this file. 
 
 ## Install
 
