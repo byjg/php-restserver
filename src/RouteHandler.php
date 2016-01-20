@@ -244,7 +244,7 @@ class RouteHandler
      * @param string $version
      * @param string $routeIndex
      */
-    public static function handleRoute($moduleAlias = [], $routePattern = null, $version = '1.0', $routeIndex = "index.php")
+    public static function handleRoute($moduleAlias = [], $routePattern = null, $version = '1.0', $defaultOutput = null ,$routeIndex = "index.php")
     {
         ob_start();
         session_start();
@@ -278,6 +278,11 @@ class RouteHandler
          * The default value is "1.0"
          */
         $route->setDefaultRestVersion($version);
+
+        /**
+         * You can set the defaultOutput where is not necessary to set the output in the URL
+         */
+        $route->setDefaultOutput($defaultOutput);
 
         /**
          * There are a couple of basic routes pattern for the default parameters

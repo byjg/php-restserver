@@ -37,7 +37,7 @@ class MyClass extends \ByJG\RestServer\ServiceAbstract
 The usual url for call this class is (see more in Routing below):
 
 ```
-http://yourserver.com/1.0/Sample.MyClass/1234.json     # Or xml or csv
+http://yourserver.com/1.0/Sample.MyClass/1234.json     # Or .xml or .csv
 ```
 
 ### Processing the request
@@ -139,7 +139,7 @@ The route-dist is look like to:
 ```php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-\ByJG\RestServer\RouteHandler::processRoute();
+\ByJG\RestServer\RouteHandler::handleRoute();
 ```
 
 This file setup all routing process and handle the execution of the proper rest class.
@@ -170,7 +170,7 @@ The processRoute accepts 5 parameters:
 * $moduleAlias 
 * $routePattern
 * $version
-* $cors
+* $defaultOutput
 * $routeIndex
 
 
@@ -181,7 +181,7 @@ Instead to pass the full namespace class you can create a module alias.
 Just add in the route.php file the follow code:
 
 ```php
-\ByJG\RestServer\RouteHandler::processRoute([ 'somealias' => 'Full.NameSpace.To.Module' ]);
+\ByJG\RestServer\RouteHandler::handleRoute([ 'somealias' => 'Full.NameSpace.To.Module' ]);
 ```
 
 In the example above if the parameter "module" matches with the value "somealias" will be mapped to the class "\Full\NameSpace\To\Module"
@@ -191,13 +191,13 @@ In the example above if the parameter "module" matches with the value "somealias
 You can override the default route values and create your own.
 
 ```php
-\ByJG\RestServer\RouteHandler::processRoute(
+\ByJG\RestServer\RouteHandler::handleRoute(
     null, 
     [ 
         [ 
             "method" => ['GET'], 
             "pattern" => '/{module}/{action}/{id:[0-9]+}.{output}', 
-            "handler" => 'service' 
+            "handler" => '\ByJG\RestServer\ServiceHandler' 
         ] 
     ]
 );
@@ -208,29 +208,27 @@ You can override the default route values and create your own.
 You can define a version to yout rest service and create a EOL for changes in the services that breaking the interface. Just set in the "route.php" file the follow line:
 
 ```php
-\ByJG\RestServer\RouteHandler::processRoute(null, null, '2.0');
+\ByJG\RestServer\RouteHandler::handleRoute(null, null, '2.0');
 ```
 
 This will populate the variable "version".
 
-#### Enable CORS on your requests
+#### Set the default output format
 
-If you want the rest server component add the necessary CORS headers on request just add **true** in the 
-last parameter as follow below
+The basic ServiceHandler can output the objects in Output::JSON, Output::XML or Output::CSV. 
+Normally this is set in the route, but you can ommit from the route and set a default output here. 
 
 ```php
-\ByJG\RestServer\RouteHandler::processRoute(null, null, null, true);
+\ByJG\RestServer\RouteHandler::handleRoute(null, null, null, Output::JSON);
 ```
-
-Note: the better option is setup your web server instead to use this feature. 
 
 #### Define a different route handler than index.php and route.php
 
-If you want the rest server component add the necessary CORS headers on request just add **true** in the 
-last parameter as follow below
+The default filename for route process is 'index.php' or 'route.php'. 
+If you use a different one you have to set it here.
 
 ```php
-\ByJG\RestServer\RouteHandler::processRoute(null, null, null, null, 'acme.php');
+\ByJG\RestServer\RouteHandler::handleRoute(null, null, null, null, 'acme.php');
 ```
 
 Note: you have to configure your webserver to support this file. 
@@ -239,6 +237,33 @@ Note: you have to configure your webserver to support this file.
 
 Just type: `composer install "byjg/restserver=~1.1"`
 
+
+## Running the rest server
+
+The follow examples assumes that the handleRoute is in the "index.php"
+
+#### PHP Built-in server
+
+```
+php -S localhost:8080 index.php
+```
+
+#### Nginx 
+
+```
+location / {
+  try_files $uri $uri/ /index.php$is_args$args;
+}
+```
+
+#### Apache .htaccess
+
+```
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ ./index.php [QSA,NC,L]
+```
 
 ----
 [Open source ByJG](http://opensource.byjg.com)
