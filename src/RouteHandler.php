@@ -156,6 +156,7 @@ class RouteHandler
                 $instance = $this->executeAction($vars['module']);
 
                 echo $handlerInstance->execute($instance);
+                break;
 
             default:
                 throw new \Exception('Unknown');
