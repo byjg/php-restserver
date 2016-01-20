@@ -3,11 +3,15 @@
 namespace ByJG\RestServer;
 
 use BadMethodCallException;
+use ByJG\RestServer\ErrorHandler;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
-use Exception;
+use ByJG\RestServer\HandlerInterface;
+use ByJG\RestServer\Output;
+use ByJG\RestServer\RouteHandler;
+use ByJG\RestServer\ServiceAbstract;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use InvalidArgumentException;
@@ -159,16 +163,18 @@ class RouteHandler
                 break;
 
             default:
-                throw new \Exception('Unknown');
+                throw new Exception('Unknown');
         }
     }
 
     /**
+     * Get the Handler based on the string
      *
-     * @param \ByJG\RestServer\HandlerInterface $handler
+     * @param string $handler
      * @param string $output
      * @throws ClassNotFoundException
      * @throws InvalidClassException
+     * @return HandlerInterface Return the Handler Interface
      */
     public function getHandler($handler, $output)
     {
@@ -185,16 +191,25 @@ class RouteHandler
         return $handlerInstance;
     }
 
+    /**
+     * Instantiate the class found in the route
+     *
+     * @param string $class
+     * @return ServiceAbstract
+     * @throws ClassNotFoundException
+     * @throws InvalidClassException
+     * @throws BadMethodCallException
+     */
     public function executeAction($class)
     {
         // Instantiate a new class
         if (!class_exists($class)) {
-            throw new Exception\ClassNotFoundException("Class $class not found");
+            throw new ClassNotFoundException("Class $class not found");
         }
         $instance = new $class();
 
         if (!($instance instanceof ServiceAbstract)) {
-            throw new Exception\InvalidClassException("Class $class is not an instance of ServiceAbstract");
+            throw new InvalidClassException("Class $class is not an instance of ServiceAbstract");
         }
 
         // Execute the method
@@ -301,6 +316,12 @@ class RouteHandler
         $route->process();
     }
 
+    /**
+     * Get the Mime Type based on the filename
+     *
+     * @param string $filename
+     * @return string
+     */
     protected static function mimeContentType($filename)
     {
 

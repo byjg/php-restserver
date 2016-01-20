@@ -2,7 +2,7 @@
 
 namespace ByJG\RestServer;
 
-class ServiceAbstract
+abstract class ServiceAbstract
 {
 
     /**
