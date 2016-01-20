@@ -17,6 +17,11 @@ class ServiceHandler implements HandlerInterface
 
     public function setOutput($output)
     {
+        // Check if output is set
+        if ($output != Output::JSON && $output != Output::XML && $output != Output::CSV && $output != Output::RDF) {
+            throw new \Exception('Invalid output format. Valid are XML, JSON or CSV');
+        }
+
         $this->output = $output;
     }
 

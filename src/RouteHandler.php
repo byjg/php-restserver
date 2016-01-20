@@ -23,15 +23,17 @@ class RouteHandler
 
     protected $_defaultMethods = [
         // Service
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}', "handler" => '\ByJG\RestServer\ServiceHandler'],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}.{output}', "handler" => '\ByJG\RestServer\ServiceHandler'],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}/{action}.{output}', "handler" => '\ByJG\RestServer\ServiceHandler'],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}.{output}', "handler" => '\ByJG\RestServer\ServiceHandler'],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}.{output}', "handler" => '\ByJG\RestServer\ServiceHandler'],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}.{output}', "handler" => '\ByJG\RestServer\ServiceHandler']
+        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}' ],
+        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}.{output}' ],
+        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}/{action}.{output}' ],
+        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}.{output}' ],
+        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}.{output}' ],
+        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}.{output}' ]
     ];
     protected $_moduleAlias = [];
-    protected $_defaultVersion = '1.0';
+    protected $_defaultRestVersion = '1.0';
+    protected $_defaultHandler = '\ByJG\RestServer\ServiceHandler';
+    protected $_defaultOutput = null;
 
     public function getDefaultMethods()
     {
@@ -55,12 +57,32 @@ class RouteHandler
 
     public function getDefaultRestVersion()
     {
-        return $this->_defaultVersion;
+        return $this->_defaultRestVersion;
     }
 
     public function setDefaultRestVersion($version)
     {
-        $this->_defaultVersion = $version;
+        $this->_defaultRestVersion = $version;
+    }
+
+    public function getDefaultHandler()
+    {
+        return $this->_defaultHandler;
+    }
+
+    public function setDefaultHandler($value)
+    {
+        $this->_defaultHandler = $value;
+    }
+
+    public function getDefaultOutput()
+    {
+        return empty($this->_defaultOutput) ? Output::JSON : $this->_defaultOutput;
+    }
+
+    public function setDefaultOutput($defaultOutput)
+    {
+        $this->_defaultOutput = $defaultOutput;
     }
 
     public function getModuleAlias()
@@ -83,13 +105,14 @@ class RouteHandler
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $queryStr);
 
-        // Generic Dispatcher for XMLNuke
+        // Generic Dispatcher for RestServer
         $dispatcher = \FastRoute\simpleDispatcher(function(RouteCollector $r) {
 
             foreach ($this->getDefaultMethods() as $route) {
                 $r->addRoute(
-                    $route['method'], str_replace('{version}', $this->getDefaultRestVersion(), $route['pattern']),
-                    isset($route['handler']) ? $route['handler'] : 'default'
+                    $route['method'],
+                    str_replace('{version}', $this->getDefaultRestVersion(), $route['pattern']),
+                    isset($route['handler']) ? $route['handler'] : $this->getDefaultHandler()
                 );
             }
         });
@@ -119,15 +142,9 @@ class RouteHandler
 
                 // Define output
                 if (!isset($vars['output'])) {
-                    $vars['output'] = Output::JSON;
+                    $vars['output'] = $this->getDefaultOutput();
                 }
                 ErrorHandler::getInstance()->setHandler($vars['output']);
-
-                // Check if output is set
-                if ($vars['output'] != Output::JSON && $vars['output'] != Output::XML && $vars['output'] != Output::CSV && $vars['output']
-                    != Output::RDF) {
-                    throw new Exception('Invalid output format. Valid are XML, JSON or CSV');
-                }
 
                 // Set all default values
                 foreach ($vars as $key => $value) {
@@ -139,7 +156,7 @@ class RouteHandler
                 $instance = $this->executeAction($vars['module']);
 
                 echo $handlerInstance->execute($instance);
-                
+
             default:
                 throw new \Exception('Unknown');
         }
@@ -185,7 +202,7 @@ class RouteHandler
         } else {
             throw new BadMethodCallException("The method '$customAction' does not exists.");
         }
-        
+
         return $instance;
     }
 
@@ -264,7 +281,7 @@ class RouteHandler
 
         if (!empty($_SERVER['SCRIPT_FILENAME'])
             && file_exists($_SERVER['SCRIPT_FILENAME'])
-            && basename($_SERVER['SCRIPT_FILENAME']) !== "route.php" 
+            && basename($_SERVER['SCRIPT_FILENAME']) !== "route.php"
             && basename($_SERVER['SCRIPT_FILENAME']) !== $routeIndex
         )  {
             $file = $_SERVER['SCRIPT_FILENAME'];
@@ -278,7 +295,7 @@ class RouteHandler
             return;
         }
 
-        $route->process();        
+        $route->process();
     }
 
     protected static function mimeContentType($filename)
