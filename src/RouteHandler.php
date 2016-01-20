@@ -135,7 +135,7 @@ class RouteHandler
                 }
 
                 // Instantiate the Service Handler
-                $handlerInstance = $this->getHandler($routeInfo[1]);
+                $handlerInstance = $this->getHandler($routeInfo[1], $vars['output']);
                 $instance = $this->executeAction($vars['module']);
 
                 echo $handlerInstance->execute($instance);
@@ -145,7 +145,14 @@ class RouteHandler
         }
     }
 
-    public function getHandler($handler)
+    /**
+     *
+     * @param \ByJG\RestServer\HandlerInterface $handler
+     * @param string $output
+     * @throws ClassNotFoundException
+     * @throws InvalidClassException
+     */
+    public function getHandler($handler, $output)
     {
         if (!class_exists($handler)) {
             throw new ClassNotFoundException("Handler $handler not found");
@@ -154,7 +161,7 @@ class RouteHandler
         if (!($handler instanceof HandlerInterface)) {
             throw new InvalidClassException("Handler $handler is not a HandlerInterface");
         }
-        $handlerInstance->setOutput($vars['output']);
+        $handlerInstance->setOutput($output);
         $handlerInstance->setHeader();
     }
 
@@ -167,11 +174,11 @@ class RouteHandler
         $instance = new $class();
 
         if (!($instance instanceof ServiceAbstract)) {
-            throw new Exception\InvalidClassException("Class $class is not instance of ServiceAbstract");
+            throw new Exception\InvalidClassException("Class $class is not an instance of ServiceAbstract");
         }
 
         // Execute the method
-        $method = strtolower($instance->getRequest()->server("REQUEST_METHOD"));
+        $method = strtolower($instance->getRequest()->server("REQUEST_METHOD")); // get, post, put, delete
         $customAction = $method . ($instance->getRequest()->get('action'));
         if (method_exists($instance, $customAction)) {
             $instance->$customAction();
@@ -190,15 +197,19 @@ class RouteHandler
      *
      * RoutePattern needs to be an array like:
      * [
-     * 		[ "method" => ['GET'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}', "handler" => 'service' ],
+     *     [
+     *         "method" => ['GET'],
+     *         "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}',
+     *         "handler" => '\ByJG\RestServer\ServiceHandler'
+     *    ],
      * ]
      *
      * @param array $moduleAlias
      * @param array $routePattern
      * @param string $version
-     * @param bool $cors
+     * @param string $routeIndex
      */
-    public static function processRoute($moduleAlias = [], $routePattern = null, $version = '1.0', $cors = false, $routeIndex = "index.php")
+    public static function handleRoute($moduleAlias = [], $routePattern = null, $version = '1.0', $routeIndex = "index.php")
     {
         ob_start();
         session_start();

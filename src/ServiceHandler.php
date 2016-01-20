@@ -20,11 +20,6 @@ class ServiceHandler implements HandlerInterface
         $this->output = $output;
     }
 
-    public function __construct($output)
-    {
-        $this->setOutput($output);
-    }
-
     public function setHeader()
     {
         switch ($this->getOutput()) {

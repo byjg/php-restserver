@@ -15,5 +15,5 @@ interface HandlerInterface
 {
     function setOutput($output);
     function setHeader();
-    function execute($class);
+    function execute(ServiceAbstract $class);
 }

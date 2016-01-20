@@ -2,5 +2,5 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-\ByJG\RestServer\RouteHandler::processRoute();
+\ByJG\RestServer\RouteHandler::handleRoute();
 
