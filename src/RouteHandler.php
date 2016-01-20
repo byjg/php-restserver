@@ -175,7 +175,7 @@ class RouteHandler
             throw new ClassNotFoundException("Handler $handler not found");
         }
         $handlerInstance = new $handler();
-        if (!($handler instanceof HandlerInterface)) {
+        if (!($handlerInstance instanceof HandlerInterface)) {
             throw new InvalidClassException("Handler $handler is not a HandlerInterface");
         }
         $handlerInstance->setOutput($output);
