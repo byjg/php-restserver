@@ -180,6 +180,8 @@ class RouteHandler
         }
         $handlerInstance->setOutput($output);
         $handlerInstance->setHeader();
+
+        return $handlerInstance;
     }
 
     public function executeAction($class)
