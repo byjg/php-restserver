@@ -20,6 +20,7 @@ class JsonResponseHandler extends OriginalJsonHandler
 {
 
     use \ByJG\RestServer\Whoops\WhoopsDebugTrait;
+    use \ByJG\RestServer\Whoops\WhoopsHeaderTrait;
 
     /**
      * @return int
@@ -46,6 +47,7 @@ class JsonResponseHandler extends OriginalJsonHandler
             header('Content-Type: application/json');
         }
 
+        $this->setProperHeader($this->getException());
         echo json_encode($response);
         return Handler::QUIT;
     }

@@ -13,7 +13,10 @@ namespace ByJG\RestServer;
  */
 interface HandlerInterface
 {
+
     function setOutput($output);
+
     function setHeader();
+
     function execute(ServiceAbstract $class);
 }
