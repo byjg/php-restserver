@@ -18,6 +18,7 @@ class PlainResponseHandler extends Handler
 {
 
     use \ByJG\RestServer\Whoops\WhoopsDebugTrait;
+    use \ByJG\RestServer\Whoops\WhoopsHeaderTrait;
 
     /**
      * @var bool
@@ -44,7 +45,7 @@ class PlainResponseHandler extends Handler
     public function handle()
     {
         $response = Formatter::formatExceptionPlain(
-                $this->getInspector()
+            $this->getInspector()
         );
 
         $debug = $this->getDataTable();
@@ -52,6 +53,7 @@ class PlainResponseHandler extends Handler
             $response .= "\n\n" . json_encode(["debug" => $debug]);
         }
 
+        $this->setProperHeader($this->getException());
         echo $response;
         return Handler::QUIT;
     }

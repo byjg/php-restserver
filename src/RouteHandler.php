@@ -2,13 +2,19 @@
 
 namespace ByJG\RestServer;
 
-use Exception;
+use BadMethodCallException;
+use ByJG\RestServer\ErrorHandler;
+use ByJG\RestServer\Exception\ClassNotFoundException;
+use ByJG\RestServer\Exception\Error404Exception;
+use ByJG\RestServer\Exception\Error405Exception;
+use ByJG\RestServer\Exception\InvalidClassException;
+use ByJG\RestServer\HandlerInterface;
+use ByJG\RestServer\Output;
+use ByJG\RestServer\RouteHandler;
+use ByJG\RestServer\ServiceAbstract;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use InvalidArgumentException;
-use ByJG\RestServer\Exception\Error404Exception;
-use ByJG\RestServer\Exception\Error405Exception;
-use ByJG\RestServer\ServiceHandler;
 
 class RouteHandler
 {
@@ -21,15 +27,17 @@ class RouteHandler
 
     protected $_defaultMethods = [
         // Service
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}', "handler" => 'service'],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}.{output}', "handler" => 'service'],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}/{action}.{output}', "handler" => 'service'],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}.{output}', "handler" => 'service'],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}.{output}', "handler" => 'service'],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}.{output}', "handler" => 'service']
+        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}' ],
+        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}.{output}' ],
+        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}/{action}.{output}' ],
+        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}.{output}' ],
+        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}.{output}' ],
+        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}.{output}' ]
     ];
     protected $_moduleAlias = [];
-    protected $_defaultVersion = '1.0';
+    protected $_defaultRestVersion = '1.0';
+    protected $_defaultHandler = '\ByJG\RestServer\ServiceHandler';
+    protected $_defaultOutput = null;
 
     public function getDefaultMethods()
     {
@@ -53,12 +61,32 @@ class RouteHandler
 
     public function getDefaultRestVersion()
     {
-        return $this->_defaultVersion;
+        return $this->_defaultRestVersion;
     }
 
     public function setDefaultRestVersion($version)
     {
-        $this->_defaultVersion = $version;
+        $this->_defaultRestVersion = $version;
+    }
+
+    public function getDefaultHandler()
+    {
+        return $this->_defaultHandler;
+    }
+
+    public function setDefaultHandler($value)
+    {
+        $this->_defaultHandler = $value;
+    }
+
+    public function getDefaultOutput()
+    {
+        return empty($this->_defaultOutput) ? Output::JSON : $this->_defaultOutput;
+    }
+
+    public function setDefaultOutput($defaultOutput)
+    {
+        $this->_defaultOutput = $defaultOutput;
     }
 
     public function getModuleAlias()
@@ -81,13 +109,14 @@ class RouteHandler
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $queryStr);
 
-        // Generic Dispatcher for XMLNuke
+        // Generic Dispatcher for RestServer
         $dispatcher = \FastRoute\simpleDispatcher(function(RouteCollector $r) {
 
             foreach ($this->getDefaultMethods() as $route) {
                 $r->addRoute(
-                    $route['method'], str_replace('{version}', $this->getDefaultRestVersion(), $route['pattern']),
-                    isset($route['handler']) ? $route['handler'] : 'default'
+                    $route['method'],
+                    str_replace('{version}', $this->getDefaultRestVersion(), $route['pattern']),
+                    isset($route['handler']) ? $route['handler'] : $this->getDefaultHandler()
                 );
             }
         });
@@ -117,26 +146,82 @@ class RouteHandler
 
                 // Define output
                 if (!isset($vars['output'])) {
-                    $vars['output'] = Output::JSON;
+                    $vars['output'] = $this->getDefaultOutput();
                 }
                 ErrorHandler::getInstance()->setHandler($vars['output']);
-
-                // Check if output is set
-                if ($vars['output'] != Output::JSON && $vars['output'] != Output::XML && $vars['output'] != Output::CSV && $vars['output']
-                    != Output::RDF) {
-                    throw new Exception('Invalid output format. Valid are XML, JSON or CSV');
-                }
 
                 // Set all default values
                 foreach ($vars as $key => $value) {
                     $_REQUEST[$key] = $_GET[$key] = $vars[$key];
                 }
 
-                return [ $vars['module'], $vars['output']];
+                // Instantiate the Service Handler
+                $handlerInstance = $this->getHandler($routeInfo[1], $vars['output']);
+                $instance = $this->executeAction($vars['module']);
+
+                echo $handlerInstance->execute($instance);
+                break;
 
             default:
-                throw new \Exception('Unknown');
+                throw new Exception('Unknown');
         }
+    }
+
+    /**
+     * Get the Handler based on the string
+     *
+     * @param string $handler
+     * @param string $output
+     * @throws ClassNotFoundException
+     * @throws InvalidClassException
+     * @return HandlerInterface Return the Handler Interface
+     */
+    public function getHandler($handler, $output)
+    {
+        if (!class_exists($handler)) {
+            throw new ClassNotFoundException("Handler $handler not found");
+        }
+        $handlerInstance = new $handler();
+        if (!($handlerInstance instanceof HandlerInterface)) {
+            throw new InvalidClassException("Handler $handler is not a HandlerInterface");
+        }
+        $handlerInstance->setOutput($output);
+        $handlerInstance->setHeader();
+
+        return $handlerInstance;
+    }
+
+    /**
+     * Instantiate the class found in the route
+     *
+     * @param string $class
+     * @return ServiceAbstract
+     * @throws ClassNotFoundException
+     * @throws InvalidClassException
+     * @throws BadMethodCallException
+     */
+    public function executeAction($class)
+    {
+        // Instantiate a new class
+        if (!class_exists($class)) {
+            throw new ClassNotFoundException("Class $class not found");
+        }
+        $instance = new $class();
+
+        if (!($instance instanceof ServiceAbstract)) {
+            throw new InvalidClassException("Class $class is not an instance of ServiceAbstract");
+        }
+
+        // Execute the method
+        $method = strtolower($instance->getRequest()->server("REQUEST_METHOD")); // get, post, put, delete
+        $customAction = $method . ($instance->getRequest()->get('action'));
+        if (method_exists($instance, $customAction)) {
+            $instance->$customAction();
+        } else {
+            throw new BadMethodCallException("The method '$customAction' does not exists.");
+        }
+
+        return $instance;
     }
 
     /**
@@ -147,15 +232,19 @@ class RouteHandler
      *
      * RoutePattern needs to be an array like:
      * [
-     * 		[ "method" => ['GET'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}', "handler" => 'service' ],
+     *     [
+     *         "method" => ['GET'],
+     *         "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}',
+     *         "handler" => '\ByJG\RestServer\ServiceHandler'
+     *    ],
      * ]
      *
      * @param array $moduleAlias
      * @param array $routePattern
      * @param string $version
-     * @param bool $cors
+     * @param string $routeIndex
      */
-    public static function processRoute($moduleAlias = [], $routePattern = null, $version = '1.0', $cors = false, $routeIndex = "index.php")
+    public static function handleRoute($moduleAlias = [], $routePattern = null, $version = '1.0', $routeIndex = "index.php")
     {
         ob_start();
         session_start();
@@ -210,7 +299,7 @@ class RouteHandler
 
         if (!empty($_SERVER['SCRIPT_FILENAME'])
             && file_exists($_SERVER['SCRIPT_FILENAME'])
-            && basename($_SERVER['SCRIPT_FILENAME']) !== "route.php" 
+            && basename($_SERVER['SCRIPT_FILENAME']) !== "route.php"
             && basename($_SERVER['SCRIPT_FILENAME']) !== $routeIndex
         )  {
             $file = $_SERVER['SCRIPT_FILENAME'];
@@ -224,15 +313,15 @@ class RouteHandler
             return;
         }
 
-        list($class, $output) = $route->process();
-
-        $handler = new ServiceHandler($output);
-        $handler->setHeader();
-        if (!$cors || ($cors && $handler->setHeaderCors())) {
-            echo $handler->execute($class);
-        }
+        $route->process();
     }
 
+    /**
+     * Get the Mime Type based on the filename
+     *
+     * @param string $filename
+     * @return string
+     */
     protected static function mimeContentType($filename)
     {
 

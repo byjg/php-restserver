@@ -2,13 +2,10 @@
 
 namespace ByJG\RestServer;
 
-use BadMethodCallException;
 use ByJG\AnyDataset\Model\ObjectHandler;
-use ByJG\RestServer\Exception\ClassNotFoundException;
-use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\Util\XmlUtil;
 
-class ServiceHandler
+class ServiceHandler implements HandlerInterface
 {
 
     protected $output = Output::JSON;
@@ -20,12 +17,12 @@ class ServiceHandler
 
     public function setOutput($output)
     {
-        $this->output = $output;
-    }
+        // Check if output is set
+        if ($output != Output::JSON && $output != Output::XML && $output != Output::CSV && $output != Output::RDF) {
+            throw new \Exception('Invalid output format. Valid are XML, JSON or CSV');
+        }
 
-    public function __construct($output)
-    {
-        $this->setOutput($output);
+        $this->output = $output;
     }
 
     public function setHeader()
@@ -64,28 +61,8 @@ class ServiceHandler
         return true;
     }
 
-    public function execute($class)
+    public function execute(ServiceAbstract $instance)
     {
-        if (!class_exists($class)) {
-            throw new ClassNotFoundException("Class $class not found");
-        }
-
-        $instance = new $class();
-
-        if (!($instance instanceof ServiceAbstract)) {
-            throw new InvalidClassException("Class $class is not instance of ServiceAbstract");
-        }
-
-        $method = strtolower($instance->getRequest()->server("REQUEST_METHOD"));
-
-        $customAction = $method . ($instance->getRequest()->get('action'));
-
-        if (method_exists($instance, $customAction)) {
-            $instance->$customAction();
-        } else {
-            throw new BadMethodCallException("The method '$customAction' does not exists.");
-        }
-
         $root = null;
         $annotationPrefix = 'object';
         if ($this->getOutput() == Output::RDF) {
