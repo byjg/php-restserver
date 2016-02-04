@@ -7,6 +7,7 @@ use ByJG\RestServer\ErrorHandler;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
+use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\HandlerInterface;
 use ByJG\RestServer\Output;
@@ -163,7 +164,7 @@ class RouteHandler
                 break;
 
             default:
-                throw new Exception('Unknown');
+                throw new Error520Exception('Unknown');
         }
     }
 

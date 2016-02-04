@@ -22,6 +22,8 @@ trait WhoopsHeaderTrait
             header('HTTP/1.0 501 Not Implemented', true, 501);
         } elseif ($exception instanceof \BadMethodCallException) {
             header('HTTP/1.0 501 Not Implemented', true, 501);
+        } elseif ($exception instanceof \ByJG\RestServer\Exception\Error520Exception) {
+            header('HTTP/1.0 520 Unknow Error', true, 501);
         }
     }
 }
