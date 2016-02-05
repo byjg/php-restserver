@@ -2,7 +2,7 @@
 
 namespace ByJG\RestServer\Exception;
 
-class ClassNotFoundException extends Error404Exception
+class BadActionException extends Error501Exception
 {
     //put your code here
 }

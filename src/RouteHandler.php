@@ -2,8 +2,8 @@
 
 namespace ByJG\RestServer;
 
-use BadMethodCallException;
 use ByJG\RestServer\ErrorHandler;
+use ByJG\RestServer\Exception\BadActionException;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
@@ -199,7 +199,7 @@ class RouteHandler
      * @return ServiceAbstract
      * @throws ClassNotFoundException
      * @throws InvalidClassException
-     * @throws BadMethodCallException
+     * @throws BadActionException
      */
     public function executeAction($class)
     {
@@ -219,7 +219,7 @@ class RouteHandler
         if (method_exists($instance, $customAction)) {
             $instance->$customAction();
         } else {
-            throw new BadMethodCallException("The method '$customAction' does not exists.");
+            throw new BadActionException("The action '$customAction' does not exists.");
         }
 
         return $instance;

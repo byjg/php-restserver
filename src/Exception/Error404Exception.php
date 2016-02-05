@@ -2,7 +2,10 @@
 
 namespace ByJG\RestServer\Exception;
 
-class Error404Exception extends \Exception
+class Error404Exception extends ClientShowException
 {
-    //put your code here
+    public function handleHeader()
+    {
+        $this->sendHeader(404, 'Not Found');
+    }
 }

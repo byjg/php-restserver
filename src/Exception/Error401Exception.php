@@ -2,7 +2,10 @@
 
 namespace ByJG\RestServer\Exception;
 
-class Error401Exception extends \Exception
+class Error401Exception extends ClientShowException
 {
-    //put your code here
+    public function handleHeader()
+    {
+        $this->sendHeader(401, 'Unathorized');
+    }
 }

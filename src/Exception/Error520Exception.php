@@ -2,7 +2,10 @@
 
 namespace ByJG\RestServer\Exception;
 
-class Error520Exception extends \Exception
+class Error520Exception extends ClientShowException
 {
-    //put your code here
+    public function handleHeader()
+    {
+        $this->sendHeader(520, 'Unknow Error');
+    }
 }

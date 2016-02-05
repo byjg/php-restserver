@@ -2,7 +2,10 @@
 
 namespace ByJG\RestServer\Exception;
 
-class Error403Exception extends \Exception
+class Error403Exception extends ClientShowException
 {
-    //put your code here
+    public function handleHeader()
+    {
+        $this->sendHeader(403, 'Forbidden');
+    }
 }

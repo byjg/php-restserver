@@ -2,7 +2,10 @@
 
 namespace ByJG\RestServer\Exception;
 
-class Error501Exception extends \Exception
+class Error501Exception extends ClientShowException
 {
-    //put your code here
+    public function handleHeader()
+    {
+        $this->sendHeader(501, 'Not Implemented');
+    }
 }
