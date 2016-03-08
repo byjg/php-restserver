@@ -44,4 +44,9 @@ class ResponseBag
 
         return $xmlDoc;
     }
+
+    public function getCollection()
+    {
+        return $this->collection;
+    }
 }
