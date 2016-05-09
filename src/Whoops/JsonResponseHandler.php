@@ -19,8 +19,8 @@ use Whoops\Util\Misc;
 class JsonResponseHandler extends OriginalJsonHandler
 {
 
-    use \ByJG\RestServer\Whoops\WhoopsDebugTrait;
-    use \ByJG\RestServer\Whoops\WhoopsHeaderTrait;
+    use WhoopsDebugTrait;
+    use WhoopsHeaderTrait;
 
     /**
      * @return int
@@ -33,7 +33,7 @@ class JsonResponseHandler extends OriginalJsonHandler
 
         $response = array(
             'error' => Formatter::formatExceptionAsDataArray(
-                $this->getInspector(), 
+                $this->getInspector(),
                 $this->addTraceToOutput()
             ),
         );
@@ -51,4 +51,12 @@ class JsonResponseHandler extends OriginalJsonHandler
         echo json_encode($response);
         return Handler::QUIT;
     }
+
+    public function isAjaxRequest() {
+        return (
+            !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
+            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
+
+    }
+
 }

@@ -8,8 +8,7 @@ trait WhoopsHeaderTrait
 {
     public function setProperHeader(\Exception $exception)
     {
-        if ($exception instanceof ClientShowException)
-        {
+        if ($exception instanceof ClientShowException) {
             $exception->handleHeader();
         }
     }

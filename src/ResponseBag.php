@@ -23,22 +23,24 @@ class ResponseBag
     /**
      *
      * @param DOMNode $current
+     * @param string $annotationPrefix
      * @return \DOMDocument XML Node
+     * @throws \ByJG\Util\Exception\XmlUtilException
      */
     public function process(DOMNode $current = null, $annotationPrefix = 'object')
     {
         $xmlDoc = null;
         if (is_null($current)) {
-            $xmlDoc = XmlUtil::CreateXmlDocument();
-            $current = XmlUtil::CreateChild($xmlDoc, "root");
+            $xmlDoc = XmlUtil::createXmlDocument();
+            $current = XmlUtil::createChild($xmlDoc, "root");
         }
 
-        foreach ((array) $this->collection as $object) {
+        foreach ((array)$this->collection as $object) {
             if ($object instanceof ResponseBag) {
                 $object->process($current);
             } else {
                 $objHandler = new ObjectHandler($current, $object, $annotationPrefix);
-                $objHandler->CreateObjectFromModel();
+                $objHandler->createObjectFromModel();
             }
         }
 

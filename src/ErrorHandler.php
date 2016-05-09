@@ -2,6 +2,7 @@
 
 namespace ByJG\RestServer;
 
+use ByJG\DesignPattern\Singleton;
 use ByJG\RestServer\Whoops\JsonResponseHandler;
 use ByJG\RestServer\Whoops\PlainResponseHandler;
 use Whoops\Handler\XmlResponseHandler;
@@ -11,7 +12,7 @@ use Whoops\Run;
 class ErrorHandler
 {
 
-    use \ByJG\DesignPattern\Singleton;
+    use Singleton;
 
     /**
      *
@@ -71,7 +72,7 @@ class ErrorHandler
      * Added extra information for debug purposes on the error handler screen
      *
      * @param string $name
-     * @param value $value
+     * @param string $value
      */
     public function addExtraInfo($name, $value)
     {

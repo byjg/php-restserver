@@ -22,7 +22,7 @@ trait WhoopsDebugTrait
      * The expected data is a simple associative array. Any nested arrays
      * will be flattened with print_r
      * @param string $label
-     * @param array  $data
+     * @param array $data
      */
     public function addDataTable($label, array $data)
     {

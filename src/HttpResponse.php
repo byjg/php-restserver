@@ -48,6 +48,7 @@ class HttpResponse
      * @param string $value
      * @param int $expire (seconds from now)
      * @param int $path (directory into domain in which the cookie will be available on )
+     * @param string $domain
      */
     public function addCookie($name, $value, $expire = null, $path = null, $domain = null)
     {
@@ -101,7 +102,7 @@ class HttpResponse
             $this->responseDebug = new ResponseBag();
             $this->response->add($this->responseDebug);
         }
-        $this->responseDebug->add(['debug' => [ $key => $string]]);
+        $this->responseDebug->add(['debug' => [$key => $string]]);
         ErrorHandler::getInstance()->addExtraInfo($key, serialize($string));
     }
 

@@ -2,17 +2,13 @@
 
 namespace ByJG\RestServer;
 
-use ByJG\RestServer\ErrorHandler;
+use ByJG\DesignPattern\Singleton;
 use ByJG\RestServer\Exception\BadActionException;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
-use ByJG\RestServer\HandlerInterface;
-use ByJG\RestServer\Output;
-use ByJG\RestServer\RouteHandler;
-use ByJG\RestServer\ServiceAbstract;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use InvalidArgumentException;
@@ -20,7 +16,7 @@ use InvalidArgumentException;
 class RouteHandler
 {
 
-    use \ByJG\DesignPattern\Singleton;
+    use Singleton;
 
     const OK = "OK";
     const METHOD_NOT_ALLOWED = "NOT_ALLOWED";
@@ -28,12 +24,12 @@ class RouteHandler
 
     protected $_defaultMethods = [
         // Service
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}' ],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}.{output}' ],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}/{action}.{output}' ],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}.{output}' ],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}.{output}' ],
-        [ "method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}.{output}' ]
+        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}'],
+        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}.{output}'],
+        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}/{action}.{output}'],
+        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}.{output}'],
+        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}.{output}'],
+        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}.{output}']
     ];
     protected $_moduleAlias = [];
     protected $_defaultRestVersion = '1.0';
@@ -111,7 +107,7 @@ class RouteHandler
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $queryStr);
 
         // Generic Dispatcher for RestServer
-        $dispatcher = \FastRoute\simpleDispatcher(function(RouteCollector $r) {
+        $dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $r) {
 
             foreach ($this->getDefaultMethods() as $route) {
                 $r->addRoute(
@@ -243,9 +239,10 @@ class RouteHandler
      * @param array $moduleAlias
      * @param array $routePattern
      * @param string $version
+     * @param string $defaultOutput
      * @param string $routeIndex
      */
-    public static function handleRoute($moduleAlias = [], $routePattern = null, $version = '1.0', $defaultOutput = null ,$routeIndex = "index.php")
+    public static function handleRoute($moduleAlias = [], $routePattern = null, $version = '1.0', $defaultOutput = null, $routeIndex = "index.php")
     {
         ob_start();
         session_start();
@@ -264,7 +261,7 @@ class RouteHandler
          * you can request only:
          * http://somehost/module/somealias
          */
-        foreach ((array) $moduleAlias as $alias => $module) {
+        foreach ((array)$moduleAlias as $alias => $module) {
             $route->addModuleAlias($alias, $module);
         }
 
@@ -307,7 +304,7 @@ class RouteHandler
             && file_exists($_SERVER['SCRIPT_FILENAME'])
             && basename($_SERVER['SCRIPT_FILENAME']) !== "route.php"
             && basename($_SERVER['SCRIPT_FILENAME']) !== $routeIndex
-        )  {
+        ) {
             $file = $_SERVER['SCRIPT_FILENAME'];
             if (strpos($file, '.php') !== false) {
                 require_once($file);

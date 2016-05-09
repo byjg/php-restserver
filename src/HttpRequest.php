@@ -144,7 +144,6 @@ class HttpRequest
      */
     public function getRequestIp()
     {
-        $ipaddress = '';
         if ($this->server('HTTP_CLIENT_IP') !== false) {
             $ipaddress = $this->server('HTTP_CLIENT_IP');
         } else if ($this->server('HTTP_X_FORWARDED_FOR') !== false) {
@@ -166,11 +165,12 @@ class HttpRequest
 
     /**
      * Use this method to get the SERVER NAME.
+     * @param bool $port
+     * @param bool $protocol
      * @return string
      */
     public function getRequestServer($port = false, $protocol = false)
     {
-        $servername = '';
         if ($this->server('SERVER_NAME') !== false) {
             $servername = $this->server('SERVER_NAME');
         } else if ($this->server('HTTP_HOST' !== false)) {

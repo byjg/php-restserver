@@ -66,9 +66,9 @@ class ServiceHandler implements HandlerInterface
         $root = null;
         $annotationPrefix = 'object';
         if ($this->getOutput() == Output::RDF) {
-            $xmlDoc = XmlUtil::CreateXmlDocument();
-            $root = XmlUtil::CreateChild($xmlDoc, "rdf:RDF", "", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-            XmlUtil::AddNamespaceToDocument($root, "rdfs", "http://www.w3.org/2000/01/rdf-schema#");
+            $xmlDoc = XmlUtil::createXmlDocument();
+            $root = XmlUtil::createChild($xmlDoc, "rdf:RDF", "", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+            XmlUtil::addNamespaceToDocument($root, "rdfs", "http://www.w3.org/2000/01/rdf-schema#");
             $annotationPrefix = 'rdf';
         }
 
@@ -86,13 +86,15 @@ class ServiceHandler implements HandlerInterface
                 $array = XmlUtil::xml2Array($dom);
 
                 $return = "";
-                foreach ((array) $array as $line) {
-                    foreach ((array) $line as $field) {
+                foreach ((array)$array as $line) {
+                    foreach ((array)$line as $field) {
                         $return .= "\"" . str_replace('"', '\\"', (is_array($field) ? json_encode($field) : $field)) . "\";";
                     }
                     $return .= "\n";
                 }
                 return $return;
         }
+
+        return null;
     }
 }

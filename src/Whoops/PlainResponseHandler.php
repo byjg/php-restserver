@@ -17,8 +17,8 @@ use Whoops\Handler\Handler;
 class PlainResponseHandler extends Handler
 {
 
-    use \ByJG\RestServer\Whoops\WhoopsDebugTrait;
-    use \ByJG\RestServer\Whoops\WhoopsHeaderTrait;
+    use WhoopsDebugTrait;
+    use WhoopsHeaderTrait;
 
     /**
      * @var bool
@@ -26,7 +26,7 @@ class PlainResponseHandler extends Handler
     private $returnFrames = false;
 
     /**
-     * @param  bool|null  $returnFrames
+     * @param  bool|null $returnFrames
      * @return bool|$this
      */
     public function addTraceToOutput($returnFrames = null)
@@ -35,7 +35,7 @@ class PlainResponseHandler extends Handler
             return $this->returnFrames;
         }
 
-        $this->returnFrames = (bool) $returnFrames;
+        $this->returnFrames = (bool)$returnFrames;
         return $this;
     }
 
