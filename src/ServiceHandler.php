@@ -2,8 +2,8 @@
 
 namespace ByJG\RestServer;
 
-use ByJG\AnyDataset\Model\ObjectHandler;
-use ByJG\Util\XmlUtil;
+use ByJG\Serialize\Formatter\JsonFormatter;
+use ByJG\Serialize\Formatter\XmlFormatter;
 
 class ServiceHandler implements HandlerInterface
 {
@@ -18,8 +18,8 @@ class ServiceHandler implements HandlerInterface
     public function setOutput($output)
     {
         // Check if output is set
-        if ($output != Output::JSON && $output != Output::XML && $output != Output::CSV && $output != Output::RDF) {
-            throw new \Exception('Invalid output format. Valid are XML, JSON or CSV');
+        if ($output != Output::JSON && $output != Output::XML) {
+            throw new \Exception('Invalid output format. Valid are XML or JSON');
         }
 
         $this->output = $output;
@@ -32,16 +32,8 @@ class ServiceHandler implements HandlerInterface
                 header('Content-Type: application/json');
                 break;
 
-            case Output::RDF:
-                header('Content-Type: application/rdf+xml');
-                break;
-
             case Output::XML:
                 header('Content-Type: text/xml');
-                break;
-
-            default:
-                header('Content-Type: text/plain');
                 break;
         }
     }
@@ -63,36 +55,16 @@ class ServiceHandler implements HandlerInterface
 
     public function execute(ServiceAbstract $instance)
     {
-        $root = null;
-        $annotationPrefix = 'object';
-        if ($this->getOutput() == Output::RDF) {
-            $xmlDoc = XmlUtil::createXmlDocument();
-            $root = XmlUtil::createChild($xmlDoc, "rdf:RDF", "", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-            XmlUtil::addNamespaceToDocument($root, "rdfs", "http://www.w3.org/2000/01/rdf-schema#");
-            $annotationPrefix = 'rdf';
-        }
 
-        $dom = $instance->getResponse()->getResponseBag()->process($root, $annotationPrefix);
+        $serialized = $instance->getResponse()->getResponseBag()->process();
 
         switch ($this->getOutput()) {
             case Output::JSON:
-                return ObjectHandler::xml2json($dom);
+                return (new JsonFormatter())->process($serialized);
 
             case Output::XML:
-            case Output::RDF:
-                return $dom->saveXML();
+                return (new XmlFormatter())->process($serialized);
 
-            case Output::CSV:
-                $array = XmlUtil::xml2Array($dom);
-
-                $return = "";
-                foreach ((array)$array as $line) {
-                    foreach ((array)$line as $field) {
-                        $return .= "\"" . str_replace('"', '\\"', (is_array($field) ? json_encode($field) : $field)) . "\";";
-                    }
-                    $return .= "\n";
-                }
-                return $return;
         }
 
         return null;
