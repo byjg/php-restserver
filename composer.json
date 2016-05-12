@@ -15,7 +15,7 @@
   "minimum-stability": "dev",
   "require": {
     "php": ">=5.4.0",
-    "byjg/serialize": "1.0.*",
+    "byjg/serializer": "1.0.*",
     "nikic/fast-route": "v0.6.0",
     "filp/whoops": "1.1.*"
   },
