@@ -3,7 +3,7 @@
 namespace ByJG\RestServer;
 
 use ByJG\RestServer\Exception\HttpResponseException;
-use ByJG\Serialize\SerializerObject;
+use ByJG\Serializer\SerializerObject;
 
 class ResponseBag
 {

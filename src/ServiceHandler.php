@@ -2,8 +2,8 @@
 
 namespace ByJG\RestServer;
 
-use ByJG\Serialize\Formatter\JsonFormatter;
-use ByJG\Serialize\Formatter\XmlFormatter;
+use ByJG\Serializer\Formatter\JsonFormatter;
+use ByJG\Serializer\Formatter\XmlFormatter;
 
 class ServiceHandler implements HandlerInterface
 {
