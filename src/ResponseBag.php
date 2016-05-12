@@ -23,7 +23,12 @@ class ResponseBag
      */
     public function process()
     {
-        $object = new SerializerObject((array)$this->collection);
+        $collection = (array)$this->collection;
+        if (count($collection)===1) {
+            $collection = $collection[0];
+        }
+        
+        $object = new SerializerObject($collection);
         return $object->build();
     }
 
