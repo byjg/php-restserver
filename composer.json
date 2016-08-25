@@ -16,8 +16,8 @@
   "require": {
     "php": ">=5.4.0",
     "byjg/serializer": "1.0.*",
-    "nikic/fast-route": "v0.6.0",
-    "filp/whoops": "1.1.*"
+    "nikic/fast-route": "v1.0.*",
+    "filp/whoops": "2.1.*"
   },
   "license": "MIT"
 }
