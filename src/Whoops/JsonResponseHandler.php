@@ -27,10 +27,6 @@ class JsonResponseHandler extends OriginalJsonHandler
      */
     public function handle()
     {
-        if ($this->onlyForAjaxRequests() && !$this->isAjaxRequest()) {
-            return Handler::DONE;
-        }
-
         $response = array(
             'error' => Formatter::formatExceptionAsDataArray(
                 $this->getInspector(),
@@ -43,20 +39,9 @@ class JsonResponseHandler extends OriginalJsonHandler
             $response["debug"] = $debug;
         }
 
-        if (Misc::canSendHeaders()) {
-            header('Content-Type: application/json');
-        }
+        echo json_encode($response, defined('JSON_PARTIAL_OUTPUT_ON_ERROR') ? JSON_PARTIAL_OUTPUT_ON_ERROR : 0);
 
-        $this->setProperHeader($this->getException());
-        echo json_encode($response);
         return Handler::QUIT;
-    }
-
-    public function isAjaxRequest() {
-        return (
-            !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
-            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest');
-
     }
 
 }
