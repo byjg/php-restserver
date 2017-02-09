@@ -5,6 +5,7 @@ namespace ByJG\RestServer;
 use ByJG\DesignPattern\Singleton;
 use ByJG\RestServer\Whoops\JsonResponseHandler;
 use ByJG\RestServer\Whoops\PlainResponseHandler;
+use Whoops\Handler\PrettyPageHandler;
 use Whoops\Handler\XmlResponseHandler;
 use Whoops\Handler\Handler;
 use Whoops\Run;
@@ -45,6 +46,8 @@ class ErrorHandler
             $this->_handler = new JsonResponseHandler();
         } else if ($output == Output::XML) {
             $this->_handler = new XmlResponseHandler();
+        } else if ($output == Output::HTML) {
+            $this->_handler = new PrettyPageHandler();
         } else {
             $this->_handler = new PlainResponseHandler();
         }

@@ -18,8 +18,8 @@ class ServiceHandler implements HandlerInterface
     public function setOutput($output)
     {
         // Check if output is set
-        if ($output != Output::JSON && $output != Output::XML) {
-            throw new \Exception('Invalid output format. Valid are XML or JSON');
+        if ($output != Output::JSON && $output != Output::XML && $output != Output::HTML) {
+            throw new \Exception('Invalid output format. Valid are XML, JSON or HTML');
         }
 
         $this->output = $output;
@@ -34,6 +34,10 @@ class ServiceHandler implements HandlerInterface
 
             case Output::XML:
                 header('Content-Type: text/xml');
+                break;
+
+            case Output::HTML:
+                header('Content-Type: text/html');
                 break;
         }
     }
