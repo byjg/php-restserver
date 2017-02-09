@@ -189,4 +189,17 @@ class HttpRequest
 
         return $servername;
     }
+
+    private $uploadedFiles;
+
+    /**
+     * @return \ByJG\RestServer\UploadedFiles
+     */
+    public function uploadedFiles()
+    {
+        if (!isset($this->uploadedFiles)) {
+            $this->uploadedFiles = new UploadedFiles();
+        }
+        return $this->uploadedFiles;
+    }
 }

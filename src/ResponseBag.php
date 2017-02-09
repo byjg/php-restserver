@@ -12,6 +12,9 @@ class ResponseBag
 
     public function add($object)
     {
+        if (is_string($object)) {
+            $object = [ $object ];
+        }
         if (!is_object($object) && !is_array($object)) {
             throw new HttpResponseException('You can add only object');
         }

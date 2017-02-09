@@ -3,6 +3,7 @@
 namespace ByJG\RestServer;
 
 use ByJG\Serializer\Formatter\JsonFormatter;
+use ByJG\Serializer\Formatter\PlainTextFormatter;
 use ByJG\Serializer\Formatter\XmlFormatter;
 
 class ServiceHandler implements HandlerInterface
@@ -18,8 +19,8 @@ class ServiceHandler implements HandlerInterface
     public function setOutput($output)
     {
         // Check if output is set
-        if ($output != Output::JSON && $output != Output::XML) {
-            throw new \Exception('Invalid output format. Valid are XML or JSON');
+        if ($output != Output::JSON && $output != Output::XML && $output != Output::HTML) {
+            throw new \Exception('Invalid output format. Valid are XML, JSON or HTML');
         }
 
         $this->output = $output;
@@ -34,6 +35,10 @@ class ServiceHandler implements HandlerInterface
 
             case Output::XML:
                 header('Content-Type: text/xml');
+                break;
+
+            case Output::HTML:
+                header('Content-Type: text/html');
                 break;
         }
     }
@@ -65,6 +70,8 @@ class ServiceHandler implements HandlerInterface
             case Output::XML:
                 return (new XmlFormatter())->process($serialized);
 
+            case Output::HTML:
+                return (new PlainTextFormatter())->process($serialized);
         }
 
         return null;
