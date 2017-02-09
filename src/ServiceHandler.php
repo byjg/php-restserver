@@ -3,6 +3,7 @@
 namespace ByJG\RestServer;
 
 use ByJG\Serializer\Formatter\JsonFormatter;
+use ByJG\Serializer\Formatter\PlainTextFormatter;
 use ByJG\Serializer\Formatter\XmlFormatter;
 
 class ServiceHandler implements HandlerInterface
@@ -69,6 +70,8 @@ class ServiceHandler implements HandlerInterface
             case Output::XML:
                 return (new XmlFormatter())->process($serialized);
 
+            case Output::HTML:
+                return (new PlainTextFormatter())->process($serialized);
         }
 
         return null;
