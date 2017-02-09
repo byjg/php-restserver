@@ -35,6 +35,11 @@ class UploadedFiles
         return $this->getFileByKey($key, 'name');
     }
 
+    public function getFileType($key)
+    {
+        return $this->getFileByKey($key, 'type');
+    }
+
     public function saveTo($key, $destinationPath, $newName = "")
     {
         if (empty($newName)) {
