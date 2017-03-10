@@ -24,12 +24,12 @@ class RouteHandler
 
     protected $_defaultMethods = [
         // Service
-        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}'],
-        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}.{output}'],
-        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}/{action}.{output}'],
-        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}.{output}'],
-        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}.{output}'],
-        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}.{output}']
+        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}'],
+        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}'],
+        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}/{action}'],
+        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{id:[0-9]+}'],
+        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}/{action}'],
+        ["method" => ['GET', 'POST', 'PUT', 'DELETE'], "pattern" => '/{version}/{module}']
     ];
     protected $_moduleAlias = [];
     protected $_defaultRestVersion = '1.0';
@@ -222,7 +222,7 @@ class RouteHandler
     }
 
     /**
-     * Process the ROUTE (see httpdocs/route-dist.php)
+     * Process the ROUTE (see web/app-dist.php)
      *
      * ModuleAlias needs to be an array like:
      *  [ 'alias' => 'Full.Namespace.To.Class' ]
@@ -231,7 +231,7 @@ class RouteHandler
      * [
      *     [
      *         "method" => ['GET'],
-     *         "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}',
+     *         "pattern" => '/{version}/{module}/{action}/{id:[0-9]+}/{secondid}',
      *         "handler" => '\ByJG\RestServer\ServiceHandler'
      *    ],
      * ]
@@ -240,9 +240,8 @@ class RouteHandler
      * @param array $routePattern
      * @param string $version
      * @param string $defaultOutput
-     * @param string $routeIndex
      */
-    public static function handleRoute($moduleAlias = [], $routePattern = null, $version = '1.0', $defaultOutput = null, $routeIndex = "index.php")
+    public static function handleRoute($moduleAlias = [], $routePattern = null, $version = '1.0', $defaultOutput = Output::JSON)
     {
         ob_start();
         session_start();
@@ -300,10 +299,10 @@ class RouteHandler
         // You do not need change from this point
         // --------------------------------------------------------------------------
 
+        $debugBacktrace =  debug_backtrace();
         if (!empty($_SERVER['SCRIPT_FILENAME'])
             && file_exists($_SERVER['SCRIPT_FILENAME'])
-            && basename($_SERVER['SCRIPT_FILENAME']) !== "route.php"
-            && basename($_SERVER['SCRIPT_FILENAME']) !== $routeIndex
+            && $_SERVER['SCRIPT_FILENAME'] !== $debugBacktrace[0]['file']
         ) {
             $file = $_SERVER['SCRIPT_FILENAME'];
             if (strpos($file, '.php') !== false) {

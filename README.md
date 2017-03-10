@@ -132,10 +132,10 @@ handle this specific action. Some examples below:
 
 ### Routing
 
-RestServer ByJG uses the Nikic/FastRoute project to do the routing. Yout need copy the file httpdocs/route-dist.php as route.php
+RestServer ByJG uses the Nikic/FastRoute project to do the routing. Yout need copy the file web/app-dist.php as route.php
 into the root of your public folder accessible throught the web.
 
-The route-dist is look like to:
+The app-dist.php file looks like to:
 
 ```php
 require_once __DIR__ . '/../vendor/autoload.php';
