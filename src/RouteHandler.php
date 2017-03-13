@@ -303,7 +303,7 @@ class RouteHandler
         $debugBacktrace =  debug_backtrace();
         if (!empty($_SERVER['SCRIPT_FILENAME'])
             && file_exists($_SERVER['SCRIPT_FILENAME'])
-            && $_SERVER['SCRIPT_FILENAME'] !== $debugBacktrace[0]['file']
+            && str_replace('//', '/', $_SERVER['SCRIPT_FILENAME']) !== $debugBacktrace[0]['file']
         ) {
             $file = $_SERVER['SCRIPT_FILENAME'];
             if (strpos($file, '.php') !== false) {
