@@ -136,10 +136,11 @@ class RouteHandler
 
                 // Check Alias
                 $moduleAlias = $this->getModuleAlias();
+                $vars['_class'] = $vars['module'];
                 if (isset($moduleAlias[$vars['module']])) {
-                    $vars['module'] = $moduleAlias[$vars['module']];
+                    $vars['_class'] = $moduleAlias[$vars['module']];
                 }
-                $vars['module'] = '\\' . str_replace('.', '\\', $vars['module']);
+                $vars['_class'] = '\\' . str_replace('.', '\\', $vars['_class']);
 
                 // Define output
                 if (!isset($vars['output'])) {
@@ -154,7 +155,7 @@ class RouteHandler
 
                 // Instantiate the Service Handler
                 $handlerInstance = $this->getHandler($routeInfo[1], $vars['output']);
-                $instance = $this->executeAction($vars['module']);
+                $instance = $this->executeAction($vars['_class']);
 
                 echo $handlerInstance->execute($instance);
                 break;
