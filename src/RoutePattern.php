@@ -61,5 +61,29 @@ class RoutePattern
     public function getHandler()
     {
         return $this->handler;
-   }
+    }
+
+    /**
+     * @param array|string $method
+     */
+    public function setMethod($method)
+    {
+        $this->method = $method;
+    }
+
+    /**
+     * @param string $pattern
+     */
+    public function setPattern($pattern)
+    {
+        $this->pattern = $pattern;
+    }
+
+    /**
+     * @param string $handler
+     */
+    public function setHandler($handler)
+    {
+        $this->handler = $handler;
+    }
 }
