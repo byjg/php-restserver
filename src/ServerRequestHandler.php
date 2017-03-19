@@ -63,6 +63,7 @@ class ServerRequestHandler
     public function setRoutes($methods)
     {
         if ($methods == null) {
+            $this->routes = null;
             return;
         }
 
@@ -166,9 +167,9 @@ class ServerRequestHandler
                     $_REQUEST[$key] = $_GET[$key] = $vars[$key];
                 }
 
-                $instance = $this->executeAction($vars['_class']);
+                $instance = $this->executeServiceMethod($vars['_class']);
 
-                echo $handlerInstance->execute($instance);
+                echo $handlerInstance->writeOutput($instance);
                 break;
 
             default:
@@ -206,7 +207,7 @@ class ServerRequestHandler
      * @throws InvalidClassException
      * @throws BadActionException
      */
-    public function executeAction($class)
+    public function executeServiceMethod($class)
     {
         // Instantiate a new class
         if (!class_exists($class)) {

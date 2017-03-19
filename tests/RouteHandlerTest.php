@@ -19,10 +19,7 @@ class RouteHandlerTest extends \PHPUnit\Framework\TestCase
     {
         $this->object = ServerRequestHandler::getInstance();
         $this->object->setModuleAlias([]);
-        $this->object->setDefaultHandler(null);
-        $this->object->setDefaultOutput(null);
-        $this->object->setDefaultRestVersion(null);
-        $this->object->setRoutes([]);
+        $this->object->setRoutes(null);
     }
 
     public function tearDown()
@@ -40,29 +37,45 @@ class RouteHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(array_merge($list, ['new' => 'Other.Class']), $this->object->getModuleAlias());
     }
 
-    public function testDefaultHandler()
-    {
-        $this->object->setDefaultHandler( '\Some\Handler' );
-        $this->assertEquals('\Some\Handler', $this->object->getDefaultHandler());
-    }
-
-    public function testDefaulOutput()
-    {
-        $this->object->setDefaultOutput( \ByJG\RestServer\Output::JSON );
-        $this->assertEquals(\ByJG\RestServer\Output::JSON, $this->object->getDefaultOutput());
-    }
-
-    public function testDefaultRestVersion()
-    {
-        $this->object->setDefaultRestVersion( 'v1' );
-        $this->assertEquals('v1', $this->object->getDefaultRestVersion());
-    }
-
     /**
      * @expectedException \InvalidArgumentException
      */
     public function testDefaultMethods()
     {
-        $this->object->setRoutes( ['wrongarray' => ''] );
+        $this->object->setRoutes([
+            ['wrongarray' => '']
+        ]);
+    }
+
+    public function testDefaultMethods2()
+    {
+        $this->object->setRoutes([
+            ['method' => 'GET', 'pattern' => '/some/pattern' ],
+            ['method' => 'POST', 'pattern' => '/some/pattern2' ]
+        ]);
+
+        $this->assertEquals(
+            [
+                new \ByJG\RestServer\RoutePattern('GET', '/some/pattern'),
+                new \ByJG\RestServer\RoutePattern('POST', '/some/pattern2')
+            ],
+            $this->object->getRoutes()
+        );
+    }
+
+    public function testDefaultMethods3()
+    {
+        $this->object->setRoutes([
+            new \ByJG\RestServer\RoutePattern('GET', '/some/pattern'),
+            new \ByJG\RestServer\RoutePattern('POST', '/some/pattern2')
+        ]);
+
+        $this->assertEquals(
+            [
+                new \ByJG\RestServer\RoutePattern('GET', '/some/pattern'),
+                new \ByJG\RestServer\RoutePattern('POST', '/some/pattern2')
+            ],
+            $this->object->getRoutes()
+        );
     }
 }

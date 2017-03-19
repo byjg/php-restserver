@@ -26,7 +26,7 @@ interface HandleOutputInterface
      * @param \ByJG\RestServer\ServiceAbstract $class
      * @return string
      */
-    public function execute(ServiceAbstract $class);
+    public function writeOutput(ServiceAbstract $class);
 
     /**
      * @return Handler

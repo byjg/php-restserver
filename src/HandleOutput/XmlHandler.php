@@ -13,7 +13,7 @@ class XmlHandler implements HandleOutputInterface
         header('Content-Type: text/xml');
     }
 
-    public function execute(ServiceAbstract $instance)
+    public function writeOutput(ServiceAbstract $instance)
     {
 
         $serialized = $instance->getResponse()->getResponseBag()->process();

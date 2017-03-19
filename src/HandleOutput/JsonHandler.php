@@ -17,7 +17,7 @@ class JsonHandler implements HandleOutputInterface
         // header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
     }
 
-    public function execute(ServiceAbstract $instance)
+    public function writeOutput(ServiceAbstract $instance)
     {
         $serialized = $instance->getResponse()->getResponseBag()->process();
         return (new JsonFormatter())->process($serialized);

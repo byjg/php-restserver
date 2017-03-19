@@ -14,7 +14,7 @@ class HtmlHandler implements HandleOutputInterface
         header('Content-Type: text/html');
     }
 
-    public function execute(ServiceAbstract $instance)
+    public function writeOutput(ServiceAbstract $instance)
     {
         $serialized = $instance->getResponse()->getResponseBag()->process();
         return (new PlainTextFormatter())->process($serialized);
