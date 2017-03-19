@@ -3,10 +3,7 @@
 namespace ByJG\RestServer;
 
 use ByJG\DesignPattern\Singleton;
-use ByJG\RestServer\Whoops\JsonResponseHandler;
 use ByJG\RestServer\Whoops\PlainResponseHandler;
-use Whoops\Handler\PrettyPageHandler;
-use Whoops\Handler\XmlResponseHandler;
 use Whoops\Handler\Handler;
 use Whoops\Run;
 
@@ -30,28 +27,18 @@ class ErrorHandler
     protected function __construct()
     {
         $this->_whoops = new Run();
-        $this->setHandler();
+        $this->setHandler(new PlainResponseHandler());
     }
 
     /**
      * Set the proper Error Handler based on the Output of the page
      *
-     * @param string $output
+     * @param \Whoops\Handler\Handler $handler
      */
-    public function setHandler($output = null)
+    public function setHandler(Handler $handler)
     {
         $this->_whoops->popHandler();
-
-        if ($output == Output::JSON) {
-            $this->_handler = new JsonResponseHandler();
-        } else if ($output == Output::XML) {
-            $this->_handler = new XmlResponseHandler();
-        } else if ($output == Output::HTML) {
-            $this->_handler = new PrettyPageHandler();
-        } else {
-            $this->_handler = new PlainResponseHandler();
-        }
-
+        $this->_handler = $handler;
         $this->_whoops->pushHandler($this->_handler);
     }
 

@@ -9,7 +9,6 @@ namespace ByJG\RestServer\Whoops;
 use Whoops\Exception\Formatter;
 use Whoops\Handler\Handler;
 use Whoops\Handler\JsonResponseHandler as OriginalJsonHandler;
-use Whoops\Util\Misc;
 
 /**
  * Catches an exception and converts it to a JSON
