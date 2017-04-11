@@ -6,7 +6,7 @@ use ByJG\RestServer\Exception\ClientShowException;
 
 trait WhoopsHeaderTrait
 {
-    public function setProperHeader(\Exception $exception)
+    public function setProperHeader($exception)
     {
         if ($exception instanceof ClientShowException) {
             $exception->handleHeader();
