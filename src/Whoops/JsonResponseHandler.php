@@ -38,6 +38,8 @@ class JsonResponseHandler extends OriginalJsonHandler
             $response["debug"] = $debug;
         }
 
+        $this->setProperHeader($this->getException());
+
         echo json_encode($response, defined('JSON_PARTIAL_OUTPUT_ON_ERROR') ? JSON_PARTIAL_OUTPUT_ON_ERROR : 0);
 
         return Handler::QUIT;
