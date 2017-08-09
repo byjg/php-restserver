@@ -132,15 +132,15 @@ handle this specific action. Some examples below:
 
 ### Routing
 
-RestServer ByJG uses the Nikic/FastRoute project to do the routing. Yout need copy the file httpdocs/route-dist.php as route.php
+RestServer ByJG uses the Nikic/FastRoute project to do the routing. Yout need copy the file web/app-dist.php as route.php
 into the root of your public folder accessible throught the web.
 
-The route-dist is look like to:
+The app-dist.php file looks like to:
 
 ```php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-\ByJG\RestServer\RouteHandler::handleRoute();
+\ByJG\RestServer\ServerRequestHandler::handle();
 ```
 
 This file setup all routing process and handle the execution of the proper rest class.
@@ -182,7 +182,7 @@ Instead to pass the full namespace class you can create a module alias.
 Just add in the route.php file the follow code:
 
 ```php
-\ByJG\RestServer\RouteHandler::handleRoute([ 'somealias' => 'Full.NameSpace.To.Module' ]);
+\ByJG\RestServer\ServerRequestHandler::handle([ 'somealias' => 'Full.NameSpace.To.Module' ]);
 ```
 
 In the example above if the parameter "module" matches with the value "somealias" will be mapped to the class "\Full\NameSpace\To\Module"
@@ -192,13 +192,13 @@ In the example above if the parameter "module" matches with the value "somealias
 You can override the default route values and create your own.
 
 ```php
-\ByJG\RestServer\RouteHandler::handleRoute(
+\ByJG\RestServer\ServerRequestHandler::handle(
     null, 
     [ 
         [ 
             "method" => ['GET'], 
             "pattern" => '/{module}/{action}/{id:[0-9]+}.{output}', 
-            "handler" => '\ByJG\RestServer\ServiceHandler' 
+            "handler" => '\ByJG\RestServer\ServiceHandleOutput' 
         ] 
     ]
 );
@@ -209,18 +209,18 @@ You can override the default route values and create your own.
 You can define a version to yout rest service and create a EOL for changes in the services that breaking the interface. Just set in the "route.php" file the follow line:
 
 ```php
-\ByJG\RestServer\RouteHandler::handleRoute(null, null, '2.0');
+\ByJG\RestServer\ServerRequestHandler::handle(null, null, '2.0');
 ```
 
 This will populate the variable "version".
 
 #### Set the default output format
 
-The basic ServiceHandler can output the objects in Output::JSON, Output::XML or Output::CSV. 
+The basic ServiceHandleOutput can output the objects in Output::JSON, Output::XML or Output::CSV. 
 Normally this is set in the route, but you can ommit from the route and set a default output here. 
 
 ```php
-\ByJG\RestServer\RouteHandler::handleRoute(null, null, null, Output::JSON);
+\ByJG\RestServer\ServerRequestHandler::handle(null, null, null, Output::JSON);
 ```
 
 #### Define a different route handler than index.php and route.php
@@ -229,7 +229,7 @@ The default filename for route process is 'index.php' or 'route.php'.
 If you use a different one you have to set it here.
 
 ```php
-\ByJG\RestServer\RouteHandler::handleRoute(null, null, null, null, 'acme.php');
+\ByJG\RestServer\ServerRequestHandler::handle(null, null, null, null, 'acme.php');
 ```
 
 Note: you have to configure your webserver to support this file. 
@@ -241,7 +241,7 @@ Just type: `composer install "byjg/restserver=~1.1"`
 
 ## Running the rest server
 
-The follow examples assumes that the handleRoute is in the "index.php"
+The follow examples assumes that the handle is in the "index.php"
 
 #### PHP Built-in server
 

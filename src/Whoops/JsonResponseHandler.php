@@ -9,7 +9,6 @@ namespace ByJG\RestServer\Whoops;
 use Whoops\Exception\Formatter;
 use Whoops\Handler\Handler;
 use Whoops\Handler\JsonResponseHandler as OriginalJsonHandler;
-use Whoops\Util\Misc;
 
 /**
  * Catches an exception and converts it to a JSON
@@ -38,6 +37,8 @@ class JsonResponseHandler extends OriginalJsonHandler
         if (count($debug) > 0) {
             $response["debug"] = $debug;
         }
+
+        $this->setProperHeader($this->getException());
 
         echo json_encode($response, defined('JSON_PARTIAL_OUTPUT_ON_ERROR') ? JSON_PARTIAL_OUTPUT_ON_ERROR : 0);
 
