@@ -2,26 +2,25 @@
 
 namespace ByJG\RestServer\HandleOutput;
 
-use ByJG\RestServer\ServiceAbstract;
 use ByJG\Serializer\Formatter\XmlFormatter;
 use Whoops\Handler\XmlResponseHandler;
 
-class XmlHandler implements HandleOutputInterface
+class XmlHandler extends BaseHandler
 {
-    public function writeHeader()
+    public function __construct()
     {
-        header('Content-Type: text/xml');
-    }
-
-    public function writeOutput(ServiceAbstract $instance)
-    {
-
-        $serialized = $instance->getResponse()->getResponseBag()->process();
-        return (new XmlFormatter())->process($serialized);
+        $this->option('header', [
+            'Content-Type: text/xml'
+        ]);
     }
 
     public function getErrorHandler()
     {
         return new XmlResponseHandler();
+    }
+
+    public function getFormatter()
+    {
+        return new XmlFormatter();
     }
 }

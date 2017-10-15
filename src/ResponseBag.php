@@ -36,9 +36,11 @@ class ResponseBag
     }
 
     /**
+     * @param bool $buildNull
+     * @param bool $onlyString
      * @return array
      */
-    public function process()
+    public function process($buildNull = true, $onlyString = false)
     {
         $collection = (array)$this->collection;
         if (count($collection) === 1 && $this->serializationRule !== ResponseBag::ARRAY && isset($collection[0])) {
@@ -46,7 +48,10 @@ class ResponseBag
         }
         
         $object = new SerializerObject($collection);
-        return $object->build();
+        return $object
+            ->setOnlyString($onlyString)
+            ->setBuildNull($buildNull)
+            ->build();
     }
 
     public function getCollection()
