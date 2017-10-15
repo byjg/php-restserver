@@ -2,7 +2,7 @@
 
 namespace ByJG\RestServer\HandleOutput;
 
-class JsonHandlerClean extends JsonHandler
+class JsonCleanHandler extends JsonHandler
 {
     public function __construct()
     {
