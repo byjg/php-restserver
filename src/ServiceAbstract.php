@@ -21,11 +21,17 @@ abstract class ServiceAbstract
         $this->response = new HttpResponse();
     }
 
+    /**
+     * @return \ByJG\RestServer\HttpRequest
+     */
     public function getRequest()
     {
         return $this->request;
     }
 
+    /**
+     * @return \ByJG\RestServer\HttpResponse
+     */
     public function getResponse()
     {
         return $this->response;

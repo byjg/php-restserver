@@ -8,7 +8,12 @@ use ByJG\Serializer\SerializerObject;
 class ResponseBag
 {
 
-    protected $collection;
+    const AUTOMATIC = 0;
+    const SINGLE_OBJECT = 1;
+    const ARRAY = 2;
+
+    protected $collection = [];
+    protected $serializationRule = ResponseBag::AUTOMATIC;
 
     public function add($object)
     {
@@ -18,7 +23,16 @@ class ResponseBag
         if (!is_object($object) && !is_array($object)) {
             throw new HttpResponseException('You can add only object');
         }
-        $this->collection[] = $object;
+
+        if ($this->serializationRule !== ResponseBag::SINGLE_OBJECT) {
+            $this->collection[] = $object;
+            return;
+        }
+
+        if (is_object($object)) {
+            $object = [$object];
+        }
+        $this->collection = array_merge($this->collection, $object);
     }
 
     /**
@@ -27,7 +41,7 @@ class ResponseBag
     public function process()
     {
         $collection = (array)$this->collection;
-        if (count($collection)===1) {
+        if (count($collection) === 1 && $this->serializationRule !== ResponseBag::ARRAY && isset($collection[0])) {
             $collection = $collection[0];
         }
         
@@ -38,5 +52,10 @@ class ResponseBag
     public function getCollection()
     {
         return $this->collection;
+    }
+
+    public function serializationRule($value)
+    {
+        $this->serializationRule = $value;
     }
 }
