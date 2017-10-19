@@ -18,6 +18,13 @@ interface HandleOutputInterface
 {
 
     /**
+     * @param $option
+     * @param $value
+     * @return $this
+     */
+    public function option($option, $value);
+
+    /**
      * @return void
      */
     public function writeHeader();
@@ -32,4 +39,9 @@ interface HandleOutputInterface
      * @return Handler
      */
     public function getErrorHandler();
+
+    /**
+     * @return \ByJG\Serializer\Formatter\FormatterInterface
+     */
+    public function getFormatter();
 }

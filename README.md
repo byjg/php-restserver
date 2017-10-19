@@ -19,7 +19,8 @@ The quick guide is:
 For example, if you want to process the HTTP method POST you have to do:
 
 ```php
-namespace Sample
+<?php
+namespace Sample;
 
 class MyClass extends \ByJG\RestServer\ServiceAbstract
 {
@@ -38,7 +39,7 @@ class MyClass extends \ByJG\RestServer\ServiceAbstract
 The usual url for call this class is (see more in Routing below):
 
 ```
-http://yourserver.com/1.0/Sample.MyClass/1234.json     # Or .xml or .csv
+http://yourserver.com/Sample.MyClass/1234     # Or .xml or .csv
 ```
 
 ### Processing the request
@@ -64,7 +65,8 @@ The main goal of the RestServer ByJG is work with the objects in your native for
 JSON, XML or CSV is done by the platform. See below some examples:
 
 ```php
-namespace Sample
+<?php
+namespace Sample;
 
 class MyClass extends \ByJG\RestServer\ServiceAbstract
 {
@@ -132,12 +134,13 @@ handle this specific action. Some examples below:
 
 ### Routing
 
-RestServer ByJG uses the Nikic/FastRoute project to do the routing. Yout need copy the file web/app-dist.php as route.php
+RestServer ByJG uses the Nikic/FastRoute project to do the routing. Yout need copy the file web/app-dist.php as app.php
 into the root of your public folder accessible throught the web.
 
 The app-dist.php file looks like to:
 
 ```php
+<?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
 \ByJG\RestServer\ServerRequestHandler::handle();
@@ -149,31 +152,32 @@ There some pre-defined routes as you can see below but you can change it any tim
 
 The pre-defined routes are:
 
-| Pattern                                                        | Exeample                                 |
-|----------------------------------------------------------------|------------------------------------------|
-| /{version}/{module}/{action}/{id:[0-9]+}/{secondid}.{output}   | /1.0/MyNameSpace.Module/list/1/2345.json |
-| /{version}/{module}/{action}/{id:[0-9]+}.{output}              | /1.0/MyNameSpace.Module/list/1.json      |
-| /{version}/{module}/{id:[0-9]+}/{action}.{output}              | /1.0/MyNameSpace.Module/1/list.json      |
-| /{version}/{module}/{id:[0-9]+}.{output}                       | /1.0/MyNameSpace.Module/1.json           |
-| /{version}/{module}/{action}.{output}                          | /1.0/MyNameSpace.Module/list.json        |
-| /{version}/{module}.{output}                                   | /1.0/MyNameSpace.Module.json             |
+| Pattern                                     | Exeample                        |
+|---------------------------------------------|---------------------------------|
+| /{module}/{action}/{id:[0-9]+}/{secondid}   | /MyNameSpace.Module/list/1/2345 |
+| /{module}/{action}/{id:[0-9]+}              | /MyNameSpace.Module/list/1      |
+| /{module}/{id:[0-9]+}/{action}              | /MyNameSpace.Module/1/list      |
+| /{module}/{id:[0-9]+}                       | /MyNameSpace.Module/1           |
+| /{module}/{action}                          | /MyNameSpace.Module/list        |
+| /{module}                                   | /MyNameSpace.Module             |
 
-All variables defined above will be available throught the $_GET. The variables output, module and version having a special
+All variables defined above will be available throught the $_GET. The variables module and action having a special
 meaning into the system:
 
-- **output** will be define the output. Can be "json", "xml" or "csv"
 - **module** will be the full namespace to your class. You have to separate the namespaces with "period" (.). Do not use back slash (\);
-- **vesion** have a symbolic version for your rest server.
+- **action** will match a specific action inside your class
 
-#### Customizing your route file
+Creating the pattern:
 
-The processRoute accepts 5 parameters:
-* $moduleAlias 
-* $routePattern
-* $version
-* $defaultOutput
-* $routeIndex
+- {variable} - Match anything and sets to "variable".
+- {variable:specific} - Match only if the value is "specific" and sets to "variable"
+- {variable:[0-9]+} - Match the regex "[0-9]+" and sets to variable;
 
+all matches values can be obtained by
+
+```php
+$this->getRequest()->get('variable')
+```
 
 #### Creating Module Alias
 
@@ -182,6 +186,7 @@ Instead to pass the full namespace class you can create a module alias.
 Just add in the route.php file the follow code:
 
 ```php
+<?php
 \ByJG\RestServer\ServerRequestHandler::handle([ 'somealias' => 'Full.NameSpace.To.Module' ]);
 ```
 
@@ -189,71 +194,58 @@ In the example above if the parameter "module" matches with the value "somealias
 
 #### Creating your own routes
 
-You can override the default route values and create your own.
+You can override the default route values and create your own. See an example:
 
 ```php
+<?php
 \ByJG\RestServer\ServerRequestHandler::handle(
-    null, 
+    [
+        'somealias' => 'Namespace.to.My.Class',
+        'another' => 'Another.Namespace.To.Class'
+    ], 
     [ 
-        [ 
+        [
             "method" => ['GET'], 
-            "pattern" => '/{module}/{action}/{id:[0-9]+}.{output}', 
-            "handler" => '\ByJG\RestServer\ServiceHandleOutput' 
-        ] 
+            "pattern" => '/{module:somealias}/{action}/{id:[0-9]+}', 
+            "handler" => \ByJG\RestServer\HandleOutput\JsonHandler::class 
+        ],
+        [
+            "method" => ['POST'], 
+            "pattern" => '/{module:another}/{action:name}/{field}', 
+            "handler" => \ByJG\RestServer\HandleOutput\JsonHandler::class 
+        ],
     ]
 );
 ```
 
-#### Versioning your rest service
+**Available Handlers**
 
-You can define a version to yout rest service and create a EOL for changes in the services that breaking the interface. Just set in the "route.php" file the follow line:
+- JsonHandler
+- XmlHandler
+- HtmlHandler
+- JsonCleanHandler
 
-```php
-\ByJG\RestServer\ServerRequestHandler::handle(null, null, '2.0');
-```
-
-This will populate the variable "version".
-
-#### Set the default output format
-
-The basic ServiceHandleOutput can output the objects in Output::JSON, Output::XML or Output::CSV. 
-Normally this is set in the route, but you can ommit from the route and set a default output here. 
-
-```php
-\ByJG\RestServer\ServerRequestHandler::handle(null, null, null, Output::JSON);
-```
-
-#### Define a different route handler than index.php and route.php
-
-The default filename for route process is 'index.php' or 'route.php'. 
-If you use a different one you have to set it here.
-
-```php
-\ByJG\RestServer\ServerRequestHandler::handle(null, null, null, null, 'acme.php');
-```
-
-Note: you have to configure your webserver to support this file. 
 
 ## Install
 
-Just type: `composer install "byjg/restserver=~1.1"`
+Just type: `composer install "byjg/restserver=2.0.*"`
 
 
 ## Running the rest server
 
-The follow examples assumes that the handle is in the "index.php"
+You need to setup your restserver to handle ALL requests to a single PHP file. Normally is "app.php" 
 
 #### PHP Built-in server
 
 ```
-php -S localhost:8080 index.php
+php -S localhost:8080 app.php
 ```
 
 #### Nginx 
 
 ```
 location / {
-  try_files $uri $uri/ /index.php$is_args$args;
+  try_files $uri $uri/ /app.php$is_args$args;
 }
 ```
 
@@ -263,7 +255,7 @@ location / {
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^(.*)$ ./index.php [QSA,NC,L]
+RewriteRule ^(.*)$ ./app.php [QSA,NC,L]
 ```
 
 ----

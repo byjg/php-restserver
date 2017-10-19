@@ -62,7 +62,7 @@ class ServerRequestHandler
      */
     public function setRoutes($methods)
     {
-        if ($methods == null) {
+        if ($methods === null) {
             $this->routes = null;
             return;
         }

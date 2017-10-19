@@ -2,29 +2,25 @@
 
 namespace ByJG\RestServer\HandleOutput;
 
-use ByJG\RestServer\ServiceAbstract;
 use ByJG\RestServer\Whoops\JsonResponseHandler;
 use ByJG\Serializer\Formatter\JsonFormatter;
 
-class JsonHandler implements HandleOutputInterface
+class JsonHandler extends BaseHandler
 {
-
-    public function writeHeader()
+    public function __construct()
     {
-        header('Content-Type: application/json');
-        // header('Access-Control-Allow-Origin: *');
-        // header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
-        // header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
-    }
-
-    public function writeOutput(ServiceAbstract $instance)
-    {
-        $serialized = $instance->getResponse()->getResponseBag()->process();
-        return (new JsonFormatter())->process($serialized);
+        $this->option('header', [
+            'Content-Type: application/json'
+        ]);
     }
 
     public function getErrorHandler()
     {
         return new JsonResponseHandler();
+    }
+
+    public function getFormatter()
+    {
+        return new JsonFormatter();
     }
 }

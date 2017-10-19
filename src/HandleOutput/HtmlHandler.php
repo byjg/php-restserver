@@ -2,26 +2,25 @@
 
 namespace ByJG\RestServer\HandleOutput;
 
-use ByJG\RestServer\ServiceAbstract;
 use ByJG\Serializer\Formatter\PlainTextFormatter;
 use Whoops\Handler\PrettyPageHandler;
 
-class HtmlHandler implements HandleOutputInterface
+class HtmlHandler extends BaseHandler
 {
-
-    public function writeHeader()
+    public function __construct()
     {
-        header('Content-Type: text/html');
-    }
-
-    public function writeOutput(ServiceAbstract $instance)
-    {
-        $serialized = $instance->getResponse()->getResponseBag()->process();
-        return (new PlainTextFormatter())->process($serialized);
+        $this->option('header', [
+            'Content-Type: text/html'
+        ]);
     }
 
     public function getErrorHandler()
     {
         return new PrettyPageHandler();
+    }
+
+    public function getFormatter()
+    {
+        return new PlainTextFormatter();
     }
 }
