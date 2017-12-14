@@ -47,7 +47,7 @@ class ResponseBagTest extends TestCase
 
     public function testAddStringArray()
     {
-        $this->object->serializationRule(ResponseBag::ARRAY);
+        $this->object->serializationRule(ResponseBag::OBJECT_LIST);
         $this->object->add('Test1');
         $this->assertEquals(
             [
@@ -105,7 +105,7 @@ class ResponseBagTest extends TestCase
 
     public function testAddArrayArray()
     {
-        $this->object->serializationRule(ResponseBag::ARRAY);
+        $this->object->serializationRule(ResponseBag::OBJECT_LIST);
         $this->object->add(['key1' => 'Test1']);
         $this->assertEquals(
             [
@@ -184,7 +184,7 @@ class ResponseBagTest extends TestCase
 
         $obj2 = new ModelSample('value3', 'value4');
 
-        $this->object->serializationRule(ResponseBag::ARRAY);
+        $this->object->serializationRule(ResponseBag::OBJECT_LIST);
         $this->object->add($obj1);
         $this->assertEquals(
             [
