@@ -15,6 +15,16 @@ class HttpResponse
      */
     protected $responseDebug;
 
+    /**
+     * @var array
+     */
+    protected $headers = [];
+
+    /**
+     * @var int
+     */
+    protected $responseCode = 200;
+
     public function __construct()
     {
         $this->emptyResponse();
@@ -109,5 +119,34 @@ class HttpResponse
     public function emptyResponse()
     {
         $this->response = new ResponseBag();
+    }
+
+    public function addHeader($header, $value)
+    {
+        $this->headers[$header][] = $value;
+    }
+
+    public function getHeaders()
+    {
+        $result = [];
+        foreach ($this->headers as $header => $values) {
+            $replace = true;
+            foreach ($values as $value) {
+                $result[] = [ "$header: $value", $replace ];
+                $replace = false;
+            }
+        }
+
+        return $result;
+    }
+
+    public function setResponseCode($code)
+    {
+        $this->responseCode = $code;
+    }
+
+    public function getResponseCode()
+    {
+        return $this->responseCode;
     }
 }

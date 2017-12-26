@@ -26,6 +26,13 @@ abstract class BaseHandler implements HandleOutputInterface
 
     public function writeOutput(ServiceAbstract $instance)
     {
+        $instanceHeaders = $instance->getResponse()->getHeaders();
+        foreach ($instanceHeaders as $header) {
+            header($header[0], $header[1]);
+        }
+
+        http_response_code($instance->getResponse()->getResponseCode());
+
         $serialized = $instance
             ->getResponse()
             ->getResponseBag()

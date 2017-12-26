@@ -1,6 +1,7 @@
 # PHP Rest Server
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/byjg/restserver/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/byjg/restserver/?branch=master)
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/40968662-27b2-4a31-9872-a29bdd68da2b/mini.png)](https://insight.sensiolabs.com/projects/40968662-27b2-4a31-9872-a29bdd68da2b)
+[![Build Status](https://travis-ci.org/byjg/restserver.svg?branch=master)](https://travis-ci.org/byjg/restserver)
 
 ## Description
 
