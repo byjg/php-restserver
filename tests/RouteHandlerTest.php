@@ -18,8 +18,6 @@ class RouteHandlerTest extends \PHPUnit\Framework\TestCase
     public function setUp()
     {
         $this->object = ServerRequestHandler::getInstance();
-        $this->object->setModuleAlias([]);
-        $this->object->setRoutes(null);
     }
 
     public function tearDown()
@@ -35,47 +33,5 @@ class RouteHandlerTest extends \PHPUnit\Framework\TestCase
 
         $this->object->addModuleAlias('new', 'Other.Class');
         $this->assertEquals(array_merge($list, ['new' => 'Other.Class']), $this->object->getModuleAlias());
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testDefaultMethods()
-    {
-        $this->object->setRoutes([
-            ['wrongarray' => '']
-        ]);
-    }
-
-    public function testDefaultMethods2()
-    {
-        $this->object->setRoutes([
-            ['method' => 'GET', 'pattern' => '/some/pattern' ],
-            ['method' => 'POST', 'pattern' => '/some/pattern2' ]
-        ]);
-
-        $this->assertEquals(
-            [
-                new \ByJG\RestServer\RoutePattern('GET', '/some/pattern'),
-                new \ByJG\RestServer\RoutePattern('POST', '/some/pattern2')
-            ],
-            $this->object->getRoutes()
-        );
-    }
-
-    public function testDefaultMethods3()
-    {
-        $this->object->setRoutes([
-            new \ByJG\RestServer\RoutePattern('GET', '/some/pattern'),
-            new \ByJG\RestServer\RoutePattern('POST', '/some/pattern2')
-        ]);
-
-        $this->assertEquals(
-            [
-                new \ByJG\RestServer\RoutePattern('GET', '/some/pattern'),
-                new \ByJG\RestServer\RoutePattern('POST', '/some/pattern2')
-            ],
-            $this->object->getRoutes()
-        );
     }
 }

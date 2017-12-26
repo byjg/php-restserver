@@ -7,6 +7,7 @@
 
 namespace ByJG\RestServer\HandleOutput;
 
+use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\ServiceAbstract;
 use Whoops\Handler\Handler;
 
@@ -30,10 +31,10 @@ interface HandleOutputInterface
     public function writeHeader();
 
     /**
-     * @param \ByJG\RestServer\ServiceAbstract $class
+     * @param \ByJG\RestServer\HttpResponse $class
      * @return string
      */
-    public function writeOutput(ServiceAbstract $class);
+    public function writeOutput(HttpResponse $class);
 
     /**
      * @return Handler

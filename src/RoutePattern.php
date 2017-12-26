@@ -2,8 +2,6 @@
 
 namespace ByJG\RestServer;
 
-use ByJG\RestServer\HandleOutput\JsonHandler;
-
 class RoutePattern
 {
     /**
@@ -19,6 +17,16 @@ class RoutePattern
     /**
      * @var string
      */
+    protected $class;
+
+    /**
+     * @var \Closure|string
+     */
+    protected $function;
+
+    /**
+     * @var string
+     */
     protected $handler;
 
     /**
@@ -27,16 +35,16 @@ class RoutePattern
      * @param array|string $method
      * @param string $pattern
      * @param string $handler
+     * @param \Closure|string $function
+     * @param string|null $class
      */
-    public function __construct($method, $pattern, $handler = null)
+    public function __construct($method, $pattern, $handler, $function, $class = null)
     {
         $this->method = $method;
         $this->pattern = $pattern;
-
-        if (is_null($handler)) {
-            $handler = JsonHandler::class;
-        }
         $this->handler = $handler;
+        $this->function = $function;
+        $this->class = $class;
     }
 
     /**
@@ -85,5 +93,37 @@ class RoutePattern
     public function setHandler($handler)
     {
         $this->handler = $handler;
+    }
+
+    /**
+     * @return string
+     */
+    public function getClass()
+    {
+        return $this->class;
+    }
+
+    /**
+     * @param string $class
+     */
+    public function setClass($class)
+    {
+        $this->class = $class;
+    }
+
+    /**
+     * @return \Closure|string
+     */
+    public function getFunction()
+    {
+        return $this->function;
+    }
+
+    /**
+     * @param \Closure|string $function
+     */
+    public function setFunction($function)
+    {
+        $this->function = $function;
     }
 }

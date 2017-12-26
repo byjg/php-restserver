@@ -2,7 +2,7 @@
 
 namespace ByJG\RestServer\HandleOutput;
 
-use ByJG\RestServer\ServiceAbstract;
+use ByJG\RestServer\HttpResponse;
 
 abstract class BaseHandler implements HandleOutputInterface
 {
@@ -24,17 +24,16 @@ abstract class BaseHandler implements HandleOutputInterface
         }
     }
 
-    public function writeOutput(ServiceAbstract $instance)
+    public function writeOutput(HttpResponse $response)
     {
-        $instanceHeaders = $instance->getResponse()->getHeaders();
+        $instanceHeaders = $response->getHeaders();
         foreach ($instanceHeaders as $header) {
             header($header[0], $header[1]);
         }
 
-        http_response_code($instance->getResponse()->getResponseCode());
+        http_response_code($response->getResponseCode());
 
-        $serialized = $instance
-            ->getResponse()
+        $serialized = $response
             ->getResponseBag()
             ->process($this->options['build-null'], $this->options['only-string']);
 
