@@ -44,5 +44,4 @@ class JsonResponseHandler extends OriginalJsonHandler
 
         return Handler::QUIT;
     }
-
 }

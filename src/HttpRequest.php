@@ -145,22 +145,30 @@ class HttpRequest
     public function getRequestIp()
     {
         if ($this->server('HTTP_CLIENT_IP') !== false) {
-            $ipaddress = $this->server('HTTP_CLIENT_IP');
-        } else if ($this->server('HTTP_X_FORWARDED_FOR') !== false) {
-            $ipaddress = $this->server('HTTP_X_FORWARDED_FOR');
-        } else if ($this->server('HTTP_X_FORWARDED') !== false) {
-            $ipaddress = $this->server('HTTP_X_FORWARDED');
-        } else if ($this->server('HTTP_FORWARDED_FOR') !== false) {
-            $ipaddress = $this->server('HTTP_FORWARDED_FOR');
-        } else if ($this->server('HTTP_FORWARDED') !== false) {
-            $ipaddress = $this->server('HTTP_FORWARDED');
-        } else if ($this->server('REMOTE_ADDR') !== false) {
-            $ipaddress = $this->server('REMOTE_ADDR');
-        } else {
-            $ipaddress = 'UNKNOWN';
+            return $this->server('HTTP_CLIENT_IP');
         }
 
-        return $ipaddress;
+        if ($this->server('HTTP_X_FORWARDED_FOR') !== false) {
+            return $this->server('HTTP_X_FORWARDED_FOR');
+        }
+
+        if ($this->server('HTTP_X_FORWARDED') !== false) {
+            return $this->server('HTTP_X_FORWARDED');
+        }
+
+        if ($this->server('HTTP_FORWARDED_FOR') !== false) {
+            return $this->server('HTTP_FORWARDED_FOR');
+        }
+
+        if ($this->server('HTTP_FORWARDED') !== false) {
+            return $this->server('HTTP_FORWARDED');
+        }
+
+        if ($this->server('REMOTE_ADDR') !== false) {
+            return $this->server('REMOTE_ADDR');
+        }
+
+        return 'UNKNOWN';
     }
 
     /**
@@ -173,7 +181,7 @@ class HttpRequest
     {
         if ($this->server('SERVER_NAME') !== false) {
             $servername = $this->server('SERVER_NAME');
-        } else if ($this->server('HTTP_HOST' !== false)) {
+        } elseif ($this->server('HTTP_HOST' !== false)) {
             $servername = $this->server('HTTP_HOST');
         } else {
             $servername = $this->server('SERVER_ADDR');

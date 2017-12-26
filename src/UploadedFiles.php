@@ -1,12 +1,6 @@
 <?php
-/**
- * User: jg
- * Date: 09/02/17
- * Time: 12:01
- */
 
 namespace ByJG\RestServer;
-
 
 class UploadedFiles
 {

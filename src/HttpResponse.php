@@ -101,7 +101,8 @@ class HttpResponse
     }
 
     /**
-     * Added informations for debug purposes only. In case the error it will showed and the result a node called "debug" will be added.
+     * Added informations for debug purposes only.
+     * In case the error it will showed and the result a node called "debug" will be added.
      *
      * @param string $key
      * @param mixed $string

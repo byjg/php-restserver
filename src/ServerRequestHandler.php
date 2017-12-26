@@ -9,6 +9,7 @@ use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\HandleOutput\HandleOutputInterface;
+use ByJG\RestServer\HandleOutput\JsonHandler;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 
@@ -84,6 +85,12 @@ class ServerRequestHandler
 
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 
+        // Default Handler for errors
+        $defaultHandler = new JsonHandler();
+        $defaultHandler->writeHeader();
+        ErrorHandler::getInstance()->setHandler($defaultHandler->getErrorHandler());
+
+        // Processing
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
                 throw new Error404Exception("404 Route '$uri' Not found");

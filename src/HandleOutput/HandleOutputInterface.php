@@ -8,7 +8,6 @@
 namespace ByJG\RestServer\HandleOutput;
 
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\ServiceAbstract;
 use Whoops\Handler\Handler;
 
 /**
