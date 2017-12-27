@@ -15,9 +15,6 @@ use FastRoute\RouteCollector;
 
 class ServerRequestHandler
 {
-
-    use Singleton;
-
     const OK = "OK";
     const METHOD_NOT_ALLOWED = "NOT_ALLOWED";
     const NOT_FOUND = "NOT FOUND";
@@ -57,7 +54,7 @@ class ServerRequestHandler
      * @throws \ByJG\RestServer\Exception\Error520Exception
      * @throws \ByJG\RestServer\Exception\InvalidClassException
      */
-    public function process()
+    protected function process()
     {
         // Initialize ErrorHandler with default error handler
         ErrorHandler::getInstance()->register();
@@ -128,7 +125,7 @@ class ServerRequestHandler
      * @throws \ByJG\RestServer\Exception\ClassNotFoundException
      * @throws \ByJG\RestServer\Exception\InvalidClassException
      */
-    public function executeRequest($handler, $class, $function, $vars)
+    protected function executeRequest($handler, $class, $function, $vars)
     {
         // Setting Default Headers and Error Handler
         $handler->writeHeader();
@@ -163,23 +160,16 @@ class ServerRequestHandler
     }
 
     /**
-     * Process the ROUTE (see web/app-dist.php)
+     * Handle the ROUTE (see web/app-dist.php)
      *
-     * ModuleAlias needs to be an array like:
-     *  [ 'alias' => 'Full.Namespace.To.Class' ]
-     *
-     * RoutePattern needs to be an array like:
-     * [
-     *     [
-     *         "method" => ['GET'],
-     *         "pattern" => '/{module}/{action}/{id:[0-9]+}/{secondid}',
-     *         "handler" => '\ByJG\RestServer\HandleOutput\HandleOutputInterface'
-     *    ],
-     * ]
-     *
-     * @param \ByJG\RestServer\RoutePattern[] $routePattern
+     * @param \ByJG\RestServer\RoutePattern[]|null $routePattern
+     * @throws \ByJG\RestServer\Exception\ClassNotFoundException
+     * @throws \ByJG\RestServer\Exception\Error404Exception
+     * @throws \ByJG\RestServer\Exception\Error405Exception
+     * @throws \ByJG\RestServer\Exception\Error520Exception
+     * @throws \ByJG\RestServer\Exception\InvalidClassException
      */
-    public static function handle($routePattern)
+    public function handle($routePattern = null)
     {
         ob_start();
         session_start();
@@ -187,9 +177,7 @@ class ServerRequestHandler
         /**
          * @var ServerRequestHandler
          */
-        $route = ServerRequestHandler::getInstance();
-
-        $route->setRoutes($routePattern);
+        $this->setRoutes($routePattern);
 
         // --------------------------------------------------------------------------
         // Check if script exists or if is itself
@@ -204,14 +192,14 @@ class ServerRequestHandler
             if (strpos($file, '.php') !== false) {
                 require_once($file);
             } else {
-                header("Content-Type: " . ServerRequestHandler::mimeContentType($file));
+                header("Content-Type: " . $this->mimeContentType($file));
 
                 echo file_get_contents($file);
             }
             return;
         }
 
-        $route->process();
+        $this->process();
     }
 
     /**
@@ -220,7 +208,7 @@ class ServerRequestHandler
      * @param string $filename
      * @return string
      */
-    protected static function mimeContentType($filename)
+    protected function mimeContentType($filename)
     {
 
         $mimeTypes = array(

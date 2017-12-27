@@ -1,24 +1,46 @@
 <?php
 
+namespace My;
+
+/**
+ * Basic Handler Object
+ *
+ */
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$routes = [];
+$restServer = new \ByJG\RestServer\ServerRequestHandler();
 
-$routes[] = new \ByJG\RestServer\RoutePattern(
+$restServer->addRoute(new \ByJG\RestServer\RoutePattern(
     'GET',
     '/test',
     \ByJG\RestServer\HandleOutput\JsonHandler::class,
-    'SomeMethod',
-    '\\Some\\Class'
-);
+    'someMethod',
+    \My\ClassName::class
+));
 
-$routes[] = new \ByJG\RestServer\RoutePattern(
+$restServer->addRoute(new \ByJG\RestServer\RoutePattern(
     'GET',
     '/testclosure',
     \ByJG\RestServer\HandleOutput\JsonHandler::class,
     function ($request, $response) {
         $response->write('OK');
     }
-);
+));
 
-\ByJG\RestServer\ServerRequestHandler::handle($routes);
+$restServer->handle();
+
+/**
+ * Class ClassName
+ *
+ * This is an example class for process the request
+ *
+ * @package My
+ */
+class ClassName
+{
+    public function someMethod($request, $response)
+    {
+        $response->write('It worked');
+    }
+}

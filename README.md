@@ -8,92 +8,141 @@
 Enable to create RESTFull services with strong model schema. The main goal is to abstract the class transformation 
 into JSON/XML and encapsulate the server commands.
 
-## Usage
+## Installation
 
-The main purpose of this package is abstract all complexity to process a RESTFull request and handle the object response. 
+```bash
+composer require "byjg/restserver=3.0.*"
+```
 
-The quick guide is:
+## Basic Usage
 
-- Create an empty class exteding from \ByJG\RestServer\ServiceAbstract
-- Implement the methods that will handle the HTTP METHODS (Get, Post, Delete or Put);
-
-For example, if you want to process the HTTP method POST you have to do:
+### Using Closures
 
 ```php
 <?php
-namespace Sample;
+require_once __DIR__ . '/../vendor/autoload.php';
 
-class MyClass extends \ByJG\RestServer\ServiceAbstract
-{
+$restServer = new \ByJG\RestServer\ServerRequestHandler();
 
-    public function post()
-    {
-        $id = $this->getRequest()->get('id');
-
-        // Do something here...
-
-        $this->getResponse()->write( [ 'result' => 'ok' ] );
+$restServer->addRoute(new \ByJG\RestServer\RoutePattern(
+    'GET',                            // The HTTP Method
+    '/testclosure',                   // The route
+    JsonHandler::class,               // The Handler
+    function ($request, $response) {  // The Closure for Process the request 
+        $response->write('OK');
     }
+));
+
+$restServer->handle();
+```
+
+### Using Classes
+
+```php
+<?php
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$restServer = new \ByJG\RestServer\ServerRequestHandler();
+
+$restServer->addRoute(new \ByJG\RestServer\RoutePattern(
+    'GET',                            // The HTTP Method
+    '/test',                          // The Route
+    JsonHandler::class,               // The Handler
+    'SomeMethod',                     // The method will process the request
+    '\\My\\ClassName'                   // The class that have the method
+));
+
+$restServer->handle();
+```
+
+the class will handle this:
+
+```php
+<?php
+namespace My;
+
+class ClassName
+{
+    //...
+    
+    /**
+     * @param \ByJG\RestServer\HttpRequest $request
+     * @param \ByJG\RestServer\HttpResponse $response 
+     */
+    public function someMethod($request, $response)
+    {
+        $response->write(['result' => 'ok']);
+    }
+    //...
 }
 ```
 
-The usual url for call this class is (see more in Routing below):
+## The HttpRequest and HttpResponse object
 
-```
-http://yourserver.com/Sample.MyClass/1234     # Or .xml or .csv
-```
+The HttpRequest and the HttpResponse always will be passed to the function will process the request
 
-### Processing the request
+The HttpRequest have all information about the request, and the HttpResponse will be used to send back
+informations to the requester.
 
-All $_GET, $_SERVER, $_POST, etc are encapsulated in the HttpRequest object. Inside the ServiceAbstract class you just call
-`$this->getRequest()` method. 
+**HttpRequest**
 
-The available options are:
-* get('key') - Get a parameter passed by GET (the same as $_GET). If not found return false.
-* post('key') - Get a parameter passed by POST (the same as $_POST). If not found return false.
-* server('key') - Get the parameters sent by server (the same as $_SERVER). If not found return false.
-* cookie('key') - Get the cookie sent by the client (the same as $_COOKIE). If not found return false.
-* session('key') - Get a server session value(the same as $_SESSION). If not found return false.
-* request('key') - Get a value from any of get, post, server, cookie or session. If not found return false.
-* payload() - Get the payload passed during the request(the same as php://input). If not found return empty.
-* getRequestIP() - Get the client request IP. It handles proxies and firewalls to get the correct IP;
-* getRequestServer() - Get the sername. It handles the different environments;
+- get($var): get a value passed in the query string
+- post($var): get a value passed by the POST Form
+- server($var): get a value passed in the Request Header (eg. HTTP_REFERER)
+- session($var): get a value from session;
+- cookie($var): get a value from a cookie;
+- request($var): get a value from the get() OR post()
+- payload(): get a value passed in the request body;
+- getRequestIp(): get the request IP (even if behing a proxy);
+- getRequestServer(): get the request server name;
+- uploadedFiles(): Return a instance of the UploadedFiles();
 
+**HttpResponse**
+
+- setSession($var, $value): set a value in the session;
+- removeSession($var): remove a value from the session;
+- addCookie($name, $value, $expire, $path, $domain): Add a cookie
+- removeCookie($var): remove a value from the cookies;
+- getResponseBag(): returns the ResponseBag object;
+- write($object): See below;
+- writeDebug($object): add information to be displayed in case of error;
+- emptyResponse(): Empty all previously write responses;
+- addHeader($header, $value): Add an header entry;
+- setResponseCode($value): Set the HTTP response code (eg. 200, 401, etc)
 
 ### Output your data 
 
-The main goal of the RestServer ByJG is work with the objects in your native form. The processing to the proper output like
-JSON, XML or CSV is done by the platform. See below some examples:
+To output your data you *have to* use the `$response->write($object)`. 
+The write method supports you output a object, stdclass, array or string. The Handler object will
+parse the output and setup in the proper format. 
+
+For example:
 
 ```php
 <?php
-namespace Sample;
 
-class MyClass extends \ByJG\RestServer\ServiceAbstract
-{
+function ($request, $response) {
+    $response->getResponseBag()->serializationRule(ResponseBag::SINGLE_OBJECT);
+    
+    // Output an array
+    $array = ["field" => "value"];
+    $response()->write($array);
 
-    public function get()
-    {
-        // Output an array
-        $array = ["field" => "value"];
-        $this->getResponse()->write($array);
+    // Output a stdClass
+    $obj = new \stdClass();
+    $obj->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
+    $obj->OtherField = "OK";
+    $response()->write($obj);
 
-        // Output a stdClass
-        $obj = new \stdClass();
-        $obj->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
-        $obj->OtherField = "OK";
-        $this->getResponse()->write($obj);
-
-        // Model  
-        // Can be an object :
-        //    - with public properties 
-        //    - with getters and setters
-        //    - with mixed public properties and getters and setters
-        // See more about object transformations in the project https://github.com/byjg/anydataset
-        // For this example, assume that Model have two properties: prop1 and prop2
-        $model = new Model('tests', 'another test');
-        $this->getResponse()->write($model);
-    }
+    // Model  
+    // Can be an object :
+    //    - with public properties 
+    //    - with getters and setters
+    //    - with mixed public properties and getters and setters
+    // See more about object transformations in the project https://github.com/byjg/anydataset
+    // For this example, assume that Model have two properties: prop1 and prop2
+    $model = new Model('tests', 'another test');
+    $this->getResponse()->write($model);
 }
 ```
 
@@ -114,59 +163,31 @@ The result will be something like:
 }
 ```
 
+## The Handlers
 
-### Combining HTTP Methods with ACTION
+The Handler will be parse the `$response->write($obj)` and output in the proper format. 
+The available handlers are:
 
-If you pass a query parameter called action you can combine the HTTP Request and the action for create a specific method for
-handle this specific action. Some examples below:
-
-
-| HTTP Method  | Action Parameter | Method in the class  |
-|--------------|------------------|----------------------|
-| GET          | -                | get()                |
-| POST         | -                | post()               |
-| DELETE       | -                | delete()             |
-| PUT          | -                | put()                |
-| GET          | someaction       | getSomeaction()      |
-| POST         | someaction       | postSomeaction()     |
-| PUT          | someaction       | putSomeaction()      |
-| DELETE       | someactiom       | deleteSomeaction()   |
+- JsonHandler
+- XmlHandler
+- HtmlHandler
+- JsonCleanHandler
 
 
-### Routing
+## Setting the Route
 
-RestServer ByJG uses the Nikic/FastRoute project to do the routing. Yout need copy the file web/app-dist.php as app.php
-into the root of your public folder accessible throught the web.
 
-The app-dist.php file looks like to:
+You can define route with constant and/or variable. For example:
 
-```php
-<?php
-require_once __DIR__ . '/../vendor/autoload.php';
 
-\ByJG\RestServer\ServerRequestHandler::handle();
-```
+| Pattern                | Description |
+|------------------------|---------------------------------|
+| /myroute               | Matches exactly "/myroute"      |
+| /myroute/{id}          | Matches /myroute + any character combination and set to ID |
+| /myroute/{id:[0-9]+}   | Matches /myroute + any number combination and set to ID |
 
-This file setup all routing process and handle the execution of the proper rest class.
-
-There some pre-defined routes as you can see below but you can change it any time you want.
-
-The pre-defined routes are:
-
-| Pattern                                     | Exeample                        |
-|---------------------------------------------|---------------------------------|
-| /{module}/{action}/{id:[0-9]+}/{secondid}   | /MyNameSpace.Module/list/1/2345 |
-| /{module}/{action}/{id:[0-9]+}              | /MyNameSpace.Module/list/1      |
-| /{module}/{id:[0-9]+}/{action}              | /MyNameSpace.Module/1/list      |
-| /{module}/{id:[0-9]+}                       | /MyNameSpace.Module/1           |
-| /{module}/{action}                          | /MyNameSpace.Module/list        |
-| /{module}                                   | /MyNameSpace.Module             |
-
-All variables defined above will be available throught the $_GET. The variables module and action having a special
-meaning into the system:
-
-- **module** will be the full namespace to your class. You have to separate the namespaces with "period" (.). Do not use back slash (\);
-- **action** will match a specific action inside your class
+All variables defined above will be available throught the $_GET. In the example above,
+if the route matches the "id" will available in the `$request->get('id');`
 
 Creating the pattern:
 
@@ -180,58 +201,6 @@ all matches values can be obtained by
 $this->getRequest()->get('variable')
 ```
 
-#### Creating Module Alias
-
-By default you have to call in the browser the URL with the full namespace separated by points. 
-Instead to pass the full namespace class you can create a module alias. 
-Just add in the route.php file the follow code:
-
-```php
-<?php
-\ByJG\RestServer\ServerRequestHandler::handle([ 'somealias' => 'Full.NameSpace.To.Module' ]);
-```
-
-In the example above if the parameter "module" matches with the value "somealias" will be mapped to the class "\Full\NameSpace\To\Module"
-
-#### Creating your own routes
-
-You can override the default route values and create your own. See an example:
-
-```php
-<?php
-\ByJG\RestServer\ServerRequestHandler::handle(
-    [
-        'somealias' => 'Namespace.to.My.Class',
-        'another' => 'Another.Namespace.To.Class'
-    ], 
-    [ 
-        [
-            "method" => ['GET'], 
-            "pattern" => '/{module:somealias}/{action}/{id:[0-9]+}', 
-            "handler" => \ByJG\RestServer\HandleOutput\JsonHandler::class 
-        ],
-        [
-            "method" => ['POST'], 
-            "pattern" => '/{module:another}/{action:name}/{field}', 
-            "handler" => \ByJG\RestServer\HandleOutput\JsonHandler::class 
-        ],
-    ]
-);
-```
-
-**Available Handlers**
-
-- JsonHandler
-- XmlHandler
-- HtmlHandler
-- JsonCleanHandler
-
-
-## Install
-
-Just type: `composer install "byjg/restserver=2.0.*"`
-
-
 ## Running the rest server
 
 You need to setup your restserver to handle ALL requests to a single PHP file. Normally is "app.php" 
@@ -239,6 +208,7 @@ You need to setup your restserver to handle ALL requests to a single PHP file. N
 #### PHP Built-in server
 
 ```
+cd web
 php -S localhost:8080 app.php
 ```
 
