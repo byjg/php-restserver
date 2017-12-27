@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests;
+
 use ByJG\RestServer\ResponseBag;
 use PHPUnit\Framework\TestCase;
 
@@ -145,7 +147,7 @@ class ResponseBagTest extends TestCase
 
     public function testAddObjectAutomatic()
     {
-        $obj1 = new stdClass();
+        $obj1 = new \stdClass();
         $obj1->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
         $obj1->OtherField = "OK";
 
@@ -178,7 +180,7 @@ class ResponseBagTest extends TestCase
 
     public function testAddObjectArray()
     {
-        $obj1 = new stdClass();
+        $obj1 = new \stdClass();
         $obj1->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
         $obj1->OtherField = "OK";
 
@@ -214,7 +216,7 @@ class ResponseBagTest extends TestCase
 
     public function testAddObjectSingleObject()
     {
-        $obj1 = new stdClass();
+        $obj1 = new \stdClass();
         $obj1->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
         $obj1->OtherField = "OK";
 

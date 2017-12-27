@@ -33,7 +33,7 @@ interface HandleOutputInterface
      * @param \ByJG\RestServer\HttpResponse $class
      * @return string
      */
-    public function writeOutput(HttpResponse $class);
+    public function processResponse(HttpResponse $class);
 
     /**
      * @return Handler
@@ -44,4 +44,10 @@ interface HandleOutputInterface
      * @return \ByJG\Serializer\Formatter\FormatterInterface
      */
     public function getFormatter();
+
+    /**
+     * @param $data
+     * @return mixed
+     */
+    public function writeData($data);
 }

@@ -31,7 +31,7 @@ class ServerRequestHandler
      */
     public function setRoutes($routes)
     {
-        foreach ($routes as $route) {
+        foreach ((array)$routes as $route) {
             $this->addRoute($route);
         }
     }
@@ -142,21 +142,21 @@ class ServerRequestHandler
 
         // Process Closure
         if ($function instanceof \Closure) {
-            $function($request, $response);
-            echo $handler->writeOutput($response);
+            $function($response, $request);
+            echo $handler->processResponse($response);
             return;
         }
 
         // Process Class::Method()
         if (!class_exists($class)) {
-            throw new ClassNotFoundException("Class $class defined in the route is not found");
+            throw new ClassNotFoundException("Class '$class' defined in the route is not found");
         }
         $instance = new $class();
         if (!method_exists($instance, $function)) {
             throw new InvalidClassException("There is no method '$class::$function''");
         }
-        $instance->$function($request, $response);
-        echo $handler->writeOutput($response);
+        $instance->$function($response, $request);
+        $handler->processResponse($response);
     }
 
     /**

@@ -28,7 +28,7 @@ $restServer->addRoute(new \ByJG\RestServer\RoutePattern(
     'GET',                            // The HTTP Method
     '/testclosure',                   // The route
     JsonHandler::class,               // The Handler
-    function ($request, $response) {  // The Closure for Process the request 
+    function ($response, $request) {  // The Closure for Process the request 
         $response->write('OK');
     }
 ));
@@ -66,10 +66,10 @@ class ClassName
     //...
     
     /**
-     * @param \ByJG\RestServer\HttpRequest $request
      * @param \ByJG\RestServer\HttpResponse $response 
+     * @param \ByJG\RestServer\HttpRequest $request
      */
-    public function someMethod($request, $response)
+    public function someMethod($response, $request)
     {
         $response->write(['result' => 'ok']);
     }
@@ -121,7 +121,7 @@ For example:
 ```php
 <?php
 
-function ($request, $response) {
+function ($response, $request) {
     $response->getResponseBag()->serializationRule(ResponseBag::SINGLE_OBJECT);
     
     // Output an array

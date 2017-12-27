@@ -24,7 +24,12 @@ abstract class BaseHandler implements HandleOutputInterface
         }
     }
 
-    public function writeOutput(HttpResponse $response)
+    public function writeData($data)
+    {
+        echo $data;
+    }
+
+    public function processResponse(HttpResponse $response)
     {
         $instanceHeaders = $response->getHeaders();
         foreach ($instanceHeaders as $header) {
@@ -37,6 +42,8 @@ abstract class BaseHandler implements HandleOutputInterface
             ->getResponseBag()
             ->process($this->options['build-null'], $this->options['only-string']);
 
-        return $this->getFormatter()->process($serialized);
+        $this->writeData(
+            $this->getFormatter()->process($serialized)
+        );
     }
 }
