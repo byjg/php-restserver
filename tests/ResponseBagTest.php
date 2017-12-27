@@ -233,10 +233,14 @@ class ResponseBagTest extends TestCase
         $this->object->add($obj2);
         $this->assertEquals(
             [
-                'MyField' => [ "teste1" => "value1", "test2" => [ "3", "4"]],
-                'OtherField' => 'OK',
-                'prop1' => 'value3',
-                'prop2' => 'value4'
+                [
+                    'MyField' => [ "teste1" => "value1", "test2" => [ "3", "4"]],
+                    'OtherField' => 'OK',
+                ],
+                [
+                    'prop1' => 'value3',
+                    'prop2' => 'value4'
+                ]
             ],
             $this->object->process()
         );
