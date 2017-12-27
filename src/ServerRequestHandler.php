@@ -153,7 +153,7 @@ class ServerRequestHandler
         }
         $instance = new $class();
         if (!method_exists($instance, $function)) {
-            throw new InvalidClassException("There is no method $function");
+            throw new InvalidClassException("There is no method '$class::$function''");
         }
         $instance->$function($request, $response);
         echo $handler->writeOutput($response);
