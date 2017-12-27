@@ -17,9 +17,16 @@ abstract class BaseHandler implements HandleOutputInterface
         $this->options[$option] = $value;
     }
 
-    public function writeHeader()
+    public function writeHeader($headerList = null)
     {
-        foreach ($this->options['header'] as $header) {
+        if ($headerList === null) {
+            $headerList = $this->options['header'];
+        }
+        foreach ($headerList as $header) {
+            if (is_array($header)) {
+                header($header[0], $header[1]);
+                continue;
+            }
             header($header);
         }
     }
@@ -32,9 +39,7 @@ abstract class BaseHandler implements HandleOutputInterface
     public function processResponse(HttpResponse $response)
     {
         $instanceHeaders = $response->getHeaders();
-        foreach ($instanceHeaders as $header) {
-            header($header[0], $header[1]);
-        }
+        $this->writeHeader($instanceHeaders);
 
         http_response_code($response->getResponseCode());
 

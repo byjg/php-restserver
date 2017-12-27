@@ -2,7 +2,6 @@
 
 namespace ByJG\RestServer;
 
-use ByJG\DesignPattern\Singleton;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
@@ -20,6 +19,8 @@ class ServerRequestHandler
     const NOT_FOUND = "NOT FOUND";
 
     protected $routes = null;
+
+    protected $defaultHandler = null;
 
     public function getRoutes()
     {
@@ -45,6 +46,25 @@ class ServerRequestHandler
             $this->routes = [];
         }
         $this->routes[] = $route;
+    }
+
+    /**
+     * @return HandleOutputInterface
+     */
+    public function getDefaultHandler()
+    {
+        if (empty($this->defaultHandler)) {
+            $this->defaultHandler = new JsonHandler();
+        }
+        return $this->defaultHandler;
+    }
+
+    /**
+     * @param HandleOutputInterface $defaultHandler
+     */
+    public function setDefaultHandler(HandleOutputInterface $defaultHandler)
+    {
+        $this->defaultHandler = $defaultHandler;
     }
 
     /**
@@ -83,9 +103,8 @@ class ServerRequestHandler
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 
         // Default Handler for errors
-        $defaultHandler = new JsonHandler();
-        $defaultHandler->writeHeader();
-        ErrorHandler::getInstance()->setHandler($defaultHandler->getErrorHandler());
+        $this->getDefaultHandler()->writeHeader();
+        ErrorHandler::getInstance()->setHandler($this->getDefaultHandler()->getErrorHandler());
 
         // Processing
         switch ($routeInfo[0]) {
@@ -137,7 +156,7 @@ class ServerRequestHandler
         }
 
         // Create the Request and Response methods
-        $request = new HttpRequest($_GET, $_POST, $_SERVER, $_SESSION, $_COOKIE);
+        $request = new HttpRequest($_GET, $_POST, $_SERVER, isset($_SESSION) ? $_SESSION : [], $_COOKIE);
         $response = new HttpResponse();
 
         // Process Closure
@@ -163,16 +182,22 @@ class ServerRequestHandler
      * Handle the ROUTE (see web/app-dist.php)
      *
      * @param \ByJG\RestServer\RoutePattern[]|null $routePattern
+     * @param bool $outputBuffer
+     * @param bool $session
      * @throws \ByJG\RestServer\Exception\ClassNotFoundException
      * @throws \ByJG\RestServer\Exception\Error404Exception
      * @throws \ByJG\RestServer\Exception\Error405Exception
      * @throws \ByJG\RestServer\Exception\Error520Exception
      * @throws \ByJG\RestServer\Exception\InvalidClassException
      */
-    public function handle($routePattern = null)
+    public function handle($routePattern = null, $outputBuffer = true, $session = true)
     {
-        ob_start();
-        session_start();
+        if ($outputBuffer) {
+            ob_start();
+        }
+        if ($session) {
+            session_start();
+        }
 
         /**
          * @var ServerRequestHandler
