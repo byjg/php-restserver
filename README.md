@@ -24,14 +24,14 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 $restServer = new \ByJG\RestServer\ServerRequestHandler();
 
-$restServer->addRoute(new \ByJG\RestServer\RoutePattern(
-    'GET',                            // The HTTP Method
-    '/testclosure',                   // The route
-    JsonHandler::class,               // The Handler
-    function ($response, $request) {  // The Closure for Process the request 
-        $response->write('OK');
-    }
-));
+$restServer->addRoute(
+    \ByJG\RestServer\RoutePattern::get(
+        '/testclosure',                   // The route
+        function ($response, $request) {  // The Closure for Process the request 
+            $response->write('OK');
+        }
+    )
+);
 
 $restServer->handle();
 ```
@@ -44,13 +44,13 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 $restServer = new \ByJG\RestServer\ServerRequestHandler();
 
-$restServer->addRoute(new \ByJG\RestServer\RoutePattern(
-    'GET',                            // The HTTP Method
-    '/test',                          // The Route
-    JsonHandler::class,               // The Handler
-    'SomeMethod',                     // The method will process the request
-    '\\My\\ClassName'                   // The class that have the method
-));
+$restServer->addRoute(
+    \ByJG\RestServer\RoutePattern::get(
+        '/test',                          // The Route
+        'SomeMethod',                     // The method will process the request
+        '\\My\\ClassName'                 // The class that have the method
+    )
+);
 
 $restServer->handle();
 ```
@@ -75,6 +75,29 @@ class ClassName
     }
     //...
 }
+```
+
+### Using Custom Response Handler
+
+The Default Response Handler will process all "$response->write" into a JSON.
+You can choose another Handlers. See below for a list of Available Response Handlers.
+
+```php
+<?php
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$restServer = new \ByJG\RestServer\ServerRequestHandler();
+
+$restServer->addRoute(
+    \ByJG\RestServer\RoutePattern::get(
+        '/test',                          // The Route
+        'SomeMethod',                     // The method will process the request
+        '\\My\\ClassName',                // The class that have the method
+        \ByJG\RestServer\HandleOutput\XmlHandler::class           // The Handler
+    )
+);
+
+$restServer->handle();
 ```
 
 ## The HttpRequest and HttpResponse object

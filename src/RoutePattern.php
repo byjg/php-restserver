@@ -5,29 +5,9 @@ namespace ByJG\RestServer;
 class RoutePattern
 {
     /**
-     * @var string|array
+     * @var string[]
      */
-    protected $method;
-
-    /**
-     * @var string
-     */
-    protected $pattern;
-
-    /**
-     * @var string
-     */
-    protected $class;
-
-    /**
-     * @var \Closure|string
-     */
-    protected $function;
-
-    /**
-     * @var string
-     */
-    protected $handler;
+    protected $properties = [];
 
     /**
      * RoutePattern constructor.
@@ -40,90 +20,79 @@ class RoutePattern
      */
     public function __construct($method, $pattern, $handler, $function, $class = null)
     {
-        $this->method = $method;
-        $this->pattern = $pattern;
-        $this->handler = $handler;
-        $this->function = $function;
-        $this->class = $class;
+        $this->properties['method'] = $method;
+        $this->properties['pattern'] = $pattern;
+        $this->properties['handler'] = $handler;
+        $this->properties['function'] = $function;
+        $this->properties['class'] = $class;
     }
 
     /**
-     * @return array|string
-     */
-    public function getMethod()
-    {
-        return $this->method;
-    }
-
-    /**
+     * @param string $property
      * @return string
      */
-    public function getPattern()
+    public function properties($property = null)
     {
-        return $this->pattern;
+        if (empty($property)) {
+            return $this->properties;
+        }
+
+        return $this->properties[$property];
     }
 
     /**
-     * @return string
-     */
-    public function getHandler()
-    {
-        return $this->handler;
-    }
-
-    /**
-     * @param array|string $method
-     */
-    public function setMethod($method)
-    {
-        $this->method = $method;
-    }
-
-    /**
+     * RoutePattern Factory for "GET" method
+     *
      * @param string $pattern
-     */
-    public function setPattern($pattern)
-    {
-        $this->pattern = $pattern;
-    }
-
-    /**
-     * @param string $handler
-     */
-    public function setHandler($handler)
-    {
-        $this->handler = $handler;
-    }
-
-    /**
-     * @return string
-     */
-    public function getClass()
-    {
-        return $this->class;
-    }
-
-    /**
+     * @param string $function
      * @param string $class
+     * @param string $handler
+     * @return \ByJG\RestServer\RoutePattern
      */
-    public function setClass($class)
+    public static function get($pattern, $function, $class = null, $handler = null)
     {
-        $this->class = $class;
+        return new RoutePattern('GET', $pattern, $handler, $function, $class);
     }
 
     /**
-     * @return \Closure|string
+     * RoutePattern Factory for "POST" method
+     *
+     * @param string $pattern
+     * @param string $function
+     * @param string $class
+     * @param string $handler
+     * @return \ByJG\RestServer\RoutePattern
      */
-    public function getFunction()
+    public static function post($pattern, $function, $class = null, $handler = null)
     {
-        return $this->function;
+        return new RoutePattern('POST', $pattern, $handler, $function, $class);
     }
 
     /**
-     * @param \Closure|string $function
+     * RoutePattern Factory for "PUT" method
+     *
+     * @param string $pattern
+     * @param string $function
+     * @param string $class
+     * @param string $handler
+     * @return \ByJG\RestServer\RoutePattern
      */
-    public function setFunction($function)
+    public static function put($pattern, $function, $class = null, $handler = null)
     {
-        $this->function = $function;
+        return new RoutePattern('PUT', $pattern, $handler, $function, $class);
+    }
+
+    /**
+     * RoutePattern Factory for "DELETE" method
+     *
+     * @param string $pattern
+     * @param string $function
+     * @param string $class
+     * @param string $handler
+     * @return \ByJG\RestServer\RoutePattern
+     */
+    public static function delete($pattern, $function, $class = null, $handler = null)
+    {
+        return new RoutePattern('DELETE', $pattern, $handler, $function, $class);
     }
 }

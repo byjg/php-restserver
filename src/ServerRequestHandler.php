@@ -89,12 +89,12 @@ class ServerRequestHandler
 
             foreach ($this->getRoutes() as $route) {
                 $r->addRoute(
-                    $route->getMethod(),
-                    $route->getPattern(),
+                    $route->properties('method'),
+                    $route->properties('pattern'),
                     [
-                        "handler" => $route->getHandler(),
-                        "class" => $route->getClass(),
-                        "function" => $route->getFunction()
+                        "handler" => $route->properties('handler'),
+                        "class" => $route->properties('class'),
+                        "function" => $route->properties('function')
                     ]
                 );
             }
@@ -122,8 +122,9 @@ class ServerRequestHandler
                 $handlerRequest = $routeInfo[1];
 
                 // Execute the request
+                $handler = !empty($handlerRequest['handler']) ? $handlerRequest['handler'] : $this->getDefaultHandler();
                 $this->executeRequest(
-                    new $handlerRequest['handler'],
+                    new $handler(),
                     $handlerRequest['class'],
                     $handlerRequest['function'],
                     $vars

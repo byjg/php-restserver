@@ -31,10 +31,8 @@ class ServerRequestHandlerTest extends \PHPUnit\Framework\TestCase
         $this->object->setDefaultHandler(new AssertHandler());
 
         $this->object->addRoute(
-            new RoutePattern(
-                'GET',
+            RoutePattern::get(
                 '/test',
-                AssertHandler::class,
                 function ($response, $request) {
                     $this->assertInstanceOf(HttpResponse::class, $response);
                     $this->assertInstanceOf(HttpRequest::class, $request);
@@ -44,10 +42,8 @@ class ServerRequestHandlerTest extends \PHPUnit\Framework\TestCase
         );
 
         $this->object->addRoute(
-            new RoutePattern(
-                'GET',
+            RoutePattern::get(
                 '/test/{id}',
-                AssertHandler::class,
                 function ($response, $request) {
                     $this->assertInstanceOf(HttpResponse::class, $response);
                     $this->assertInstanceOf(HttpRequest::class, $request);
