@@ -9,9 +9,9 @@ class XmlHandler extends BaseHandler
 {
     public function __construct()
     {
-        $this->option('header', [
+        $this->header = [
             'Content-Type: text/xml'
-        ]);
+        ];
     }
 
     public function getErrorHandler()

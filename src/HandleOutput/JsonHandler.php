@@ -9,9 +9,9 @@ class JsonHandler extends BaseHandler
 {
     public function __construct()
     {
-        $this->option('header', [
+        $this->header = [
             'Content-Type: application/json'
-        ]);
+        ];
     }
 
     public function getErrorHandler()

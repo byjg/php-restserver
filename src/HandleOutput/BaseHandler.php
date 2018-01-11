@@ -6,21 +6,14 @@ use ByJG\RestServer\HttpResponse;
 
 abstract class BaseHandler implements HandleOutputInterface
 {
-    protected $options = [
-        'header' => [],
-        'build-null' => true,
-        'only-string' => false
-    ];
-
-    public function option($option, $value)
-    {
-        $this->options[$option] = $value;
-    }
+    protected $buildNull = true;
+    protected $onlyString = false;
+    protected $header = [];
 
     public function writeHeader($headerList = null)
     {
         if ($headerList === null) {
-            $headerList = $this->options['header'];
+            $headerList = $this->header;
         }
         foreach ($headerList as $header) {
             if (is_array($header)) {
@@ -45,7 +38,7 @@ abstract class BaseHandler implements HandleOutputInterface
 
         $serialized = $response
             ->getResponseBag()
-            ->process($this->options['build-null'], $this->options['only-string']);
+            ->process($this->buildNull, $this->onlyString);
 
         $this->writeData(
             $this->getFormatter()->process($serialized)

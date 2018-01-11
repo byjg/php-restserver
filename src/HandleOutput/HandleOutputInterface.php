@@ -18,13 +18,6 @@ interface HandleOutputInterface
 {
 
     /**
-     * @param $option
-     * @param $value
-     * @return $this
-     */
-    public function option($option, $value);
-
-    /**
      * @return void
      */
     public function writeHeader();
