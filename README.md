@@ -160,6 +160,24 @@ $restServer->setRoutesSwagger(
 );
 ```
 
+#### Customizing the Handlers
+
+As the Swagger process is fully automated, you can define the handler by Mime Type or Route:
+
+*Mime Type*
+
+```php
+<?php
+$restServer->setMimeTypeHandler("application/json", \ByJG\RestServer\HandleOutput\JsonCleanHandler::class);
+```
+
+*Route*
+
+```php
+<?php
+$restServer->setPathHandler("GET", "/pet/{petId}", \ByJG\RestServer\HandleOutput\JsonHandler::class);
+```
+
 ## 2. Processing the Request and Response
 
 You need to implement a method, function or clousure with two parameters - Response and Request - in that order. 
