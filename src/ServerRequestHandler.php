@@ -29,6 +29,17 @@ class ServerRequestHandler
 
     protected $defaultHandler = null;
 
+    protected $mimeTypeHandler = [
+        "text/xml" => XmlHandler::class,
+        "application/xml" => XmlHandler::class,
+        "text/html" => HtmlHandler::class,
+        "application/json" => JsonHandler::class
+    ];
+
+    protected $pathHandler = [
+
+    ];
+
     public function getRoutes()
     {
         return $this->routes;
@@ -346,7 +357,7 @@ class ServerRequestHandler
         $routes = [];
         foreach ($schema['paths'] as $path => $methodData) {
             foreach ($methodData as $method => $properties) {
-                $handler = $this->getMethodHandler($properties);
+                $handler = $this->getMethodHandler($method, $path, $properties);
                 if (!isset($properties['operationId'])) {
                     throw new OperationIdInvalidException('OperationId was not found');
                 }
@@ -372,15 +383,20 @@ class ServerRequestHandler
     }
 
     /**
+     * @param $method
+     * @param $path
      * @param $properties
      * @return string
+     * @throws \ByJG\RestServer\Exception\OperationIdInvalidException
      */
-    protected function getMethodHandler($properties)
+    protected function getMethodHandler($method, $path, $properties)
     {
-        $handler = JsonHandler::class;
-
+        $method = strtoupper($method);
+        if (isset($this->pathHandler["$method::$path"])) {
+            return $this->pathHandler["$method::$path"];
+        }
         if (!isset($properties['produces'])) {
-            return $handler;
+            return get_class($this->getDefaultHandler());
         }
 
         $produces = $properties['produces'];
@@ -388,17 +404,21 @@ class ServerRequestHandler
             $produces = $produces[0];
         }
 
-        switch ($produces) {
-            case "text/xml":
-            case "application/xml":
-                $handler = XmlHandler::class;
-                break;
-
-            case "text/html":
-                $handler = HtmlHandler::class;
-                break;
+        if (!isset($this->mimeTypeHandler[$produces])) {
+            throw new OperationIdInvalidException("There is no handler for $produces");
         }
 
-        return $handler;
+        return $this->mimeTypeHandler[$produces];
+    }
+
+    public function setMimeTypeHandler($mimetype, $handler)
+    {
+        $this->mimeTypeHandler[$mimetype] = $handler;
+    }
+
+    public function setPathHandler($method, $path, $handler)
+    {
+        $method = strtoupper($method);
+        $this->pathHandler["$method::$path"] = $handler;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use ByJG\RestServer\HandleOutput\JsonCleanHandler;
 use ByJG\RestServer\RoutePattern;
 use ByJG\RestServer\ServerRequestHandler;
 
@@ -34,6 +35,7 @@ class ServerHandlerTest extends \PHPUnit\Framework\TestCase
      */
     public function testGenerateRoutes()
     {
+        $this->object->setPathHandler('get', '/pet/{petId}', JsonCleanHandler::class);
         $this->object->setRoutesSwagger(__DIR__ . '/swagger-example.json');
 
         $this->assertEquals(
@@ -73,7 +75,7 @@ class ServerHandlerTest extends \PHPUnit\Framework\TestCase
                 new RoutePattern(
                     "GET",
                     "/pet/{petId}",
-                    "ByJG\RestServer\HandleOutput\XmlHandler",
+                    "ByJG\RestServer\HandleOutput\JsonCleanHandler",
                     "getPetById",
                     "PetStore\Pet"
                 ),
