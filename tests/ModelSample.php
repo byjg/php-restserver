@@ -50,6 +50,4 @@ class ModelSample
     {
         $this->prop2 = $prop2;
     }
-
-
 }

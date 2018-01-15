@@ -70,6 +70,13 @@ class ServerRequestHandlerTest extends \PHPUnit\Framework\TestCase
         $this->headers = null;
     }
 
+    /**
+     * @throws \ByJG\RestServer\Exception\ClassNotFoundException
+     * @throws \ByJG\RestServer\Exception\Error404Exception
+     * @throws \ByJG\RestServer\Exception\Error405Exception
+     * @throws \ByJG\RestServer\Exception\Error520Exception
+     * @throws \ByJG\RestServer\Exception\InvalidClassException
+     */
     public function testHandle1()
     {
         $_SERVER['REQUEST_METHOD'] = 'GET';
@@ -80,6 +87,13 @@ class ServerRequestHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($this->reach);
     }
 
+    /**
+     * @throws \ByJG\RestServer\Exception\ClassNotFoundException
+     * @throws \ByJG\RestServer\Exception\Error404Exception
+     * @throws \ByJG\RestServer\Exception\Error405Exception
+     * @throws \ByJG\RestServer\Exception\Error520Exception
+     * @throws \ByJG\RestServer\Exception\InvalidClassException
+     */
     public function testHandle2()
     {
         $_SERVER['REQUEST_METHOD'] = 'GET';

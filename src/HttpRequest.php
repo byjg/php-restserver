@@ -192,7 +192,10 @@ class HttpRequest
         }
 
         if ($protocol) {
-            $servername = (($this->server('HTTPS') !== 'off' || $this->server('SERVER_PORT') == 443) ? "https://" : "http://") . $servername;
+            $servername = (
+                ($this->server('HTTPS') !== 'off'
+                    || $this->server('SERVER_PORT') == 443) ? "https://" : "http://") . $servername
+            ;
         }
 
         return $servername;

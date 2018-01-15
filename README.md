@@ -5,16 +5,32 @@
 
 ## Description
 
-Enable to create RESTFull services with strong model schema. The main goal is to abstract the class transformation 
-into JSON/XML and encapsulate the server commands.
+Create RESTFull services with different and customizable output handlers (JSON, XML, Html, etc.).
+Auto-Generate routes from swagger.json definition.
 
 ## Installation
 
 ```bash
 composer require "byjg/restserver=3.0.*"
 ```
+## Understanding the RestServer library
 
-## Basic Usage
+Basically the RestServer library enables you to create a full feature RESTFul 
+application on top of the well-known [FastRoute](https://github.com/nikic/FastRoute) library.
+
+You can get this working in a few minutes. Just follow this steps:
+
+1. Create the Routes
+    - Using Clousures (Easiest)
+    - Using Classes
+    - Using the Swagger documentation (the most reliable and for long-term and maintable applications)
+    
+2. Process the Request and output the Response
+
+Each "Path" or "Route" can have your own handle for output the response. 
+The are several handlers implemented and you can implement your own.
+
+## 1. Creating the Routes
 
 ### Using Closures
 
@@ -77,28 +93,76 @@ class ClassName
 }
 ```
 
-### Using Custom Response Handler
+### Auto-Generate from a "swagger.json" definition
 
-The Default Response Handler will process all "$response->write" into a JSON.
-You can choose another Handlers. See below for a list of Available Response Handlers.
+[Swagger](https://swagguer.io) is the world's largest framework of API developer tools for the 
+OpenAPI Specification(OAS), enabling development across 
+the entire API lifecycle, from design and documentation, 
+to test and deployment.
+
+There are several tools for create and maintain the definition. Once you're using this concept/methodology
+you can apply here and generate automatically the routes without duplicate your work.
+
+First you need to create a swagger.json file. 
+The "operationId" must have the `Namespace\\Class::method` like the example below:
+
+```json
+{
+  ...
+  "paths": {
+    "/pet": {
+      "post": {
+        "summary": "Add a new pet to the store",
+        "description": "",
+        "operationId": "PetStore\\Pet::addPet"
+      }
+    }
+  }
+  ...
+}
+```
+
+We recommend you use the [zircote/swagger-php](https://github.com/zircote/swagger-php) tool
+for auto generate your JSON file from PHPDocs comments.
+Is the best way for maintain your code documented and with the Swagger definition updated. 
+Since the Zircode Swagger PHP version 2.0.14 you can
+generate the proper "operationId" for you. Just run on command line:
+
+```bash
+swagger --operationid
+```
+
+After you have the proper swagger.json just call the `ServiceRequestHandler`
+and set automatic routes:
 
 ```php
 <?php
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $restServer = new \ByJG\RestServer\ServerRequestHandler();
 
-$restServer->addRoute(
-    \ByJG\RestServer\RoutePattern::get(
-        '/test',                          // The Route
-        'SomeMethod',                     // The method will process the request
-        '\\My\\ClassName',                // The class that have the method
-        \ByJG\RestServer\HandleOutput\XmlHandler::class           // The Handler
-    )
-);
+$restServer->setRoutesSwagger(__DIR__ . '/swagger.json');
 
 $restServer->handle();
 ```
+
+#### Caching the Routes
+
+It is possible to cache the route by adding any PSR-16 instance on the second parameter of the constructor:
+
+```php
+<?php
+$restServer = new \ByJG\RestServer\ServerRequestHandler();
+$restServer->setRoutesSwagger(
+    __DIR__ . '/swagger.json',
+    new \ByJG\Cache\Psr16\FileSystemCacheEngine()
+);
+```
+
+## 2. Processing the Request and Response
+
+You need to implement a method, function or clousure with two parameters - Response and Request - in that order. 
 
 ## The HttpRequest and HttpResponse object
 
@@ -196,8 +260,31 @@ The available handlers are:
 - HtmlHandler
 - JsonCleanHandler
 
+### Using Custom Response Handler
 
-## Setting the Route
+The Default Response Handler will process all "$response->write" into a JSON.
+You can choose another Handlers. See below for a list of Available Response Handlers.
+
+```php
+<?php
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$restServer = new \ByJG\RestServer\ServerRequestHandler();
+
+$restServer->addRoute(
+    \ByJG\RestServer\RoutePattern::get(
+        '/test',                          // The Route
+        'SomeMethod',                     // The method will process the request
+        '\\My\\ClassName',                // The class that have the method
+        \ByJG\RestServer\HandleOutput\XmlHandler::class           // The Handler
+    )
+);
+
+$restServer->handle();
+```
+
+
+## Defining a Route
 
 
 You can define route with constant and/or variable. For example:

@@ -2,15 +2,22 @@
 
 namespace ByJG\RestServer;
 
+use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
+use ByJG\RestServer\Exception\OperationIdInvalidException;
+use ByJG\RestServer\Exception\SchemaInvalidException;
+use ByJG\RestServer\Exception\SchemaNotFoundException;
 use ByJG\RestServer\HandleOutput\HandleOutputInterface;
+use ByJG\RestServer\HandleOutput\HtmlHandler;
 use ByJG\RestServer\HandleOutput\JsonHandler;
+use ByJG\RestServer\HandleOutput\XmlHandler;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
+use Psr\SimpleCache\CacheInterface;
 
 class ServerRequestHandler
 {
@@ -297,5 +304,101 @@ class ServerRequestHandler
         } else {
             return 'application/octet-stream';
         }
+    }
+
+    /**
+     * @param $swaggerJson
+     * @param \Psr\SimpleCache\CacheInterface|null $cache
+     * @throws \ByJG\RestServer\Exception\SchemaInvalidException
+     * @throws \ByJG\RestServer\Exception\SchemaNotFoundException
+     * @throws \ByJG\RestServer\Exception\OperationIdInvalidException
+     */
+    public function setRoutesSwagger($swaggerJson, CacheInterface $cache = null)
+    {
+        if (!file_exists($swaggerJson)) {
+            throw new SchemaNotFoundException("Schema '$swaggerJson' not found");
+        }
+
+        $schema = json_decode(file_get_contents($swaggerJson), true);
+        if (!isset($schema['paths'])) {
+            throw new SchemaInvalidException("Schema '$swaggerJson' is invalid");
+        }
+
+        if (is_null($cache)) {
+            $cache = new NoCacheEngine();
+        }
+
+        $routePattern = $cache->get('SERVERHANDLERROUTES', false);
+        if ($routePattern === false) {
+            $routePattern = $this->generateRoutes($schema);
+            $cache->set('SERVERHANDLERROUTES', $routePattern);
+        }
+        $this->setRoutes($routePattern);
+    }
+
+    /**
+     * @param $schema
+     * @return array
+     * @throws \ByJG\RestServer\Exception\OperationIdInvalidException
+     */
+    protected function generateRoutes($schema)
+    {
+        $routes = [];
+        foreach ($schema['paths'] as $path => $methodData) {
+            foreach ($methodData as $method => $properties) {
+                $handler = $this->getMethodHandler($properties);
+                if (!isset($properties['operationId'])) {
+                    throw new OperationIdInvalidException('OperationId was not found');
+                }
+
+                $parts = explode('::', $properties['operationId']);
+                if (count($parts) !== 2) {
+                    throw new OperationIdInvalidException(
+                        'OperationId needs to be in the format Namespace\\class::method'
+                    );
+                }
+
+                $routes[] = new RoutePattern(
+                    strtoupper($method),
+                    $path,
+                    $handler,
+                    $parts[1],
+                    $parts[0]
+                );
+            }
+        }
+
+        return $routes;
+    }
+
+    /**
+     * @param $properties
+     * @return string
+     */
+    protected function getMethodHandler($properties)
+    {
+        $handler = JsonHandler::class;
+
+        if (!isset($properties['produces'])) {
+            return $handler;
+        }
+
+        $produces = $properties['produces'];
+        if (is_array($produces)) {
+            $produces = $produces[0];
+        }
+
+        switch ($produces) {
+            case "text/xml":
+            case "application/xml":
+                $handler = XmlHandler::class;
+                break;
+
+            case "text/html":
+                $handler = HtmlHandler::class;
+                break;
+        }
+
+        return $handler;
     }
 }
