@@ -354,9 +354,11 @@ class ServerRequestHandler
      */
     protected function generateRoutes($schema)
     {
+        $pathList = $this->sortPaths(array_keys($schema['paths']));
+
         $routes = [];
-        foreach ($schema['paths'] as $path => $methodData) {
-            foreach ($methodData as $method => $properties) {
+        foreach ($pathList as $path) {
+            foreach ($schema['paths'][$path] as $method => $properties) {
                 $handler = $this->getMethodHandler($method, $path, $properties);
                 if (!isset($properties['operationId'])) {
                     throw new OperationIdInvalidException('OperationId was not found');
@@ -380,6 +382,27 @@ class ServerRequestHandler
         }
 
         return $routes;
+    }
+
+    protected function sortPaths($pathList)
+    {
+        usort($pathList, function ($left, $right) {
+            if (strpos($left, '{') === false && strpos($right, '{') !== false) {
+                return -16384;
+            }
+            if (strpos($left, '{') !== false && strpos($right, '{') === false) {
+                return 16384;
+            }
+            if (strpos($left, $right) !== false) {
+                return -16384;
+            }
+            if (strpos($right, $left) !== false) {
+                return 16384;
+            }
+            return strcmp($left, $right);
+        });
+
+        return $pathList;
     }
 
     /**

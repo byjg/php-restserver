@@ -41,29 +41,12 @@ class ServerHandlerTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals(
             [
                 new RoutePattern(
-                    "POST",
-                    "/pet",
-                    "ByJG\RestServer\HandleOutput\XmlHandler",
-                    "addPet",
-                    "PetStore\Pet"
-                ),
-
-                new RoutePattern(
-                    "PUT",
-                    "/pet",
-                    "ByJG\RestServer\HandleOutput\XmlHandler",
-                    "updatePet",
-                    "PetStore\Pet"
-                ),
-
-                new RoutePattern(
                     "GET",
                     "/pet/findByStatus",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "findPetsByStatus",
                     "PetStore\Pet"
                 ),
-
                 new RoutePattern(
                     "GET",
                     "/pet/findByTags",
@@ -71,39 +54,20 @@ class ServerHandlerTest extends \PHPUnit\Framework\TestCase
                     "findPetsByTags",
                     "PetStore\Pet"
                 ),
-
-                new RoutePattern(
-                    "GET",
-                    "/pet/{petId}",
-                    "ByJG\RestServer\HandleOutput\JsonCleanHandler",
-                    "getPetById",
-                    "PetStore\Pet"
-                ),
-
                 new RoutePattern(
                     "POST",
-                    "/pet/{petId}",
+                    "/pet",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
-                    "updatePetWithForm",
+                    "addPet",
                     "PetStore\Pet"
                 ),
-
                 new RoutePattern(
-                    "DELETE",
-                    "/pet/{petId}",
+                    "PUT",
+                    "/pet",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
-                    "deletePet",
+                    "updatePet",
                     "PetStore\Pet"
                 ),
-
-                new RoutePattern(
-                    "POST",
-                    "/pet/{petId}/uploadImage",
-                    "ByJG\RestServer\HandleOutput\JsonHandler",
-                    "uploadFile",
-                    "PetStore\Pet"
-                ),
-
                 new RoutePattern(
                     "GET",
                     "/store/inventory",
@@ -111,7 +75,6 @@ class ServerHandlerTest extends \PHPUnit\Framework\TestCase
                     "getInventory",
                     "PetStore\Pet"
                 ),
-
                 new RoutePattern(
                     "POST",
                     "/store/order",
@@ -119,31 +82,6 @@ class ServerHandlerTest extends \PHPUnit\Framework\TestCase
                     "placeOrder",
                     "PetStore\Pet"
                 ),
-
-                new RoutePattern(
-                    "GET",
-                    "/store/order/{orderId}",
-                    "ByJG\RestServer\HandleOutput\XmlHandler",
-                    "getOrderById",
-                    "PetStore\Pet"
-                ),
-
-                new RoutePattern(
-                    "DELETE",
-                    "/store/order/{orderId}",
-                    "ByJG\RestServer\HandleOutput\XmlHandler",
-                    "deleteOrder",
-                    "PetStore\Pet"
-                ),
-
-                new RoutePattern(
-                    "POST",
-                    "/user",
-                    "ByJG\RestServer\HandleOutput\XmlHandler",
-                    "createUser",
-                    "PetStore\Pet"
-                ),
-
                 new RoutePattern(
                     "POST",
                     "/user/createWithArray",
@@ -151,7 +89,6 @@ class ServerHandlerTest extends \PHPUnit\Framework\TestCase
                     "createUsersWithArrayInput",
                     "PetStore\Pet"
                 ),
-
                 new RoutePattern(
                     "POST",
                     "/user/createWithList",
@@ -159,7 +96,6 @@ class ServerHandlerTest extends \PHPUnit\Framework\TestCase
                     "createUsersWithListInput",
                     "PetStore\Pet"
                 ),
-
                 new RoutePattern(
                     "GET",
                     "/user/login",
@@ -167,7 +103,6 @@ class ServerHandlerTest extends \PHPUnit\Framework\TestCase
                     "loginUser",
                     "PetStore\Pet"
                 ),
-
                 new RoutePattern(
                     "GET",
                     "/user/logout",
@@ -175,7 +110,55 @@ class ServerHandlerTest extends \PHPUnit\Framework\TestCase
                     "logoutUser",
                     "PetStore\Pet"
                 ),
-
+                new RoutePattern(
+                    "POST",
+                    "/user",
+                    "ByJG\RestServer\HandleOutput\XmlHandler",
+                    "createUser",
+                    "PetStore\Pet"
+                ),
+                new RoutePattern(
+                    "POST",
+                    "/pet/{petId}/uploadImage",
+                    "ByJG\RestServer\HandleOutput\JsonHandler",
+                    "uploadFile",
+                    "PetStore\Pet"
+                ),
+                new RoutePattern(
+                    "GET",
+                    "/pet/{petId}",
+                    "ByJG\RestServer\HandleOutput\JsonCleanHandler",
+                    "getPetById",
+                    "PetStore\Pet"
+                ),
+                new RoutePattern(
+                    "POST",
+                    "/pet/{petId}",
+                    "ByJG\RestServer\HandleOutput\XmlHandler",
+                    "updatePetWithForm",
+                    "PetStore\Pet"
+                ),
+                new RoutePattern(
+                    "DELETE",
+                    "/pet/{petId}",
+                    "ByJG\RestServer\HandleOutput\XmlHandler",
+                    "deletePet",
+                    "PetStore\Pet"
+                ),
+                new RoutePattern(
+                    "GET",
+                    "/store/order/{orderId}",
+                    "ByJG\RestServer\HandleOutput\XmlHandler",
+                    "getOrderById",
+                    "PetStore\Pet"
+                ),
+                new RoutePattern(
+                    "DELETE",
+                    "/store/order/{orderId}",
+                    "ByJG\RestServer\HandleOutput\XmlHandler",
+                    "deleteOrder",
+                    "PetStore\Pet"
+                ),
                 new RoutePattern(
                     "GET",
                     "/user/{username}",
@@ -183,7 +166,6 @@ class ServerHandlerTest extends \PHPUnit\Framework\TestCase
                     "getUserByName",
                     "PetStore\Pet"
                 ),
-
                 new RoutePattern(
                     "PUT",
                     "/user/{username}",
@@ -191,7 +173,6 @@ class ServerHandlerTest extends \PHPUnit\Framework\TestCase
                     "updateUser",
                     "PetStore\Pet"
                 ),
-
                 new RoutePattern(
                     "DELETE",
                     "/user/{username}",
@@ -199,7 +180,6 @@ class ServerHandlerTest extends \PHPUnit\Framework\TestCase
                     "deleteUser",
                     "PetStore\Pet"
                 ),
-
             ],
             $this->object->getRoutes()
         );
