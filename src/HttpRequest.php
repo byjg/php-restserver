@@ -144,31 +144,35 @@ class HttpRequest
      */
     public function getRequestIp()
     {
-        if ($this->server('HTTP_CLIENT_IP') !== false) {
-            return $this->server('HTTP_CLIENT_IP');
-        }
-
-        if ($this->server('HTTP_X_FORWARDED_FOR') !== false) {
-            return $this->server('HTTP_X_FORWARDED_FOR');
-        }
-
-        if ($this->server('HTTP_X_FORWARDED') !== false) {
-            return $this->server('HTTP_X_FORWARDED');
-        }
-
-        if ($this->server('HTTP_FORWARDED_FOR') !== false) {
-            return $this->server('HTTP_FORWARDED_FOR');
-        }
-
-        if ($this->server('HTTP_FORWARDED') !== false) {
-            return $this->server('HTTP_FORWARDED');
-        }
-
-        if ($this->server('REMOTE_ADDR') !== false) {
-            return $this->server('REMOTE_ADDR');
+        $headers = [
+            'HTTP_CLIENT_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED',
+            'HTTP_FORWARDED_FOR',
+            'HTTP_FORWARDED',
+            'REMOTE_ADDR',
+        ];
+        foreach ($headers as $header) {
+            if ($this->server($header) !== false) {
+                return $this->server($header);
+            }
         }
 
         return 'UNKNOWN';
+    }
+
+    public function getServerName()
+    {
+        $headers = [
+            'SERVER_NAME',
+            'HTTP_HOST',
+        ];
+        foreach ($headers as $header) {
+            if ($this->server($header) !== false) {
+                return $this->server('SERVER_NAME');
+            }
+        }
+        return $this->server('SERVER_ADDR');
     }
 
     /**
@@ -179,13 +183,7 @@ class HttpRequest
      */
     public function getRequestServer($port = false, $protocol = false)
     {
-        if ($this->server('SERVER_NAME') !== false) {
-            $servername = $this->server('SERVER_NAME');
-        } elseif ($this->server('HTTP_HOST' !== false)) {
-            $servername = $this->server('HTTP_HOST');
-        } else {
-            $servername = $this->server('SERVER_ADDR');
-        }
+        $servername = $this->getServerName();
 
         if ($port && $this->server('SERVER_PORT' !== false)) {
             $servername .= ':' . $this->server('SERVER_PORT');
