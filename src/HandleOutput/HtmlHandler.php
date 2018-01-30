@@ -9,9 +9,9 @@ class HtmlHandler extends BaseHandler
 {
     public function __construct()
     {
-        $this->option('header', [
+        $this->header = [
             'Content-Type: text/html'
-        ]);
+        ];
     }
 
     public function getErrorHandler()

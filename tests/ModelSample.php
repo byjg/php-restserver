@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests;
+
 class ModelSample
 {
     protected $prop1;
@@ -48,6 +50,4 @@ class ModelSample
     {
         $this->prop2 = $prop2;
     }
-
-
 }

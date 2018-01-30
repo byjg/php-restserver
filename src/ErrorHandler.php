@@ -16,17 +16,17 @@ class ErrorHandler
      *
      * @var Run
      */
-    protected $_whoops = null;
+    protected $whoops = null;
 
     /**
      *
      * @var Handler
      */
-    protected $_handler = null;
+    protected $handler = null;
 
     protected function __construct()
     {
-        $this->_whoops = new Run();
+        $this->whoops = new Run();
         $this->setHandler(new PlainResponseHandler());
     }
 
@@ -37,9 +37,9 @@ class ErrorHandler
      */
     public function setHandler(Handler $handler)
     {
-        $this->_whoops->popHandler();
-        $this->_handler = $handler;
-        $this->_whoops->pushHandler($this->_handler);
+        $this->whoops->popHandler();
+        $this->handler = $handler;
+        $this->whoops->pushHandler($this->handler);
     }
 
     /**
@@ -47,7 +47,7 @@ class ErrorHandler
      */
     public function register()
     {
-        $this->_whoops->register();
+        $this->whoops->register();
     }
 
     /**
@@ -55,7 +55,7 @@ class ErrorHandler
      */
     public function unregister()
     {
-        $this->_whoops->unregister();
+        $this->whoops->unregister();
     }
 
     /**
@@ -66,9 +66,9 @@ class ErrorHandler
      */
     public function addExtraInfo($name, $value)
     {
-        if (method_exists($this->_handler, 'addDataTable')) {
-            $data = $this->_handler->getDataTable();
-            $this->_handler->addDataTable('Info #' . (count($data) + 1), array($name => $value));
+        if (method_exists($this->handler, 'addDataTable')) {
+            $data = $this->handler->getDataTable();
+            $this->handler->addDataTable('Info #' . (count($data) + 1), array($name => $value));
         }
     }
 }

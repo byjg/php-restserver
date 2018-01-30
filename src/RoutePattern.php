@@ -2,24 +2,12 @@
 
 namespace ByJG\RestServer;
 
-use ByJG\RestServer\HandleOutput\JsonHandler;
-
 class RoutePattern
 {
     /**
-     * @var string|array
+     * @var string[]
      */
-    protected $method;
-
-    /**
-     * @var string
-     */
-    protected $pattern;
-
-    /**
-     * @var string
-     */
-    protected $handler;
+    protected $properties = [];
 
     /**
      * RoutePattern constructor.
@@ -27,63 +15,84 @@ class RoutePattern
      * @param array|string $method
      * @param string $pattern
      * @param string $handler
+     * @param \Closure|string $function
+     * @param string|null $class
      */
-    public function __construct($method, $pattern, $handler = null)
+    public function __construct($method, $pattern, $handler, $function, $class = null)
     {
-        $this->method = $method;
-        $this->pattern = $pattern;
+        $this->properties['method'] = $method;
+        $this->properties['pattern'] = $pattern;
+        $this->properties['handler'] = $handler;
+        $this->properties['function'] = $function;
+        $this->properties['class'] = $class;
+    }
 
-        if (is_null($handler)) {
-            $handler = JsonHandler::class;
+    /**
+     * @param string $property
+     * @return string
+     */
+    public function properties($property = null)
+    {
+        if (empty($property)) {
+            return $this->properties;
         }
-        $this->handler = $handler;
+
+        return $this->properties[$property];
     }
 
     /**
-     * @return array|string
-     */
-    public function getMethod()
-    {
-        return $this->method;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPattern()
-    {
-        return $this->pattern;
-    }
-
-    /**
-     * @return string
-     */
-    public function getHandler()
-    {
-        return $this->handler;
-    }
-
-    /**
-     * @param array|string $method
-     */
-    public function setMethod($method)
-    {
-        $this->method = $method;
-    }
-
-    /**
+     * RoutePattern Factory for "GET" method
+     *
      * @param string $pattern
+     * @param string $function
+     * @param string $class
+     * @param string $handler
+     * @return \ByJG\RestServer\RoutePattern
      */
-    public function setPattern($pattern)
+    public static function get($pattern, $function, $class = null, $handler = null)
     {
-        $this->pattern = $pattern;
+        return new RoutePattern('GET', $pattern, $handler, $function, $class);
     }
 
     /**
+     * RoutePattern Factory for "POST" method
+     *
+     * @param string $pattern
+     * @param string $function
+     * @param string $class
      * @param string $handler
+     * @return \ByJG\RestServer\RoutePattern
      */
-    public function setHandler($handler)
+    public static function post($pattern, $function, $class = null, $handler = null)
     {
-        $this->handler = $handler;
+        return new RoutePattern('POST', $pattern, $handler, $function, $class);
+    }
+
+    /**
+     * RoutePattern Factory for "PUT" method
+     *
+     * @param string $pattern
+     * @param string $function
+     * @param string $class
+     * @param string $handler
+     * @return \ByJG\RestServer\RoutePattern
+     */
+    public static function put($pattern, $function, $class = null, $handler = null)
+    {
+        return new RoutePattern('PUT', $pattern, $handler, $function, $class);
+    }
+
+    /**
+     * RoutePattern Factory for "DELETE" method
+     *
+     * @param string $pattern
+     * @param string $function
+     * @param string $class
+     * @param string $handler
+     * @return \ByJG\RestServer\RoutePattern
+     */
+    public static function delete($pattern, $function, $class = null, $handler = null)
+    {
+        return new RoutePattern('DELETE', $pattern, $handler, $function, $class);
     }
 }

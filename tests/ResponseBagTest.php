@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests;
+
 use ByJG\RestServer\ResponseBag;
 use PHPUnit\Framework\TestCase;
 
@@ -145,17 +147,17 @@ class ResponseBagTest extends TestCase
 
     public function testAddObjectAutomatic()
     {
-        $obj1 = new stdClass();
-        $obj1->key1 = 'value1';
-        $obj1->key2 = 'value2';
+        $obj1 = new \stdClass();
+        $obj1->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
+        $obj1->OtherField = "OK";
 
         $obj2 = new ModelSample('value3', 'value4');
 
         $this->object->add($obj1);
         $this->assertEquals(
             [
-                'key1' => 'value1',
-                'key2' => 'value2'
+                'MyField' => [ "teste1" => "value1", "test2" => [ "3", "4"]],
+                'OtherField' => 'OK'
             ],
             $this->object->process()
         );
@@ -164,8 +166,8 @@ class ResponseBagTest extends TestCase
         $this->assertEquals(
             [
                 [
-                    'key1' => 'value1',
-                    'key2' => 'value2'
+                    'MyField' => [ "teste1" => "value1", "test2" => [ "3", "4"]],
+                    'OtherField' => 'OK'
                 ],
                 [
                     'prop1' => 'value3',
@@ -178,9 +180,9 @@ class ResponseBagTest extends TestCase
 
     public function testAddObjectArray()
     {
-        $obj1 = new stdClass();
-        $obj1->key1 = 'value1';
-        $obj1->key2 = 'value2';
+        $obj1 = new \stdClass();
+        $obj1->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
+        $obj1->OtherField = "OK";
 
         $obj2 = new ModelSample('value3', 'value4');
 
@@ -189,9 +191,9 @@ class ResponseBagTest extends TestCase
         $this->assertEquals(
             [
                 [
-                    'key1' => 'value1',
-                    'key2' => 'value2'
-                ]
+                    'MyField' => [ "teste1" => "value1", "test2" => [ "3", "4"]],
+                    'OtherField' => 'OK'
+                ],
             ],
             $this->object->process()
         );
@@ -200,8 +202,8 @@ class ResponseBagTest extends TestCase
         $this->assertEquals(
             [
                 [
-                    'key1' => 'value1',
-                    'key2' => 'value2'
+                    'MyField' => [ "teste1" => "value1", "test2" => [ "3", "4"]],
+                    'OtherField' => 'OK'
                 ],
                 [
                     'prop1' => 'value3',
@@ -214,9 +216,9 @@ class ResponseBagTest extends TestCase
 
     public function testAddObjectSingleObject()
     {
-        $obj1 = new stdClass();
-        $obj1->key1 = 'value1';
-        $obj1->key2 = 'value2';
+        $obj1 = new \stdClass();
+        $obj1->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
+        $obj1->OtherField = "OK";
 
         $obj2 = new ModelSample('value3', 'value4');
 
@@ -224,8 +226,8 @@ class ResponseBagTest extends TestCase
         $this->object->add($obj1);
         $this->assertEquals(
             [
-                'key1' => 'value1',
-                'key2' => 'value2'
+                'MyField' => [ "teste1" => "value1", "test2" => [ "3", "4"]],
+                'OtherField' => 'OK'
             ],
             $this->object->process()
         );
@@ -234,13 +236,13 @@ class ResponseBagTest extends TestCase
         $this->assertEquals(
             [
                 [
-                    'key1' => 'value1',
-                    'key2' => 'value2'
+                    'MyField' => [ "teste1" => "value1", "test2" => [ "3", "4"]],
+                    'OtherField' => 'OK',
                 ],
                 [
                     'prop1' => 'value3',
                     'prop2' => 'value4'
-                ],
+                ]
             ],
             $this->object->process()
         );

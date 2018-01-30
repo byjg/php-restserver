@@ -6,8 +6,8 @@ class JsonCleanHandler extends JsonHandler
 {
     public function __construct()
     {
-        $this->option('build-null', false);
-        $this->option('only-string', false);
+        $this->buildNull = false;
+        $this->onlyString = false;
         parent::__construct();
     }
 }

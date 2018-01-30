@@ -7,7 +7,7 @@
 
 namespace ByJG\RestServer\HandleOutput;
 
-use ByJG\RestServer\ServiceAbstract;
+use ByJG\RestServer\HttpResponse;
 use Whoops\Handler\Handler;
 
 /**
@@ -18,22 +18,15 @@ interface HandleOutputInterface
 {
 
     /**
-     * @param $option
-     * @param $value
-     * @return $this
-     */
-    public function option($option, $value);
-
-    /**
      * @return void
      */
     public function writeHeader();
 
     /**
-     * @param \ByJG\RestServer\ServiceAbstract $class
+     * @param \ByJG\RestServer\HttpResponse $class
      * @return string
      */
-    public function writeOutput(ServiceAbstract $class);
+    public function processResponse(HttpResponse $class);
 
     /**
      * @return Handler
@@ -44,4 +37,10 @@ interface HandleOutputInterface
      * @return \ByJG\Serializer\Formatter\FormatterInterface
      */
     public function getFormatter();
+
+    /**
+     * @param $data
+     * @return mixed
+     */
+    public function writeData($data);
 }

@@ -2,42 +2,46 @@
 
 namespace ByJG\RestServer\HandleOutput;
 
-use ByJG\RestServer\ServiceAbstract;
+use ByJG\RestServer\HttpResponse;
 
 abstract class BaseHandler implements HandleOutputInterface
 {
-    protected $options = [
-        'header' => [],
-        'build-null' => true,
-        'only-string' => false
-    ];
+    protected $buildNull = true;
+    protected $onlyString = false;
+    protected $header = [];
 
-    public function option($option, $value)
+    public function writeHeader($headerList = null)
     {
-        $this->options[$option] = $value;
-    }
-
-    public function writeHeader()
-    {
-        foreach ($this->options['header'] as $header) {
+        if ($headerList === null) {
+            $headerList = $this->header;
+        }
+        foreach ($headerList as $header) {
+            if (is_array($header)) {
+                header($header[0], $header[1]);
+                continue;
+            }
             header($header);
         }
     }
 
-    public function writeOutput(ServiceAbstract $instance)
+    public function writeData($data)
     {
-        $instanceHeaders = $instance->getResponse()->getHeaders();
-        foreach ($instanceHeaders as $header) {
-            header($header[0], $header[1]);
-        }
+        echo $data;
+    }
 
-        http_response_code($instance->getResponse()->getResponseCode());
+    public function processResponse(HttpResponse $response)
+    {
+        $instanceHeaders = $response->getHeaders();
+        $this->writeHeader($instanceHeaders);
 
-        $serialized = $instance
-            ->getResponse()
+        http_response_code($response->getResponseCode());
+
+        $serialized = $response
             ->getResponseBag()
-            ->process($this->options['build-null'], $this->options['only-string']);
+            ->process($this->buildNull, $this->onlyString);
 
-        return $this->getFormatter()->process($serialized);
+        $this->writeData(
+            $this->getFormatter()->process($serialized)
+        );
     }
 }

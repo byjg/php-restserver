@@ -42,7 +42,9 @@ class ResponseBag
     public function process($buildNull = true, $onlyString = false)
     {
         $collection = (array)$this->collection;
-        if (count($collection) === 1 && $this->serializationRule !== ResponseBag::OBJECT_LIST && isset($collection[0])) {
+        if (count($collection) === 1
+            && $this->serializationRule !== ResponseBag::OBJECT_LIST && isset($collection[0])
+        ) {
             $collection = $collection[0];
         }
         
