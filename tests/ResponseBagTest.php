@@ -7,11 +7,6 @@ use PHPUnit\Framework\TestCase;
 
 require __DIR__ . '/ModelSample.php';
 
-// backward compatibility
-if (!class_exists('\PHPUnit\Framework\TestCase')) {
-    class_alias('\PHPUnit_Framework_TestCase', '\PHPUnit\Framework\TestCase');
-}
-
 class ResponseBagTest extends TestCase
 {
     /**

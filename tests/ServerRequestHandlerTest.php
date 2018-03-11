@@ -6,16 +6,12 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\RoutePattern;
 use ByJG\RestServer\ServerRequestHandler;
+use PHPUnit\Framework\TestCase;
 
 require __DIR__ . '/AssertHandler.php';
 require __DIR__ . '/ServerRequestHandlerExposed.php';
 
-// backward compatibility
-if (!class_exists('\PHPUnit\Framework\TestCase')) {
-    class_alias('\PHPUnit_Framework_TestCase', '\PHPUnit\Framework\TestCase');
-}
-
-class ServerRequestHandlerTest extends \PHPUnit\Framework\TestCase
+class ServerRequestHandlerTest extends TestCase
 {
     /**
      * @var ServerRequestHandler

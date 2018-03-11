@@ -5,13 +5,9 @@ namespace Tests;
 use ByJG\RestServer\HandleOutput\JsonCleanHandler;
 use ByJG\RestServer\RoutePattern;
 use ByJG\RestServer\ServerRequestHandler;
+use PHPUnit\Framework\TestCase;
 
-// backward compatibility
-if (!class_exists('\PHPUnit\Framework\TestCase')) {
-    class_alias('\PHPUnit_Framework_TestCase', '\PHPUnit\Framework\TestCase');
-}
-
-class ServerHandlerTest extends \PHPUnit\Framework\TestCase
+class ServerHandlerTest extends TestCase
 {
     /**
      * @var \ByJG\RestServer\ServerRequestHandler
