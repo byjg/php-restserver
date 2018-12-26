@@ -3,17 +3,16 @@
 [![SensioLabsInsight](https://insight.sensiolabs.com/projects/40968662-27b2-4a31-9872-a29bdd68da2b/mini.png)](https://insight.sensiolabs.com/projects/40968662-27b2-4a31-9872-a29bdd68da2b)
 [![Build Status](https://travis-ci.org/byjg/restserver.svg?branch=master)](https://travis-ci.org/byjg/restserver)
 
-## Description
 
 Create RESTFull services with different and customizable output handlers (JSON, XML, Html, etc.).
 Auto-Generate routes from swagger.json definition.
 
-## Installation
+# Installation
 
 ```bash
 composer require "byjg/restserver=3.0.*"
 ```
-## Understanding the RestServer library
+# Understanding the RestServer library
 
 Basically the RestServer library enables you to create a full feature RESTFul 
 application on top of the well-known [FastRoute](https://github.com/nikic/FastRoute) library.
@@ -30,9 +29,9 @@ You can get this working in a few minutes. Just follow this steps:
 Each "Path" or "Route" can have your own handle for output the response. 
 The are several handlers implemented and you can implement your own.
 
-## 1. Creating the Routes
+# 1. Creating the Routes
 
-### Using Closures
+## Using Closures
 
 ```php
 <?php
@@ -52,7 +51,7 @@ $restServer->addRoute(
 $restServer->handle();
 ```
 
-### Using Classes
+## Using Classes
 
 ```php
 <?php
@@ -93,7 +92,7 @@ class ClassName
 }
 ```
 
-### Auto-Generate from a "swagger.json" definition
+## Auto-Generate from a "swagger.json" definition
 
 [Swagger](https://swagguer.io) is the world's largest framework of API developer tools for the 
 OpenAPI Specification(OAS), enabling development across 
@@ -147,7 +146,7 @@ $restServer->setRoutesSwagger(__DIR__ . '/swagger.json');
 $restServer->handle();
 ```
 
-#### Caching the Routes
+## Caching the Routes
 
 It is possible to cache the route by adding any PSR-16 instance on the second parameter of the constructor:
 
@@ -160,7 +159,7 @@ $restServer->setRoutesSwagger(
 );
 ```
 
-#### Customizing the Handlers
+## Customizing the Handlers
 
 As the Swagger process is fully automated, you can define the handler by Mime Type or Route:
 
@@ -178,7 +177,7 @@ $restServer->setMimeTypeHandler("application/json", \ByJG\RestServer\HandleOutpu
 $restServer->setPathHandler("GET", "/pet/{petId}", \ByJG\RestServer\HandleOutput\JsonHandler::class);
 ```
 
-## 2. Processing the Request and Response
+# 2. Processing the Request and Response
 
 You need to implement a method, function or clousure with two parameters - Response and Request - in that order. 
 
@@ -215,7 +214,7 @@ informations to the requester.
 - addHeader($header, $value): Add an header entry;
 - setResponseCode($value): Set the HTTP response code (eg. 200, 401, etc)
 
-### Output your data 
+## Output your data 
 
 To output your data you *have to* use the `$response->write($object)`. 
 The write method supports you output a object, stdclass, array or string. The Handler object will
@@ -268,7 +267,7 @@ The result will be something like:
 }
 ```
 
-## The Handlers
+# The Handlers
 
 The Handler will be parse the `$response->write($obj)` and output in the proper format. 
 The available handlers are:
@@ -278,7 +277,7 @@ The available handlers are:
 - HtmlHandler
 - JsonCleanHandler
 
-### Using Custom Response Handler
+## Using Custom Response Handler
 
 The Default Response Handler will process all "$response->write" into a JSON.
 You can choose another Handlers. See below for a list of Available Response Handlers.
@@ -302,7 +301,7 @@ $restServer->handle();
 ```
 
 
-## Defining a Route
+# Defining a Route
 
 
 You can define route with constant and/or variable. For example:
@@ -329,18 +328,18 @@ all matches values can be obtained by
 $this->getRequest()->get('variable')
 ```
 
-## Running the rest server
+# Running the rest server
 
 You need to setup your restserver to handle ALL requests to a single PHP file. Normally is "app.php" 
 
-#### PHP Built-in server
+## PHP Built-in server
 
 ```
 cd web
 php -S localhost:8080 app.php
 ```
 
-#### Nginx 
+## Nginx 
 
 ```
 location / {
@@ -348,7 +347,7 @@ location / {
 }
 ```
 
-#### Apache .htaccess
+## Apache .htaccess
 
 ```
 RewriteEngine On
@@ -359,3 +358,4 @@ RewriteRule ^(.*)$ ./app.php [QSA,NC,L]
 
 ----
 [Open source ByJG](http://opensource.byjg.com)
+
