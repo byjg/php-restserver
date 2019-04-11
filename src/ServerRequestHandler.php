@@ -233,17 +233,19 @@ class ServerRequestHandler
             && basename($_SERVER['SCRIPT_FILENAME']) !== basename($debugBacktrace[0]['file'])
         ) {
             $file = $_SERVER['SCRIPT_FILENAME'];
-            if (strpos($file, '.php') !== false) {
+            if (strrchr($file, '.') === ".php") {
                 require_once($file);
             } else {
-                header("Content-Type: " . $this->mimeContentType($file));
+                if (!defined("RESTSERVER_TEST")) {
+                    header("Content-Type: " . $this->mimeContentType($file));
+                }
 
                 echo file_get_contents($file);
             }
-            return;
+            return true;
         }
 
-        $this->process();
+        return $this->process();
     }
 
     /**
@@ -251,8 +253,9 @@ class ServerRequestHandler
      *
      * @param string $filename
      * @return string
+     * @throws Error404Exception
      */
-    protected function mimeContentType($filename)
+    public function mimeContentType($filename)
     {
 
         $mimeTypes = array(
@@ -304,7 +307,11 @@ class ServerRequestHandler
             'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
         );
 
-        $ext = strtolower(array_pop(explode('.', $filename)));
+        if (!file_exists($filename)) {
+            throw new Error404Exception();
+        }
+
+        $ext = substr(strrchr($filename, "."), 1);
         if (array_key_exists($ext, $mimeTypes)) {
             return $mimeTypes[$ext];
         } elseif (function_exists('finfo_open')) {
