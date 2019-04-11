@@ -243,8 +243,8 @@
         "description": "Returns a single pet",
         "operationId": "PetStore\\Pet::getPetById",
         "produces": [
-          "application/xml",
-          "application/json"
+          "application/json",
+          "application/xml"
         ],
         "parameters": [
           {

@@ -365,12 +365,14 @@ class ServerRequestHandler
      */
     protected function generateRoutes($schema)
     {
+        $basePath = isset($schema["basePath"]) ? $schema["basePath"] : "";
+
         $pathList = $this->sortPaths(array_keys($schema['paths']));
 
         $routes = [];
         foreach ($pathList as $path) {
             foreach ($schema['paths'][$path] as $method => $properties) {
-                $handler = $this->getMethodHandler($method, $path, $properties);
+                $handler = $this->getMethodHandler($method, $basePath . $path, $properties);
                 if (!isset($properties['operationId'])) {
                     throw new OperationIdInvalidException('OperationId was not found');
                 }
@@ -384,7 +386,7 @@ class ServerRequestHandler
 
                 $routes[] = new RoutePattern(
                     strtoupper($method),
-                    $path,
+                    $basePath . $path,
                     $handler,
                     $parts[1],
                     $parts[0]

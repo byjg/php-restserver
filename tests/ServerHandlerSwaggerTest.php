@@ -28,150 +28,151 @@ class ServerHandlerTest extends TestCase
      * @throws \ByJG\RestServer\Exception\OperationIdInvalidException
      * @throws \ByJG\RestServer\Exception\SchemaInvalidException
      * @throws \ByJG\RestServer\Exception\SchemaNotFoundException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function testGenerateRoutes()
     {
-        $this->object->setPathHandler('get', '/pet/{petId}', JsonCleanHandler::class);
+        $this->object->setPathHandler('get', '/v2/pet/{petId}', JsonCleanHandler::class);
         $this->object->setRoutesSwagger(__DIR__ . '/swagger-example.json');
 
         $this->assertEquals(
             [
                 new RoutePattern(
                     "GET",
-                    "/pet/findByStatus",
+                    "/v2/pet/findByStatus",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "findPetsByStatus",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "GET",
-                    "/pet/findByTags",
+                    "/v2/pet/findByTags",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "findPetsByTags",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "POST",
-                    "/pet",
+                    "/v2/pet",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "addPet",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "PUT",
-                    "/pet",
+                    "/v2/pet",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "updatePet",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "GET",
-                    "/store/inventory",
+                    "/v2/store/inventory",
                     "ByJG\RestServer\HandleOutput\JsonHandler",
                     "getInventory",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "POST",
-                    "/store/order",
+                    "/v2/store/order",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "placeOrder",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "POST",
-                    "/user/createWithArray",
+                    "/v2/user/createWithArray",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "createUsersWithArrayInput",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "POST",
-                    "/user/createWithList",
+                    "/v2/user/createWithList",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "createUsersWithListInput",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "GET",
-                    "/user/login",
+                    "/v2/user/login",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "loginUser",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "GET",
-                    "/user/logout",
+                    "/v2/user/logout",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "logoutUser",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "POST",
-                    "/user",
+                    "/v2/user",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "createUser",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "POST",
-                    "/pet/{petId}/uploadImage",
+                    "/v2/pet/{petId}/uploadImage",
                     "ByJG\RestServer\HandleOutput\JsonHandler",
                     "uploadFile",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "GET",
-                    "/pet/{petId}",
+                    "/v2/pet/{petId}",
                     "ByJG\RestServer\HandleOutput\JsonCleanHandler",
                     "getPetById",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "POST",
-                    "/pet/{petId}",
+                    "/v2/pet/{petId}",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "updatePetWithForm",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "DELETE",
-                    "/pet/{petId}",
+                    "/v2/pet/{petId}",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "deletePet",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "GET",
-                    "/store/order/{orderId}",
+                    "/v2/store/order/{orderId}",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "getOrderById",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "DELETE",
-                    "/store/order/{orderId}",
+                    "/v2/store/order/{orderId}",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "deleteOrder",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "GET",
-                    "/user/{username}",
+                    "/v2/user/{username}",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "getUserByName",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "PUT",
-                    "/user/{username}",
+                    "/v2/user/{username}",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "updateUser",
                     "PetStore\Pet"
                 ),
                 new RoutePattern(
                     "DELETE",
-                    "/user/{username}",
+                    "/v2/user/{username}",
                     "ByJG\RestServer\HandleOutput\XmlHandler",
                     "deleteUser",
                     "PetStore\Pet"
