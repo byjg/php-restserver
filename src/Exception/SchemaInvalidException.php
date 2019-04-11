@@ -2,7 +2,9 @@
 
 namespace ByJG\RestServer\Exception;
 
-class SchemaInvalidException extends \Exception
+use Exception;
+
+class SchemaInvalidException extends Exception
 {
 
 }

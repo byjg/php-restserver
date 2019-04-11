@@ -15,9 +15,11 @@ use ByJG\RestServer\HandleOutput\HandleOutputInterface;
 use ByJG\RestServer\HandleOutput\HtmlHandler;
 use ByJG\RestServer\HandleOutput\JsonHandler;
 use ByJG\RestServer\HandleOutput\XmlHandler;
+use Closure;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class ServerRequestHandler
 {
@@ -46,7 +48,7 @@ class ServerRequestHandler
     }
 
     /**
-     * @param \ByJG\RestServer\RoutePattern[] $routes
+     * @param RoutePattern[] $routes
      */
     public function setRoutes($routes)
     {
@@ -56,7 +58,7 @@ class ServerRequestHandler
     }
 
     /**
-     * @param \ByJG\RestServer\RoutePattern $route
+     * @param RoutePattern $route
      */
     public function addRoute(RoutePattern $route)
     {
@@ -86,11 +88,11 @@ class ServerRequestHandler
     }
 
     /**
-     * @throws \ByJG\RestServer\Exception\ClassNotFoundException
-     * @throws \ByJG\RestServer\Exception\Error404Exception
-     * @throws \ByJG\RestServer\Exception\Error405Exception
-     * @throws \ByJG\RestServer\Exception\Error520Exception
-     * @throws \ByJG\RestServer\Exception\InvalidClassException
+     * @throws ClassNotFoundException
+     * @throws Error404Exception
+     * @throws Error405Exception
+     * @throws Error520Exception
+     * @throws InvalidClassException
      */
     protected function process()
     {
@@ -160,8 +162,8 @@ class ServerRequestHandler
      * @param string $class
      * @param string $function
      * @param array $vars
-     * @throws \ByJG\RestServer\Exception\ClassNotFoundException
-     * @throws \ByJG\RestServer\Exception\InvalidClassException
+     * @throws ClassNotFoundException
+     * @throws InvalidClassException
      */
     protected function executeRequest($handler, $class, $function, $vars)
     {
@@ -179,7 +181,7 @@ class ServerRequestHandler
         $response = new HttpResponse();
 
         // Process Closure
-        if ($function instanceof \Closure) {
+        if ($function instanceof Closure) {
             $function($response, $request);
             echo $handler->processResponse($response);
             return;
@@ -200,14 +202,15 @@ class ServerRequestHandler
     /**
      * Handle the ROUTE (see web/app-dist.php)
      *
-     * @param \ByJG\RestServer\RoutePattern[]|null $routePattern
+     * @param RoutePattern[]|null $routePattern
      * @param bool $outputBuffer
      * @param bool $session
-     * @throws \ByJG\RestServer\Exception\ClassNotFoundException
-     * @throws \ByJG\RestServer\Exception\Error404Exception
-     * @throws \ByJG\RestServer\Exception\Error405Exception
-     * @throws \ByJG\RestServer\Exception\Error520Exception
-     * @throws \ByJG\RestServer\Exception\InvalidClassException
+     * @return bool|void
+     * @throws ClassNotFoundException
+     * @throws Error404Exception
+     * @throws Error405Exception
+     * @throws Error520Exception
+     * @throws InvalidClassException
      */
     public function handle($routePattern = null, $outputBuffer = true, $session = true)
     {
@@ -326,10 +329,11 @@ class ServerRequestHandler
 
     /**
      * @param $swaggerJson
-     * @param \Psr\SimpleCache\CacheInterface|null $cache
-     * @throws \ByJG\RestServer\Exception\SchemaInvalidException
-     * @throws \ByJG\RestServer\Exception\SchemaNotFoundException
-     * @throws \ByJG\RestServer\Exception\OperationIdInvalidException
+     * @param CacheInterface|null $cache
+     * @throws SchemaInvalidException
+     * @throws SchemaNotFoundException
+     * @throws OperationIdInvalidException
+     * @throws InvalidArgumentException
      */
     public function setRoutesSwagger($swaggerJson, CacheInterface $cache = null)
     {
@@ -357,7 +361,7 @@ class ServerRequestHandler
     /**
      * @param $schema
      * @return array
-     * @throws \ByJG\RestServer\Exception\OperationIdInvalidException
+     * @throws OperationIdInvalidException
      */
     protected function generateRoutes($schema)
     {
@@ -417,7 +421,7 @@ class ServerRequestHandler
      * @param $path
      * @param $properties
      * @return string
-     * @throws \ByJG\RestServer\Exception\OperationIdInvalidException
+     * @throws OperationIdInvalidException
      */
     protected function getMethodHandler($method, $path, $properties)
     {

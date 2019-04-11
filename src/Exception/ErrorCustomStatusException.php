@@ -9,7 +9,7 @@ class ErrorCustomStatusException extends ClientShowException
     protected $status;
     protected $description;
 
-    public function __construct($message = "", $code = 400, \Throwable $previous = null)
+    public function __construct($message = "", $code = 400, Throwable $previous = null)
     {
         $this->status = $code;
         $this->description = $message;

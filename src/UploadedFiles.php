@@ -2,6 +2,8 @@
 
 namespace ByJG\RestServer;
 
+use InvalidArgumentException;
+
 class UploadedFiles
 {
     public function count()
@@ -51,7 +53,7 @@ class UploadedFiles
     private function getFileByKey($key, $property)
     {
         if (!isset($_FILES[$key])) {
-            throw new \InvalidArgumentException("The upload '$key' does not exists");
+            throw new InvalidArgumentException("The upload '$key' does not exists");
         }
 
         return $_FILES[$key][$property];

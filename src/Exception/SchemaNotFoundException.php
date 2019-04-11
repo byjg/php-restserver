@@ -2,7 +2,9 @@
 
 namespace ByJG\RestServer\Exception;
 
-class SchemaNotFoundException extends \Exception
+use Exception;
+
+class SchemaNotFoundException extends Exception
 {
 
 }

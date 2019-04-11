@@ -8,6 +8,7 @@
 namespace ByJG\RestServer\HandleOutput;
 
 use ByJG\RestServer\HttpResponse;
+use ByJG\Serializer\Formatter\FormatterInterface;
 use Whoops\Handler\Handler;
 
 /**
@@ -23,7 +24,7 @@ interface HandleOutputInterface
     public function writeHeader();
 
     /**
-     * @param \ByJG\RestServer\HttpResponse $class
+     * @param HttpResponse $class
      * @return string
      */
     public function processResponse(HttpResponse $class);
@@ -34,7 +35,7 @@ interface HandleOutputInterface
     public function getErrorHandler();
 
     /**
-     * @return \ByJG\Serializer\Formatter\FormatterInterface
+     * @return FormatterInterface
      */
     public function getFormatter();
 

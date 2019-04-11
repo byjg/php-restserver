@@ -2,6 +2,8 @@
 
 namespace ByJG\RestServer;
 
+use Closure;
+
 class RoutePattern
 {
     /**
@@ -15,7 +17,7 @@ class RoutePattern
      * @param array|string $method
      * @param string $pattern
      * @param string $handler
-     * @param \Closure|string $function
+     * @param Closure|string $function
      * @param string|null $class
      */
     public function __construct($method, $pattern, $handler, $function, $class = null)
@@ -47,7 +49,7 @@ class RoutePattern
      * @param string $function
      * @param string $class
      * @param string $handler
-     * @return \ByJG\RestServer\RoutePattern
+     * @return RoutePattern
      */
     public static function get($pattern, $function, $class = null, $handler = null)
     {
@@ -61,7 +63,7 @@ class RoutePattern
      * @param string $function
      * @param string $class
      * @param string $handler
-     * @return \ByJG\RestServer\RoutePattern
+     * @return RoutePattern
      */
     public static function post($pattern, $function, $class = null, $handler = null)
     {
@@ -75,7 +77,7 @@ class RoutePattern
      * @param string $function
      * @param string $class
      * @param string $handler
-     * @return \ByJG\RestServer\RoutePattern
+     * @return RoutePattern
      */
     public static function put($pattern, $function, $class = null, $handler = null)
     {
@@ -89,7 +91,7 @@ class RoutePattern
      * @param string $function
      * @param string $class
      * @param string $handler
-     * @return \ByJG\RestServer\RoutePattern
+     * @return RoutePattern
      */
     public static function delete($pattern, $function, $class = null, $handler = null)
     {

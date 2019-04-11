@@ -202,7 +202,7 @@ class HttpRequest
     private $uploadedFiles;
 
     /**
-     * @return \ByJG\RestServer\UploadedFiles
+     * @return UploadedFiles
      */
     public function uploadedFiles()
     {

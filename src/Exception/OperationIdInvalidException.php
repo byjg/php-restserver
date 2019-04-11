@@ -2,7 +2,9 @@
 
 namespace ByJG\RestServer\Exception;
 
-class OperationIdInvalidException extends \Exception
+use Exception;
+
+class OperationIdInvalidException extends Exception
 {
 
 }

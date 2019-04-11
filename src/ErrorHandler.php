@@ -33,7 +33,7 @@ class ErrorHandler
     /**
      * Set the proper Error Handler based on the Output of the page
      *
-     * @param \Whoops\Handler\Handler $handler
+     * @param Handler $handler
      */
     public function setHandler(Handler $handler)
     {

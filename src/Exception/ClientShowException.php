@@ -2,7 +2,9 @@
 
 namespace ByJG\RestServer\Exception;
 
-abstract class ClientShowException extends \Exception
+use Exception;
+
+abstract class ClientShowException extends Exception
 {
     //put your code here
 
