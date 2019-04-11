@@ -23,7 +23,7 @@ $restServer->addRoute(new \ByJG\RestServer\RoutePattern(
     'GET',
     '/testclosure',
     \ByJG\RestServer\HandleOutput\JsonHandler::class,
-    function ($request, $response) {
+    function ($response, $request) {
         $response->write('OK');
     }
 ));
@@ -39,7 +39,7 @@ $restServer->handle();
  */
 class ClassName
 {
-    public function someMethod($request, $response)
+    public function someMethod($response, $request)
     {
         $response->write('It worked');
     }
