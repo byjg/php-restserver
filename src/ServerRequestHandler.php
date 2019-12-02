@@ -15,6 +15,7 @@ use ByJG\RestServer\HandleOutput\HandleOutputInterface;
 use ByJG\RestServer\HandleOutput\HtmlHandler;
 use ByJG\RestServer\HandleOutput\JsonHandler;
 use ByJG\RestServer\HandleOutput\XmlHandler;
+use ByJG\Util\Uri;
 use Closure;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
@@ -366,6 +367,10 @@ class ServerRequestHandler
     protected function generateRoutes($schema)
     {
         $basePath = isset($schema["basePath"]) ? $schema["basePath"] : "";
+        if (empty($basePath) && isset($schema["servers"])) {
+            $uri = new Uri($schema["servers"][0]["url"]);
+            $basePath = $uri->getPath();
+        }
 
         $pathList = $this->sortPaths(array_keys($schema['paths']));
 
