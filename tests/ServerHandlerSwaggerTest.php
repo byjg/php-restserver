@@ -2,15 +2,20 @@
 
 namespace Tests;
 
+use ByJG\RestServer\Exception\OperationIdInvalidException;
+use ByJG\RestServer\Exception\SchemaInvalidException;
+use ByJG\RestServer\Exception\SchemaNotFoundException;
 use ByJG\RestServer\HandleOutput\JsonCleanHandler;
+use ByJG\RestServer\HandleOutput\XmlHandler;
 use ByJG\RestServer\RoutePattern;
 use ByJG\RestServer\ServerRequestHandler;
 use PHPUnit\Framework\TestCase;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class ServerHandlerTest extends TestCase
 {
     /**
-     * @var \ByJG\RestServer\ServerRequestHandler
+     * @var ServerRequestHandler
      */
     protected $object;
 
@@ -25,16 +30,36 @@ class ServerHandlerTest extends TestCase
     }
 
     /**
-     * @throws \ByJG\RestServer\Exception\OperationIdInvalidException
-     * @throws \ByJG\RestServer\Exception\SchemaInvalidException
-     * @throws \ByJG\RestServer\Exception\SchemaNotFoundException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @throws OperationIdInvalidException
+     * @throws SchemaInvalidException
+     * @throws SchemaNotFoundException
+     * @throws InvalidArgumentException
      */
-    public function testGenerateRoutes()
+    public function testGenerateRoutesSwagger()
     {
         $this->object->setPathHandler('get', '/v2/pet/{petId}', JsonCleanHandler::class);
         $this->object->setRoutesSwagger(__DIR__ . '/swagger-example.json');
 
+        $this->assert();
+    }
+
+    /**
+     * @throws OperationIdInvalidException
+     * @throws SchemaInvalidException
+     * @throws SchemaNotFoundException
+     * @throws InvalidArgumentException
+     */
+    public function testGenerateRoutesOpenApi()
+    {
+        $this->object->setPathHandler('get', '/v2/pet/{petId}', JsonCleanHandler::class);
+        $this->object->setDefaultHandler(new XmlHandler());
+        $this->object->setRoutesSwagger(__DIR__ . '/openapi-example.json');
+
+        $this->assert();
+    }
+
+    protected function assert()
+    {
         $this->assertEquals(
             [
                 new RoutePattern(
@@ -61,7 +86,7 @@ class ServerHandlerTest extends TestCase
                 new RoutePattern(
                     "PUT",
                     "/v2/pet",
-                    "ByJG\RestServer\HandleOutput\XmlHandler",
+                    "ByJG\RestServer\HandleOutput\JsonHandler",
                     "updatePet",
                     "PetStore\Pet"
                 ),

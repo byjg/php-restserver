@@ -338,14 +338,7 @@ class ServerRequestHandler
      */
     public function setRoutesSwagger($swaggerJson, CacheInterface $cache = null)
     {
-        if (!file_exists($swaggerJson)) {
-            throw new SchemaNotFoundException("Schema '$swaggerJson' not found");
-        }
-
-        $schema = json_decode(file_get_contents($swaggerJson), true);
-        if (!isset($schema['paths'])) {
-            throw new SchemaInvalidException("Schema '$swaggerJson' is invalid");
-        }
+        $swaggerWrapper = new SwaggerWrapper($swaggerJson, $this);
 
         if (is_null($cache)) {
             $cache = new NoCacheEngine();
@@ -353,103 +346,10 @@ class ServerRequestHandler
 
         $routePattern = $cache->get('SERVERHANDLERROUTES', false);
         if ($routePattern === false) {
-            $routePattern = $this->generateRoutes($schema);
+            $routePattern = $swaggerWrapper->generateRoutes();
             $cache->set('SERVERHANDLERROUTES', $routePattern);
         }
         $this->setRoutes($routePattern);
-    }
-
-    /**
-     * @param $schema
-     * @return array
-     * @throws OperationIdInvalidException
-     */
-    protected function generateRoutes($schema)
-    {
-        $basePath = isset($schema["basePath"]) ? $schema["basePath"] : "";
-        if (empty($basePath) && isset($schema["servers"])) {
-            $uri = new Uri($schema["servers"][0]["url"]);
-            $basePath = $uri->getPath();
-        }
-
-        $pathList = $this->sortPaths(array_keys($schema['paths']));
-
-        $routes = [];
-        foreach ($pathList as $path) {
-            foreach ($schema['paths'][$path] as $method => $properties) {
-                $handler = $this->getMethodHandler($method, $basePath . $path, $properties);
-                if (!isset($properties['operationId'])) {
-                    throw new OperationIdInvalidException('OperationId was not found');
-                }
-
-                $parts = explode('::', $properties['operationId']);
-                if (count($parts) !== 2) {
-                    throw new OperationIdInvalidException(
-                        'OperationId needs to be in the format Namespace\\class::method'
-                    );
-                }
-
-                $routes[] = new RoutePattern(
-                    strtoupper($method),
-                    $basePath . $path,
-                    $handler,
-                    $parts[1],
-                    $parts[0]
-                );
-            }
-        }
-
-        return $routes;
-    }
-
-    protected function sortPaths($pathList)
-    {
-        usort($pathList, function ($left, $right) {
-            if (strpos($left, '{') === false && strpos($right, '{') !== false) {
-                return -16384;
-            }
-            if (strpos($left, '{') !== false && strpos($right, '{') === false) {
-                return 16384;
-            }
-            if (strpos($left, $right) !== false) {
-                return -16384;
-            }
-            if (strpos($right, $left) !== false) {
-                return 16384;
-            }
-            return strcmp($left, $right);
-        });
-
-        return $pathList;
-    }
-
-    /**
-     * @param $method
-     * @param $path
-     * @param $properties
-     * @return string
-     * @throws OperationIdInvalidException
-     */
-    protected function getMethodHandler($method, $path, $properties)
-    {
-        $method = strtoupper($method);
-        if (isset($this->pathHandler["$method::$path"])) {
-            return $this->pathHandler["$method::$path"];
-        }
-        if (!isset($properties['produces'])) {
-            return get_class($this->getDefaultHandler());
-        }
-
-        $produces = $properties['produces'];
-        if (is_array($produces)) {
-            $produces = $produces[0];
-        }
-
-        if (!isset($this->mimeTypeHandler[$produces])) {
-            throw new OperationIdInvalidException("There is no handler for $produces");
-        }
-
-        return $this->mimeTypeHandler[$produces];
     }
 
     public function setMimeTypeHandler($mimetype, $handler)
@@ -461,5 +361,40 @@ class ServerRequestHandler
     {
         $method = strtoupper($method);
         $this->pathHandler["$method::$path"] = $handler;
+    }
+
+    /**
+     * @param $method
+     * @param $path
+     * @param $properties
+     * @return string
+     * @throws OperationIdInvalidException
+     */
+    public function getMethodHandler($method, $path, $properties)
+    {
+        $method = strtoupper($method);
+        if (isset($this->pathHandler["$method::$path"])) {
+            return $this->pathHandler["$method::$path"];
+        }
+
+        $produces = null;
+        if (isset($properties['produces'])) {
+            $produces = (array) $properties['produces'];
+        }
+        if (empty($produces) && isset($properties["responses"]["200"]["content"])) {
+            $produces = array_keys($properties["responses"]["200"]["content"]);
+        }
+
+        if (empty($produces)) {
+            return get_class($this->getDefaultHandler());
+        }
+
+        $produces = $produces[0];
+
+        if (!isset($this->mimeTypeHandler[$produces])) {
+            throw new OperationIdInvalidException("There is no handler for $produces");
+        }
+
+        return $this->mimeTypeHandler[$produces];
     }
 }

@@ -2,9 +2,9 @@
 
 namespace Tests;
 
-use ByJG\RestServer\ServerRequestHandler;
+use ByJG\RestServer\SwaggerWrapper;
 
-class ServerRequestHandlerExposed extends ServerRequestHandler
+class SwaggerWrapperExposed extends SwaggerWrapper
 {
     public function sortPaths($pathList)
     {

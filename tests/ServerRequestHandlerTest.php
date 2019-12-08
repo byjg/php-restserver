@@ -10,7 +10,7 @@ use ByJG\RestServer\ServerRequestHandler;
 use PHPUnit\Framework\TestCase;
 
 require __DIR__ . '/AssertHandler.php';
-require __DIR__ . '/ServerRequestHandlerExposed.php';
+require __DIR__ . '/SwaggerWrapperExposed.php';
 
 define("RESTSERVER_TEST", "RESTSERVER_TEST");
 
@@ -190,7 +190,7 @@ class ServerRequestHandlerTest extends TestCase
     public function testSortPaths()
     {
         // Expose the method
-        $testObject = new ServerRequestHandlerExposed();
+        $testObject = new SwaggerWrapperExposed(__DIR__ . "/swagger-example.json", null);
 
         $pathList = [
             "/rest/accessible/recentPosts",

@@ -94,8 +94,8 @@
           "application/xml"
         ],
         "produces": [
-          "application/xml",
-          "application/json"
+          "application/json",
+          "application/xml"
         ],
         "parameters": [
           {
