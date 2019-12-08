@@ -15,12 +15,12 @@ use ByJG\RestServer\HandleOutput\HandleOutputInterface;
 use ByJG\RestServer\HandleOutput\HtmlHandler;
 use ByJG\RestServer\HandleOutput\JsonHandler;
 use ByJG\RestServer\HandleOutput\XmlHandler;
-use ByJG\Util\Uri;
 use Closure;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
+use function FastRoute\simpleDispatcher;
 
 class ServerRequestHandler
 {
@@ -106,7 +106,7 @@ class ServerRequestHandler
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $queryStr);
 
         // Generic Dispatcher for RestServer
-        $dispatcher = \FastRoute\simpleDispatcher(function (RouteCollector $r) {
+        $dispatcher = simpleDispatcher(function (RouteCollector $r) {
 
             foreach ($this->getRoutes() as $route) {
                 $r->addRoute(
