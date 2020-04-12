@@ -167,14 +167,14 @@ As the Swagger process is fully automated, you can define the handler by Mime Ty
 
 ```php
 <?php
-$restServer->setMimeTypeHandler("application/json", \ByJG\RestServer\HandleOutput\JsonCleanHandler::class);
+$restServer->setMimeTypeHandler("application/json", \ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor::class);
 ```
 
 *Route*
 
 ```php
 <?php
-$restServer->setPathHandler("GET", "/pet/{petId}", \ByJG\RestServer\HandleOutput\JsonHandler::class);
+$restServer->setPathHandler("GET", "/pet/{petId}", \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class);
 ```
 
 # 2. Processing the Request and Response
@@ -272,10 +272,10 @@ The result will be something like:
 The Handler will be parse the `$response->write($obj)` and output in the proper format. 
 The available handlers are:
 
-- JsonHandler
-- XmlHandler
+- JsonOutputProcessor
+- XmlOutputProcessor
 - HtmlHandler
-- JsonCleanHandler
+- JsonCleanOutputProcessor
 
 ## Using Custom Response Handler
 
@@ -293,7 +293,7 @@ $restServer->addRoute(
         '/test',                          // The Route
         'SomeMethod',                     // The method will process the request
         '\\My\\ClassName',                // The class that have the method
-        \ByJG\RestServer\HandleOutput\XmlHandler::class           // The Handler
+        \ByJG\RestServer\OutputProcessor\XmlOutputProcessor::class           // The Handler
     )
 );
 

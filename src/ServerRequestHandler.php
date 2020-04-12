@@ -11,10 +11,10 @@ use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\Exception\SchemaInvalidException;
 use ByJG\RestServer\Exception\SchemaNotFoundException;
-use ByJG\RestServer\HandleOutput\HandleOutputInterface;
-use ByJG\RestServer\HandleOutput\HtmlHandler;
-use ByJG\RestServer\HandleOutput\JsonHandler;
-use ByJG\RestServer\HandleOutput\XmlHandler;
+use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
+use ByJG\RestServer\OutputProcessor\HtmlOutputProcessor;
+use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
+use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
 use Closure;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
@@ -33,10 +33,10 @@ class ServerRequestHandler
     protected $defaultHandler = null;
 
     protected $mimeTypeHandler = [
-        "text/xml" => XmlHandler::class,
-        "application/xml" => XmlHandler::class,
-        "text/html" => HtmlHandler::class,
-        "application/json" => JsonHandler::class
+        "text/xml" => XmlOutputProcessor::class,
+        "application/xml" => XmlOutputProcessor::class,
+        "text/html" => HtmlOutputProcessor::class,
+        "application/json" => JsonOutputProcessor::class
     ];
 
     protected $pathHandler = [
@@ -70,20 +70,20 @@ class ServerRequestHandler
     }
 
     /**
-     * @return HandleOutputInterface
+     * @return OutputProcessorInterface
      */
     public function getDefaultHandler()
     {
         if (empty($this->defaultHandler)) {
-            $this->defaultHandler = new JsonHandler();
+            $this->defaultHandler = new JsonOutputProcessor();
         }
         return $this->defaultHandler;
     }
 
     /**
-     * @param HandleOutputInterface $defaultHandler
+     * @param OutputProcessorInterface $defaultHandler
      */
-    public function setDefaultHandler(HandleOutputInterface $defaultHandler)
+    public function setDefaultHandler(OutputProcessorInterface $defaultHandler)
     {
         $this->defaultHandler = $defaultHandler;
     }
@@ -159,7 +159,7 @@ class ServerRequestHandler
     }
 
     /**
-     * @param HandleOutputInterface $handler
+     * @param OutputProcessorInterface $handler
      * @param string $class
      * @param string $function
      * @param array $vars

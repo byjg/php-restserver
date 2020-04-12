@@ -2,9 +2,9 @@
 
 namespace Tests;
 
-use ByJG\RestServer\HandleOutput\JsonHandler;
+use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 
-class AssertHandler extends JsonHandler
+class AssertOutputProcessor extends JsonOutputProcessor
 {
     /**
      * @param null $headerList

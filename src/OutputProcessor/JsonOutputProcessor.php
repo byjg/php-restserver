@@ -1,11 +1,11 @@
 <?php
 
-namespace ByJG\RestServer\HandleOutput;
+namespace ByJG\RestServer\OutputProcessor;
 
-use ByJG\RestServer\Whoops\JsonResponseHandler;
+use ByJG\RestServer\Whoops\JsonResponseErrorHandler;
 use ByJG\Serializer\Formatter\JsonFormatter;
 
-class JsonHandler extends BaseHandler
+class JsonOutputProcessor extends BaseOutputProcessor
 {
     public function __construct()
     {
@@ -16,7 +16,7 @@ class JsonHandler extends BaseHandler
 
     public function getErrorHandler()
     {
-        return new JsonResponseHandler();
+        return new JsonResponseErrorHandler();
     }
 
     public function getFormatter()

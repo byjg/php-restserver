@@ -9,7 +9,7 @@ use ByJG\RestServer\RoutePattern;
 use ByJG\RestServer\ServerRequestHandler;
 use PHPUnit\Framework\TestCase;
 
-require __DIR__ . '/AssertHandler.php';
+require __DIR__ . '/AssertOutputProcessor.php';
 require __DIR__ . '/SwaggerWrapperExposed.php';
 
 define("RESTSERVER_TEST", "RESTSERVER_TEST");
@@ -28,7 +28,7 @@ class ServerRequestHandlerTest extends TestCase
     public function setUp()
     {
         $this->object = new ServerRequestHandler();
-        $this->object->setDefaultHandler(new AssertHandler());
+        $this->object->setDefaultHandler(new AssertOutputProcessor());
 
         $this->object->addRoute(
             RoutePattern::get(
@@ -56,7 +56,7 @@ class ServerRequestHandlerTest extends TestCase
             new RoutePattern(
                 'GET',
                 '/error',
-                AssertHandler::class,
+                AssertOutputProcessor::class,
                 'method',
                 '\\My\\Class'
             )

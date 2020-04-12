@@ -1,10 +1,10 @@
 <?php
 
-namespace ByJG\RestServer\HandleOutput;
+namespace ByJG\RestServer\OutputProcessor;
 
 use ByJG\RestServer\HttpResponse;
 
-abstract class BaseHandler implements HandleOutputInterface
+abstract class BaseOutputProcessor implements OutputProcessorInterface
 {
     protected $buildNull = true;
     protected $onlyString = false;

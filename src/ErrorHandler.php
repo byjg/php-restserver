@@ -3,7 +3,7 @@
 namespace ByJG\RestServer;
 
 use ByJG\DesignPattern\Singleton;
-use ByJG\RestServer\Whoops\PlainResponseHandler;
+use ByJG\RestServer\Whoops\PlainResponseErrorHandler;
 use Whoops\Handler\Handler;
 use Whoops\Run;
 
@@ -27,7 +27,7 @@ class ErrorHandler
     protected function __construct()
     {
         $this->whoops = new Run();
-        $this->setHandler(new PlainResponseHandler());
+        $this->setHandler(new PlainResponseErrorHandler());
     }
 
     /**

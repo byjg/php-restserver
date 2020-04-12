@@ -14,7 +14,7 @@ use Whoops\Handler\Handler;
  * response. Additionally can also return exception
  * frames for consumption by an API.
  */
-class PlainResponseHandler extends Handler
+class PlainResponseErrorHandler extends Handler
 {
 
     use WhoopsDebugTrait;

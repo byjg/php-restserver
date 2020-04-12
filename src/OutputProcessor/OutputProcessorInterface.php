@@ -5,7 +5,7 @@
  * and open the template in the editor.
  */
 
-namespace ByJG\RestServer\HandleOutput;
+namespace ByJG\RestServer\OutputProcessor;
 
 use ByJG\RestServer\HttpResponse;
 use ByJG\Serializer\Formatter\FormatterInterface;
@@ -15,7 +15,7 @@ use Whoops\Handler\Handler;
  *
  * @author jg
  */
-interface HandleOutputInterface
+interface OutputProcessorInterface
 {
 
     /**

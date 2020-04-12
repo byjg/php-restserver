@@ -14,7 +14,7 @@ $restServer = new \ByJG\RestServer\ServerRequestHandler();
 $restServer->addRoute(new \ByJG\RestServer\RoutePattern(
     'GET',
     '/test',
-    \ByJG\RestServer\HandleOutput\JsonHandler::class,
+    \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class,
     'someMethod',
     \My\ClassName::class
 ));
@@ -22,7 +22,7 @@ $restServer->addRoute(new \ByJG\RestServer\RoutePattern(
 $restServer->addRoute(new \ByJG\RestServer\RoutePattern(
     'GET',
     '/testclosure',
-    \ByJG\RestServer\HandleOutput\JsonHandler::class,
+    \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class,
     function ($response, $request) {
         $response->write('OK');
     }

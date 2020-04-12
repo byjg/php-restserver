@@ -1,11 +1,11 @@
 <?php
 
-namespace ByJG\RestServer\HandleOutput;
+namespace ByJG\RestServer\OutputProcessor;
 
 use ByJG\Serializer\Formatter\XmlFormatter;
 use Whoops\Handler\XmlResponseHandler;
 
-class XmlHandler extends BaseHandler
+class XmlOutputProcessor extends BaseOutputProcessor
 {
     public function __construct()
     {
