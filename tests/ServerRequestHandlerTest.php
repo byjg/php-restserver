@@ -28,7 +28,7 @@ class ServerRequestHandlerTest extends TestCase
     public function setUp()
     {
         $this->object = new ServerRequestHandler();
-        $this->object->setDefaultHandler(new AssertOutputProcessor());
+        $this->object->setDefaultOutputProcessor(new AssertOutputProcessor());
 
         $this->object->addRoute(
             RoutePattern::get(

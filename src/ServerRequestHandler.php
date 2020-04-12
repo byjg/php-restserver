@@ -30,18 +30,16 @@ class ServerRequestHandler
 
     protected $routes = null;
 
-    protected $defaultHandler = null;
+    protected $defaultOutputProcessor = null;
 
-    protected $mimeTypeHandler = [
+    protected $mimeTypeOutputProcessor = [
         "text/xml" => XmlOutputProcessor::class,
         "application/xml" => XmlOutputProcessor::class,
         "text/html" => HtmlOutputProcessor::class,
         "application/json" => JsonOutputProcessor::class
     ];
 
-    protected $pathHandler = [
-
-    ];
+    protected $pathOutputProcessor = [];
 
     public function getRoutes()
     {
@@ -72,20 +70,20 @@ class ServerRequestHandler
     /**
      * @return OutputProcessorInterface
      */
-    public function getDefaultHandler()
+    public function getDefaultOutputProcessor()
     {
-        if (empty($this->defaultHandler)) {
-            $this->defaultHandler = new JsonOutputProcessor();
+        if (empty($this->defaultOutputProcessor)) {
+            $this->defaultOutputProcessor = new JsonOutputProcessor();
         }
-        return $this->defaultHandler;
+        return $this->defaultOutputProcessor;
     }
 
     /**
-     * @param OutputProcessorInterface $defaultHandler
+     * @param OutputProcessorInterface $defaultOutputProcessor
      */
-    public function setDefaultHandler(OutputProcessorInterface $defaultHandler)
+    public function setDefaultOutputProcessor(OutputProcessorInterface $defaultOutputProcessor)
     {
-        $this->defaultHandler = $defaultHandler;
+        $this->defaultOutputProcessor = $defaultOutputProcessor;
     }
 
     /**
@@ -124,8 +122,8 @@ class ServerRequestHandler
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 
         // Default Handler for errors
-        $this->getDefaultHandler()->writeHeader();
-        ErrorHandler::getInstance()->setHandler($this->getDefaultHandler()->getErrorHandler());
+        $this->getDefaultOutputProcessor()->writeHeader();
+        ErrorHandler::getInstance()->setHandler($this->getDefaultOutputProcessor()->getErrorHandler());
 
         // Processing
         switch ($routeInfo[0]) {
@@ -143,7 +141,7 @@ class ServerRequestHandler
                 $handlerRequest = $routeInfo[1];
 
                 // Execute the request
-                $handler = !empty($handlerRequest['handler']) ? $handlerRequest['handler'] : $this->getDefaultHandler();
+                $handler = !empty($handlerRequest['handler']) ? $handlerRequest['handler'] : $this->getDefaultOutputProcessor();
                 $this->executeRequest(
                     new $handler(),
                     $handlerRequest['class'],
@@ -352,15 +350,15 @@ class ServerRequestHandler
         $this->setRoutes($routePattern);
     }
 
-    public function setMimeTypeHandler($mimetype, $handler)
+    public function setMimeTypeOutputProcessor($mimetype, $handler)
     {
-        $this->mimeTypeHandler[$mimetype] = $handler;
+        $this->mimeTypeOutputProcessor[$mimetype] = $handler;
     }
 
-    public function setPathHandler($method, $path, $handler)
+    public function setPathOutputProcessor($method, $path, $handler)
     {
         $method = strtoupper($method);
-        $this->pathHandler["$method::$path"] = $handler;
+        $this->pathOutputProcessor["$method::$path"] = $handler;
     }
 
     /**
@@ -370,11 +368,11 @@ class ServerRequestHandler
      * @return string
      * @throws OperationIdInvalidException
      */
-    public function getMethodHandler($method, $path, $properties)
+    public function getMethodOutputProcessor($method, $path, $properties)
     {
         $method = strtoupper($method);
-        if (isset($this->pathHandler["$method::$path"])) {
-            return $this->pathHandler["$method::$path"];
+        if (isset($this->pathOutputProcessor["$method::$path"])) {
+            return $this->pathOutputProcessor["$method::$path"];
         }
 
         $produces = null;
@@ -386,15 +384,15 @@ class ServerRequestHandler
         }
 
         if (empty($produces)) {
-            return get_class($this->getDefaultHandler());
+            return get_class($this->getDefaultOutputProcessor());
         }
 
         $produces = $produces[0];
 
-        if (!isset($this->mimeTypeHandler[$produces])) {
+        if (!isset($this->mimeTypeOutputProcessor[$produces])) {
             throw new OperationIdInvalidException("There is no handler for $produces");
         }
 
-        return $this->mimeTypeHandler[$produces];
+        return $this->mimeTypeOutputProcessor[$produces];
     }
 }

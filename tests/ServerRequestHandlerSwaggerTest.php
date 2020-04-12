@@ -37,7 +37,7 @@ class ServerRequestHandlerSwaggerTest extends TestCase
      */
     public function testGenerateRoutesSwagger()
     {
-        $this->object->setPathHandler('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class);
+        $this->object->setPathOutputProcessor('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class);
         $this->object->setRoutesSwagger(__DIR__ . '/swagger-example.json');
 
         $this->assert();
@@ -51,8 +51,8 @@ class ServerRequestHandlerSwaggerTest extends TestCase
      */
     public function testGenerateRoutesOpenApi()
     {
-        $this->object->setPathHandler('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class);
-        $this->object->setDefaultHandler(new XmlOutputProcessor());
+        $this->object->setPathOutputProcessor('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class);
+        $this->object->setDefaultOutputProcessor(new XmlOutputProcessor());
         $this->object->setRoutesSwagger(__DIR__ . '/openapi-example.json');
 
         $this->assert();

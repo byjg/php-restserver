@@ -54,7 +54,7 @@ class SwaggerWrapper
         $routes = [];
         foreach ($pathList as $path) {
             foreach ($this->schema['paths'][$path] as $method => $properties) {
-                $handler = $this->handler->getMethodHandler($method, $basePath . $path, $properties);
+                $handler = $this->handler->getMethodOutputProcessor($method, $basePath . $path, $properties);
                 if (!isset($properties['operationId'])) {
                     throw new OperationIdInvalidException('OperationId was not found');
                 }

@@ -167,14 +167,14 @@ As the Swagger process is fully automated, you can define the handler by Mime Ty
 
 ```php
 <?php
-$restServer->setMimeTypeHandler("application/json", \ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor::class);
+$restServer->setMimeTypeOutputProcessor("application/json", \ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor::class);
 ```
 
 *Route*
 
 ```php
 <?php
-$restServer->setPathHandler("GET", "/pet/{petId}", \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class);
+$restServer->setPathOutputProcessor("GET", "/pet/{petId}", \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class);
 ```
 
 # 2. Processing the Request and Response
