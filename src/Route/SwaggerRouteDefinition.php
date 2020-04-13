@@ -9,7 +9,7 @@ use ByJG\RestServer\Exception\SchemaInvalidException;
 use ByJG\RestServer\Exception\SchemaNotFoundException;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
-use ByJG\RestServer\ServerRequestHandler;
+use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\SwaggerWrapper;
 use ByJG\Util\Uri;
 use Psr\SimpleCache\CacheInterface;

@@ -24,7 +24,7 @@ use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use function FastRoute\simpleDispatcher;
 
-class ServerRequestHandler implements RequestHandler
+class HttpRequestHandler implements RequestHandler
 {
     const OK = "OK";
     const METHOD_NOT_ALLOWED = "NOT_ALLOWED";

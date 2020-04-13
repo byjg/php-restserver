@@ -37,7 +37,7 @@ The are several handlers implemented and you can implement your own.
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$restServer = new \ByJG\RestServer\ServerRequestHandler();
+$restServer = new \ByJG\RestServer\HttpRequestHandler();
 
 $restServer->addRoute(
     \ByJG\RestServer\RoutePattern::get(
@@ -57,7 +57,7 @@ $restServer->handle();
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$restServer = new \ByJG\RestServer\ServerRequestHandler();
+$restServer = new \ByJG\RestServer\HttpRequestHandler();
 
 $restServer->addRoute(
     \ByJG\RestServer\RoutePattern::get(
@@ -139,7 +139,7 @@ and set automatic routes:
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$restServer = new \ByJG\RestServer\ServerRequestHandler();
+$restServer = new \ByJG\RestServer\HttpRequestHandler();
 
 $restServer->setRoutesSwagger(__DIR__ . '/swagger.json');
 
@@ -152,7 +152,7 @@ It is possible to cache the route by adding any PSR-16 instance on the second pa
 
 ```php
 <?php
-$restServer = new \ByJG\RestServer\ServerRequestHandler();
+$restServer = new \ByJG\RestServer\HttpRequestHandler();
 $restServer->setRoutesSwagger(
     __DIR__ . '/swagger.json',
     new \ByJG\Cache\Psr16\FileSystemCacheEngine()
@@ -286,7 +286,7 @@ You can choose another Handlers. See below for a list of Available Response Hand
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$restServer = new \ByJG\RestServer\ServerRequestHandler();
+$restServer = new \ByJG\RestServer\HttpRequestHandler();
 
 $restServer->addRoute(
     \ByJG\RestServer\RoutePattern::get(

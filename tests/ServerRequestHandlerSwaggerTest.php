@@ -8,20 +8,20 @@ use ByJG\RestServer\Exception\SchemaNotFoundException;
 use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
 use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
 use ByJG\RestServer\RoutePattern;
-use ByJG\RestServer\ServerRequestHandler;
+use ByJG\RestServer\HttpRequestHandler;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\InvalidArgumentException;
 
 class ServerRequestHandlerSwaggerTest extends TestCase
 {
     /**
-     * @var ServerRequestHandler
+     * @var HttpRequestHandler
      */
     protected $object;
 
     public function setUp()
     {
-        $this->object = new ServerRequestHandler();
+        $this->object = new HttpRequestHandler();
     }
 
     public function tearDown()

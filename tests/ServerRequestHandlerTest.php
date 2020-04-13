@@ -6,7 +6,7 @@ use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\RoutePattern;
-use ByJG\RestServer\ServerRequestHandler;
+use ByJG\RestServer\HttpRequestHandler;
 use PHPUnit\Framework\TestCase;
 
 require __DIR__ . '/AssertOutputProcessor.php';
@@ -17,7 +17,7 @@ define("RESTSERVER_TEST", "RESTSERVER_TEST");
 class ServerRequestHandlerTest extends TestCase
 {
     /**
-     * @var ServerRequestHandler
+     * @var HttpRequestHandler
      */
     protected $object;
 
@@ -27,7 +27,7 @@ class ServerRequestHandlerTest extends TestCase
 
     public function setUp()
     {
-        $this->object = new ServerRequestHandler();
+        $this->object = new HttpRequestHandler();
         $this->object->setDefaultOutputProcessor(new AssertOutputProcessor());
 
         $this->object->addRoute(

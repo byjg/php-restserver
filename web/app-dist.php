@@ -37,7 +37,7 @@ $routeDefintion->addRoute(\ByJG\RestServer\Route\RoutePattern::get(
 ));
 
 // Handle Request
-$restServer = new \ByJG\RestServer\ServerRequestHandler();
+$restServer = new \ByJG\RestServer\HttpRequestHandler();
 $restServer->handle($routeDefintion);
 
 /**
