@@ -2,6 +2,8 @@
 
 namespace My;
 
+use ByJG\RestServer\Route\RouteDefinition;
+
 /**
  * Basic Handler Object
  *
@@ -9,26 +11,34 @@ namespace My;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$restServer = new \ByJG\RestServer\ServerRequestHandler();
+// Defining Routes
+$routeDefintion = new RouteDefinition();
 
-$restServer->addRoute(new \ByJG\RestServer\RoutePattern(
-    'GET',
-    '/test',
+$routeDefintion->addRoute(\ByJG\RestServer\Route\RoutePattern::get(
+    "/testjson",
     \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class,
-    'someMethod',
-    \My\ClassName::class
+    \My\ClassName::class,
+    "someMethod"
 ));
 
-$restServer->addRoute(new \ByJG\RestServer\RoutePattern(
-    'GET',
-    '/testclosure',
+$routeDefintion->addRoute(\ByJG\RestServer\Route\RoutePattern::get(
+    "/testxml",
+    \ByJG\RestServer\OutputProcessor\XmlOutputProcessor::class,
+    \My\ClassName::class,
+    "someMethod"
+));
+
+$routeDefintion->addRoute(\ByJG\RestServer\Route\RoutePattern::get(
+    "/testclosure",
     \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class,
     function ($response, $request) {
         $response->write('OK');
     }
 ));
 
-$restServer->handle();
+// Handle Request
+$restServer = new \ByJG\RestServer\ServerRequestHandler();
+$restServer->handle($routeDefintion);
 
 /**
  * Class ClassName
@@ -41,6 +51,6 @@ class ClassName
 {
     public function someMethod($response, $request)
     {
-        $response->write('It worked');
+        $response->write(["name" => 'It worked']);
     }
 }

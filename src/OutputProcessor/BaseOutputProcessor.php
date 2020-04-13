@@ -2,6 +2,7 @@
 
 namespace ByJG\RestServer\OutputProcessor;
 
+use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\HttpResponse;
 
 abstract class BaseOutputProcessor implements OutputProcessorInterface
@@ -9,6 +10,29 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
     protected $buildNull = true;
     protected $onlyString = false;
     protected $header = [];
+
+    public static function getOutputProcessorClass($contentType)
+    {
+        $mimeTypeOutputProcessor = [
+            "text/xml" => XmlOutputProcessor::class,
+            "application/xml" => XmlOutputProcessor::class,
+            "text/html" => HtmlOutputProcessor::class,
+            "application/json" => JsonOutputProcessor::class
+        ];
+
+        if (!isset($mimeTypeOutputProcessor[$contentType])) {
+            throw new OperationIdInvalidException("There is no output rocessor for $contentType");
+        }
+
+        return $mimeTypeOutputProcessor[$contentType];
+    }
+
+    public static function getOutputProcessorInstance($contentType)
+    {
+        $class = self::getOutputProcessorClass($contentType);
+
+        return new $class();
+    }
 
     public function writeHeader($headerList = null)
     {

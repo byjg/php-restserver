@@ -15,6 +15,8 @@ use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
 use ByJG\RestServer\OutputProcessor\HtmlOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
+use ByJG\RestServer\Route\RouteDefinition;
+use ByJG\RestServer\Route\RoutePattern;
 use Closure;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
@@ -22,78 +24,21 @@ use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 use function FastRoute\simpleDispatcher;
 
-class ServerRequestHandler
+class ServerRequestHandler implements RequestHandler
 {
     const OK = "OK";
     const METHOD_NOT_ALLOWED = "NOT_ALLOWED";
     const NOT_FOUND = "NOT FOUND";
 
-    protected $routes = null;
-
-    protected $defaultOutputProcessor = null;
-
-    protected $mimeTypeOutputProcessor = [
-        "text/xml" => XmlOutputProcessor::class,
-        "application/xml" => XmlOutputProcessor::class,
-        "text/html" => HtmlOutputProcessor::class,
-        "application/json" => JsonOutputProcessor::class
-    ];
-
-    protected $pathOutputProcessor = [];
-
-    public function getRoutes()
-    {
-        return $this->routes;
-    }
-
     /**
-     * @param RoutePattern[] $routes
-     */
-    public function setRoutes($routes)
-    {
-        foreach ((array)$routes as $route) {
-            $this->addRoute($route);
-        }
-    }
-
-    /**
-     * @param RoutePattern $route
-     */
-    public function addRoute(RoutePattern $route)
-    {
-        if (is_null($this->routes)) {
-            $this->routes = [];
-        }
-        $this->routes[] = $route;
-    }
-
-    /**
-     * @return OutputProcessorInterface
-     */
-    public function getDefaultOutputProcessor()
-    {
-        if (empty($this->defaultOutputProcessor)) {
-            $this->defaultOutputProcessor = new JsonOutputProcessor();
-        }
-        return $this->defaultOutputProcessor;
-    }
-
-    /**
-     * @param OutputProcessorInterface $defaultOutputProcessor
-     */
-    public function setDefaultOutputProcessor(OutputProcessorInterface $defaultOutputProcessor)
-    {
-        $this->defaultOutputProcessor = $defaultOutputProcessor;
-    }
-
-    /**
+     * @param RouteDefinition $routeDefinition
      * @throws ClassNotFoundException
      * @throws Error404Exception
      * @throws Error405Exception
      * @throws Error520Exception
      * @throws InvalidClassException
      */
-    protected function process()
+    protected function process(RouteDefinition $routeDefinition)
     {
         // Initialize ErrorHandler with default error handler
         ErrorHandler::getInstance()->register();
@@ -104,26 +49,9 @@ class ServerRequestHandler
         parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $queryStr);
 
         // Generic Dispatcher for RestServer
-        $dispatcher = simpleDispatcher(function (RouteCollector $r) {
-
-            foreach ($this->getRoutes() as $route) {
-                $r->addRoute(
-                    $route->properties('method'),
-                    $route->properties('pattern'),
-                    [
-                        "handler" => $route->properties('handler'),
-                        "class" => $route->properties('class'),
-                        "function" => $route->properties('function')
-                    ]
-                );
-            }
-        });
+        $dispatcher = $routeDefinition->getDispatcher();
 
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
-
-        // Default Handler for errors
-        $this->getDefaultOutputProcessor()->writeHeader();
-        ErrorHandler::getInstance()->setHandler($this->getDefaultOutputProcessor()->getErrorHandler());
 
         // Processing
         switch ($routeInfo[0]) {
@@ -137,17 +65,21 @@ class ServerRequestHandler
                 // ... 200 Process:
                 $vars = array_merge($routeInfo[2], $queryStr);
 
-                // Instantiate the Service Handler
-                $handlerRequest = $routeInfo[1];
+                // Get the Selected Route
+                $selectedRoute = $routeInfo[1];
+
+                // Default Handler for errors
+                $outputProcessorClass = $selectedRoute["output_processor"];
+                $outputProcessor = new $outputProcessorClass();
+
+                // Class
+                $class = $selectedRoute["class"];
+
+                // Create the Request
+                $request = new HttpRequest($_GET, $_POST, $_SERVER, isset($_SESSION) ? $_SESSION : [], $_COOKIE);
 
                 // Execute the request
-                $handler = !empty($handlerRequest['handler']) ? $handlerRequest['handler'] : $this->getDefaultOutputProcessor();
-                $this->executeRequest(
-                    new $handler(),
-                    $handlerRequest['class'],
-                    $handlerRequest['function'],
-                    $vars
-                );
+                $this->executeRequest($outputProcessor, $class, $request, $vars);
 
                 break;
 
@@ -157,18 +89,18 @@ class ServerRequestHandler
     }
 
     /**
-     * @param OutputProcessorInterface $handler
-     * @param string $class
-     * @param string $function
+     * @param OutputProcessorInterface $outputProcessor
+     * @param $class
+     * @param HttpRequest $request
      * @param array $vars
      * @throws ClassNotFoundException
      * @throws InvalidClassException
      */
-    protected function executeRequest($handler, $class, $function, $vars)
+    protected function executeRequest(OutputProcessorInterface $outputProcessor, $class, HttpRequest $request, $vars)
     {
-        // Setting Default Headers and Error Handler
-        $handler->writeHeader();
-        ErrorHandler::getInstance()->setHandler($handler->getErrorHandler());
+        // Write Header info
+        $outputProcessor->writeHeader();
+        ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
 
         // Set all default values
         foreach (array_keys($vars) as $key) {
@@ -176,17 +108,18 @@ class ServerRequestHandler
         }
 
         // Create the Request and Response methods
-        $request = new HttpRequest($_GET, $_POST, $_SERVER, isset($_SESSION) ? $_SESSION : [], $_COOKIE);
         $response = new HttpResponse();
 
         // Process Closure
-        if ($function instanceof Closure) {
-            $function($response, $request);
-            echo $handler->processResponse($response);
+        if ($class instanceof Closure) {
+            $class($response, $request);
+            $outputProcessor->processResponse($response);
             return;
         }
 
         // Process Class::Method()
+        $function = $class[1];
+        $class =  $class[0];
         if (!class_exists($class)) {
             throw new ClassNotFoundException("Class '$class' defined in the route is not found");
         }
@@ -195,13 +128,13 @@ class ServerRequestHandler
             throw new InvalidClassException("There is no method '$class::$function''");
         }
         $instance->$function($response, $request);
-        $handler->processResponse($response);
+        $outputProcessor->processResponse($response);
     }
 
     /**
      * Handle the ROUTE (see web/app-dist.php)
      *
-     * @param RoutePattern[]|null $routePattern
+     * @param RouteDefinition $routeDefinition
      * @param bool $outputBuffer
      * @param bool $session
      * @return bool|void
@@ -211,7 +144,7 @@ class ServerRequestHandler
      * @throws Error520Exception
      * @throws InvalidClassException
      */
-    public function handle($routePattern = null, $outputBuffer = true, $session = true)
+    public function handle(RouteDefinition $routeDefinition, $outputBuffer = true, $session = true)
     {
         if ($outputBuffer) {
             ob_start();
@@ -220,19 +153,21 @@ class ServerRequestHandler
             session_start();
         }
 
-        /**
-         * @var ServerRequestHandler
-         */
-        $this->setRoutes($routePattern);
-
         // --------------------------------------------------------------------------
         // Check if script exists or if is itself
         // --------------------------------------------------------------------------
 
+        if (!$this->deliveryPhysicalFile()) {
+            return $this->process($routeDefinition);
+        }
+    }
+
+    protected function deliveryPhysicalFile()
+    {
         $debugBacktrace =  debug_backtrace();
         if (!empty($_SERVER['SCRIPT_FILENAME'])
             && file_exists($_SERVER['SCRIPT_FILENAME'])
-            && basename($_SERVER['SCRIPT_FILENAME']) !== basename($debugBacktrace[0]['file'])
+            && basename($_SERVER['SCRIPT_FILENAME']) !== basename($debugBacktrace[1]['file'])
         ) {
             $file = $_SERVER['SCRIPT_FILENAME'];
             if (strrchr($file, '.') === ".php") {
@@ -247,7 +182,7 @@ class ServerRequestHandler
             return true;
         }
 
-        return $this->process();
+        return false;
     }
 
     /**
@@ -257,7 +192,7 @@ class ServerRequestHandler
      * @return string
      * @throws Error404Exception
      */
-    public function mimeContentType($filename)
+    protected function mimeContentType($filename)
     {
 
         $mimeTypes = array(
@@ -324,75 +259,5 @@ class ServerRequestHandler
         } else {
             return 'application/octet-stream';
         }
-    }
-
-    /**
-     * @param $swaggerJson
-     * @param CacheInterface|null $cache
-     * @throws SchemaInvalidException
-     * @throws SchemaNotFoundException
-     * @throws OperationIdInvalidException
-     * @throws InvalidArgumentException
-     */
-    public function setRoutesSwagger($swaggerJson, CacheInterface $cache = null)
-    {
-        $swaggerWrapper = new SwaggerWrapper($swaggerJson, $this);
-
-        if (is_null($cache)) {
-            $cache = new NoCacheEngine();
-        }
-
-        $routePattern = $cache->get('SERVERHANDLERROUTES', false);
-        if ($routePattern === false) {
-            $routePattern = $swaggerWrapper->generateRoutes();
-            $cache->set('SERVERHANDLERROUTES', $routePattern);
-        }
-        $this->setRoutes($routePattern);
-    }
-
-    public function setMimeTypeOutputProcessor($mimetype, $handler)
-    {
-        $this->mimeTypeOutputProcessor[$mimetype] = $handler;
-    }
-
-    public function setPathOutputProcessor($method, $path, $handler)
-    {
-        $method = strtoupper($method);
-        $this->pathOutputProcessor["$method::$path"] = $handler;
-    }
-
-    /**
-     * @param $method
-     * @param $path
-     * @param $properties
-     * @return string
-     * @throws OperationIdInvalidException
-     */
-    public function getMethodOutputProcessor($method, $path, $properties)
-    {
-        $method = strtoupper($method);
-        if (isset($this->pathOutputProcessor["$method::$path"])) {
-            return $this->pathOutputProcessor["$method::$path"];
-        }
-
-        $produces = null;
-        if (isset($properties['produces'])) {
-            $produces = (array) $properties['produces'];
-        }
-        if (empty($produces) && isset($properties["responses"]["200"]["content"])) {
-            $produces = array_keys($properties["responses"]["200"]["content"]);
-        }
-
-        if (empty($produces)) {
-            return get_class($this->getDefaultOutputProcessor());
-        }
-
-        $produces = $produces[0];
-
-        if (!isset($this->mimeTypeOutputProcessor[$produces])) {
-            throw new OperationIdInvalidException("There is no handler for $produces");
-        }
-
-        return $this->mimeTypeOutputProcessor[$produces];
     }
 }

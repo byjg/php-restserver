@@ -1,32 +1,34 @@
 <?php
 
-namespace ByJG\RestServer;
 
+namespace ByJG\RestServer\Route;
+
+use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\Exception\SchemaInvalidException;
 use ByJG\RestServer\Exception\SchemaNotFoundException;
+use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
+use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
+use ByJG\RestServer\ServerRequestHandler;
+use ByJG\RestServer\SwaggerWrapper;
 use ByJG\Util\Uri;
+use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 
-class SwaggerWrapper
+class SwaggerRouteDefinition extends RouteDefinition
 {
     protected $schema;
 
     /**
-     * @var ServerRequestHandler
-     */
-    protected $handler;
-
-    /**
-     * SwaggerWrapper constructor.
      * @param $swaggerJson
-     * @param ServerRequestHandler $handler
+     * @param CacheInterface|null $cache
      * @throws SchemaInvalidException
      * @throws SchemaNotFoundException
+     * @throws OperationIdInvalidException
+     * @throws InvalidArgumentException
      */
-    public function __construct($swaggerJson, $handler)
+    public function __construct($swaggerJson, CacheInterface $cache = null)
     {
-        $this->handler = $handler;
-        
         if (!file_exists($swaggerJson)) {
             throw new SchemaNotFoundException("Schema '$swaggerJson' not found");
         }
@@ -35,13 +37,24 @@ class SwaggerWrapper
         if (!isset($this->schema['paths'])) {
             throw new SchemaInvalidException("Schema '$swaggerJson' is invalid");
         }
+
+        if (is_null($cache)) {
+            $cache = new NoCacheEngine();
+        }
+
+        $routePattern = $cache->get('SERVERHANDLERROUTES', false);
+        if ($routePattern === false) {
+            $routePattern = $this->generateRoutes();
+            $cache->set('SERVERHANDLERROUTES', $routePattern);
+        }
+        $this->setRoutes($routePattern);
     }
 
     /**
      * @return array
      * @throws OperationIdInvalidException
      */
-    public function generateRoutes()
+    protected function generateRoutes()
     {
         $basePath = isset($this->schema["basePath"]) ? $this->schema["basePath"] : "";
         if (empty($basePath) && isset($this->schema["servers"])) {
@@ -54,7 +67,6 @@ class SwaggerWrapper
         $routes = [];
         foreach ($pathList as $path) {
             foreach ($this->schema['paths'][$path] as $method => $properties) {
-                $handler = $this->handler->getMethodOutputProcessor($method, $basePath . $path, $properties);
                 if (!isset($properties['operationId'])) {
                     throw new OperationIdInvalidException('OperationId was not found');
                 }
@@ -66,12 +78,16 @@ class SwaggerWrapper
                     );
                 }
 
+                print_r($parts);
+
+                $outputProcessor = $this->getMethodOutputProcessor($properties);
+
                 $routes[] = new RoutePattern(
                     strtoupper($method),
                     $basePath . $path,
-                    $handler,
-                    $parts[1],
-                    $parts[0]
+                    $outputProcessor,
+                    $parts[0],
+                    $parts[1]
                 );
             }
         }
@@ -98,5 +114,31 @@ class SwaggerWrapper
         });
 
         return $pathList;
+    }
+
+    /**
+     * @param $method
+     * @param $path
+     * @param $properties
+     * @return string
+     * @throws OperationIdInvalidException
+     */
+    public function getMethodOutputProcessor($properties)
+    {
+        $produces = null;
+        if (isset($properties['produces'])) {
+            $produces = (array) $properties['produces'];
+        }
+        if (empty($produces) && isset($properties["responses"]["200"]["content"])) {
+            $produces = array_keys($properties["responses"]["200"]["content"]);
+        }
+
+        if (empty($produces)) {
+            return JsonOutputProcessor::class;
+        }
+
+        $produces = $produces[0];
+
+        return BaseOutputProcessor::getOutputProcessorClass($produces);
     }
 }
