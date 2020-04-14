@@ -21,7 +21,12 @@ interface OutputProcessorInterface
     /**
      * @return void
      */
-    public function writeHeader();
+    public function writeContentType();
+
+    /**
+     * @return string
+     */
+    public function getContentType();
 
     /**
      * @param HttpResponse $class
@@ -38,10 +43,4 @@ interface OutputProcessorInterface
      * @return FormatterInterface
      */
     public function getFormatter();
-
-    /**
-     * @param $data
-     * @return mixed
-     */
-    public function writeData($data);
 }

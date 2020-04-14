@@ -2,33 +2,25 @@
 
 namespace ByJG\RestServer;
 
-use ByJG\Cache\Psr16\NoCacheEngine;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
-use ByJG\RestServer\Exception\OperationIdInvalidException;
-use ByJG\RestServer\Exception\SchemaInvalidException;
-use ByJG\RestServer\Exception\SchemaNotFoundException;
+use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
-use ByJG\RestServer\OutputProcessor\HtmlOutputProcessor;
-use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
-use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
 use ByJG\RestServer\Route\RouteDefinition;
-use ByJG\RestServer\Route\RoutePattern;
+use ByJG\RestServer\Route\RouteDefinitionInterface;
 use Closure;
 use FastRoute\Dispatcher;
-use FastRoute\RouteCollector;
-use Psr\SimpleCache\CacheInterface;
-use Psr\SimpleCache\InvalidArgumentException;
-use function FastRoute\simpleDispatcher;
 
 class HttpRequestHandler implements RequestHandler
 {
     const OK = "OK";
     const METHOD_NOT_ALLOWED = "NOT_ALLOWED";
     const NOT_FOUND = "NOT FOUND";
+
+    protected $useErrorHandler = true;
 
     /**
      * @param RouteDefinition $routeDefinition
@@ -41,7 +33,9 @@ class HttpRequestHandler implements RequestHandler
     protected function process(RouteDefinition $routeDefinition)
     {
         // Initialize ErrorHandler with default error handler
-        ErrorHandler::getInstance()->register();
+        if ($this->useErrorHandler) {
+            ErrorHandler::getInstance()->register();
+        }
 
         // Get the URL parameters
         $httpMethod = $_SERVER['REQUEST_METHOD'];
@@ -69,8 +63,7 @@ class HttpRequestHandler implements RequestHandler
                 $selectedRoute = $routeInfo[1];
 
                 // Default Handler for errors
-                $outputProcessorClass = $selectedRoute["output_processor"];
-                $outputProcessor = new $outputProcessorClass();
+                $outputProcessor = BaseOutputProcessor::getFromClassName($selectedRoute["output_processor"]);
 
                 // Class
                 $class = $selectedRoute["class"];
@@ -99,7 +92,7 @@ class HttpRequestHandler implements RequestHandler
     protected function executeRequest(OutputProcessorInterface $outputProcessor, $class, HttpRequest $request, $vars)
     {
         // Write Header info
-        $outputProcessor->writeHeader();
+        $outputProcessor->writeContentType();
         ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
 
         // Set all default values
@@ -134,7 +127,7 @@ class HttpRequestHandler implements RequestHandler
     /**
      * Handle the ROUTE (see web/app-dist.php)
      *
-     * @param RouteDefinition $routeDefinition
+     * @param RouteDefinitionInterface $routeDefinition
      * @param bool $outputBuffer
      * @param bool $session
      * @return bool|void
@@ -144,7 +137,7 @@ class HttpRequestHandler implements RequestHandler
      * @throws Error520Exception
      * @throws InvalidClassException
      */
-    public function handle(RouteDefinition $routeDefinition, $outputBuffer = true, $session = true)
+    public function handle(RouteDefinitionInterface $routeDefinition, $outputBuffer = true, $session = false)
     {
         if ($outputBuffer) {
             ob_start();

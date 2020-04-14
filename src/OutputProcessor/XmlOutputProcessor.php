@@ -9,9 +9,7 @@ class XmlOutputProcessor extends BaseOutputProcessor
 {
     public function __construct()
     {
-        $this->header = [
-            'Content-Type: text/xml'
-        ];
+        $this->contentType = "text/xml";
     }
 
     public function getErrorHandler()

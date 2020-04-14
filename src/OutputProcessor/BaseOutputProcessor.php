@@ -10,8 +10,9 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
     protected $buildNull = true;
     protected $onlyString = false;
     protected $header = [];
+    protected $contentType = "";
 
-    public static function getOutputProcessorClass($contentType)
+    public static function getFromContentType($contentType)
     {
         $mimeTypeOutputProcessor = [
             "text/xml" => XmlOutputProcessor::class,
@@ -27,28 +28,47 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         return $mimeTypeOutputProcessor[$contentType];
     }
 
+    /**
+     * @param $className
+     * @return OutputProcessorInterface
+     */
+    public static function getFromClassName($className)
+    {
+        if ($className instanceof \Closure) {
+            return $className();
+        }
+        return new $className();
+    }
+
     public static function getOutputProcessorInstance($contentType)
     {
-        $class = self::getOutputProcessorClass($contentType);
+        $class = self::getFromContentType($contentType);
 
         return new $class();
     }
 
-    public function writeHeader($headerList = null)
+    public function writeContentType()
     {
-        if ($headerList === null) {
-            $headerList = $this->header;
-        }
+        header("Content-Type: " . $this->contentType);
+    }
+
+    public function getContentType()
+    {
+        return $this->contentType;
+    }
+
+    protected function writeHeader($headerList)
+    {
         foreach ($headerList as $header) {
             if (is_array($header)) {
-                header($header[0], $header[1]);
+                $this->header($header[0], $header[1]);
                 continue;
             }
-            header($header);
+            $this->header($header);
         }
     }
 
-    public function writeData($data)
+    protected function writeData($data)
     {
         echo $data;
     }

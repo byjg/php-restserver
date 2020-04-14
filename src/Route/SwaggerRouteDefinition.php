@@ -78,8 +78,6 @@ class SwaggerRouteDefinition extends RouteDefinition
                     );
                 }
 
-                print_r($parts);
-
                 $outputProcessor = $this->getMethodOutputProcessor($properties);
 
                 $routes[] = new RoutePattern(
@@ -139,6 +137,6 @@ class SwaggerRouteDefinition extends RouteDefinition
 
         $produces = $produces[0];
 
-        return BaseOutputProcessor::getOutputProcessorClass($produces);
+        return BaseOutputProcessor::getFromContentType($produces);
     }
 }

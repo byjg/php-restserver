@@ -9,9 +9,7 @@ class JsonOutputProcessor extends BaseOutputProcessor
 {
     public function __construct()
     {
-        $this->header = [
-            'Content-Type: application/json'
-        ];
+        $this->contentType = "application/json";
     }
 
     public function getErrorHandler()

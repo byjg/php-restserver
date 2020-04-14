@@ -9,9 +9,7 @@ class HtmlOutputProcessor extends BaseOutputProcessor
 {
     public function __construct()
     {
-        $this->header = [
-            'Content-Type: text/html'
-        ];
+        $this->contentType = "text/html";
     }
 
     public function getErrorHandler()
