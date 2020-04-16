@@ -10,7 +10,7 @@ class HttpRequest
     protected $server;
     protected $session;
     protected $cookie;
-    protected $request;
+    protected $phpRequest;
 
     /**
      *
@@ -28,7 +28,7 @@ class HttpRequest
         $this->session = $session;
         $this->cookie = $cookie;
 
-        $this->request = array_merge($get, $post, $server, $session, $cookie);
+        $this->phpRequest = array_merge($get, $post, $server, $session, $cookie);
     }
 
     /**
@@ -114,10 +114,10 @@ class HttpRequest
      */
     public function request($value)
     {
-        if (!isset($this->request[$value])) {
+        if (!isset($this->phpRequest[$value])) {
             return false;
         } else {
-            return $this->request[$value];
+            return $this->phpRequest[$value];
         }
     }
 

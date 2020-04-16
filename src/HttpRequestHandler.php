@@ -37,10 +37,13 @@ class HttpRequestHandler implements RequestHandler
             ErrorHandler::getInstance()->register();
         }
 
+        // Get HttpRequest
+        $request = $this->getHttpRequest();
+
         // Get the URL parameters
-        $httpMethod = $_SERVER['REQUEST_METHOD'];
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        parse_str(parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $queryStr);
+        $httpMethod = $request->server('REQUEST_METHOD');
+        $uri = parse_url($request->server('REQUEST_URI'), PHP_URL_PATH);
+        parse_str(parse_url($request->server('REQUEST_URI'), PHP_URL_QUERY), $queryStr);
 
         // Generic Dispatcher for RestServer
         $dispatcher = $routeDefinition->getDispatcher();
@@ -68,9 +71,6 @@ class HttpRequestHandler implements RequestHandler
                 // Class
                 $class = $selectedRoute["class"];
 
-                // Create the Request
-                $request = new HttpRequest($_GET, $_POST, $_SERVER, isset($_SESSION) ? $_SESSION : [], $_COOKIE);
-
                 // Execute the request
                 $this->executeRequest($outputProcessor, $class, $request, $vars);
 
@@ -79,6 +79,11 @@ class HttpRequestHandler implements RequestHandler
             default:
                 throw new Error520Exception('Unknown');
         }
+    }
+
+    protected function getHttpRequest()
+    {
+        return new HttpRequest($_GET, $_POST, $_SERVER, isset($_SESSION) ? $_SESSION : [], $_COOKIE);
     }
 
     /**
@@ -150,32 +155,7 @@ class HttpRequestHandler implements RequestHandler
         // Check if script exists or if is itself
         // --------------------------------------------------------------------------
 
-        if (!$this->deliveryPhysicalFile()) {
-            return $this->process($routeDefinition);
-        }
-    }
-
-    protected function deliveryPhysicalFile()
-    {
-        $debugBacktrace =  debug_backtrace();
-        if (!empty($_SERVER['SCRIPT_FILENAME'])
-            && file_exists($_SERVER['SCRIPT_FILENAME'])
-            && basename($_SERVER['SCRIPT_FILENAME']) !== basename($debugBacktrace[1]['file'])
-        ) {
-            $file = $_SERVER['SCRIPT_FILENAME'];
-            if (strrchr($file, '.') === ".php") {
-                require_once($file);
-            } else {
-                if (!defined("RESTSERVER_TEST")) {
-                    header("Content-Type: " . $this->mimeContentType($file));
-                }
-
-                echo file_get_contents($file);
-            }
-            return true;
-        }
-
-        return false;
+        return $this->process($routeDefinition);
     }
 
     /**

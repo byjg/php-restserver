@@ -63,91 +63,15 @@ class MockRequestHandler extends HttpRequestHandler
      */
     public function handle(RouteDefinitionInterface $routeDefinition, $outputBuffer = true, $session = true)
     {
-        $this->initializePhpVariables();
-
         return $this->callParentHandle($routeDefinition);
     }
 
     /**
-     * Initilize PHP variables based on the request
+     * @return HttpRequest|MockHttpRequest
      */
-    protected function initializePhpVariables()
+    protected function getHttpRequest()
     {
-        $_SESSION = null;
-
-        $_SERVER = [];
-        $_SERVER["REMOTE_ADDR"] = "127.0.0.1";
-        $_SERVER["REMOTE_PORT"] = rand(1000, 60000);
-        $_SERVER["SERVER_SOFTWARE"] = "Mock";
-        $_SERVER["SERVER_PROTOCOL"] = "HTTP/" . $this->request->getProtocolVersion();
-        $_SERVER["SERVER_NAME"] = $this->request->getUri()->getHost();
-        $_SERVER["SERVER_PORT"] = $this->request->getUri()->getPort();
-        $_SERVER["REQUEST_URI"] = $this->request->getRequestTarget();
-        $_SERVER["REQUEST_METHOD"] = $this->request->getMethod();
-        $_SERVER["SCRIPT_NAME"] = $this->request->getUri()->getPath();
-        $_SERVER["SCRIPT_FILENAME"] = __FILE__;
-        $_SERVER["PHP_SELF"] = $this->request->getUri()->getPath();
-        $_SERVER["QUERY_STRING"] = $this->request->getUri()->getQuery();
-        $_SERVER["HTTP_HOST"] = $this->request->getHeaderLine("Host");
-        $_SERVER["HTTP_USER_AGENT"] = $this->request->getHeaderLine("User-Agent");
-
-        // Headers and Cookies
-        $_COOKIE = [];
-        foreach ($this->request->getHeaders() as $key => $value) {
-            $_SERVER["HTTP_" . strtoupper($key)] = $this->request->getHeaderLine($key);
-
-            if ($key == "Cookie") {
-                parse_str(preg_replace("/;\s*/", "&", $this->request->getHeaderLine($key)), $_COOKIE);
-            }
-        }
-
-        $_REQUEST = [];
-        if (!empty($_SERVER["QUERY_STRING"])) {
-            parse_str($_SERVER["QUERY_STRING"], $_REQUEST);
-        }
-
-        $_POST = [];
-        if ($this->request->getHeaderLine("content-type") == "application/x-www-form-urlencoded") {
-            parse_str($this->request->getBody(), $_POST);
-        }
-
-        $this->initializePhpFileVar();
-    }
-
-    /**
-     * Inicialize the PHP variable $_FILE
-     */
-    protected function initializePhpFileVar()
-    {
-        $_FILES = [];
-
-        $contentType = $this->request->getHeaderLine("Content-Type");
-        if (empty($contentType) || strpos($contentType, "multipart/") === false) {
-            return;
-        }
-
-        $body = $this->request->getBody()->getContents();
-        $matches = [];
-
-        preg_match('/boundary=(.*)$/', $contentType, $matches);
-        $boundary = $matches[1];
-
-        // split content by boundary and get rid of last -- element
-        $blocks = preg_split("/-+$boundary/", $body);
-        array_pop($blocks);
-
-        // loop data blocks
-        foreach ($blocks as $id => $block) {
-            if (empty($block))
-                continue;
-
-            if (strpos($block, 'application/octet-stream') !== false) {
-                preg_match("/name=\"([^\"]*)\".*stream[\n|\r]+([^\n\r].*)?$/s", $block, $matches);
-            } else {
-                preg_match('/name=\"([^\"]*)\"[\n|\r]+([^\n\r].*)?\r$/s', $block, $matches);
-            }
-            $_FILES[$matches[1]] = $matches[2];
-        }
+        return new MockHttpRequest($this->request);
     }
 
     /**
