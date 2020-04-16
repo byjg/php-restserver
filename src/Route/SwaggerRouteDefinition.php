@@ -18,16 +18,18 @@ use Psr\SimpleCache\InvalidArgumentException;
 class SwaggerRouteDefinition extends RouteDefinition
 {
     protected $schema;
+    protected $defaultProcessor;
 
     /**
      * @param $swaggerJson
+     * @param string $defaultProcessor
      * @param CacheInterface|null $cache
+     * @throws InvalidArgumentException
+     * @throws OperationIdInvalidException
      * @throws SchemaInvalidException
      * @throws SchemaNotFoundException
-     * @throws OperationIdInvalidException
-     * @throws InvalidArgumentException
      */
-    public function __construct($swaggerJson, CacheInterface $cache = null)
+    public function __construct($swaggerJson, $defaultProcessor = JsonOutputProcessor::class, CacheInterface $cache = null)
     {
         if (!file_exists($swaggerJson)) {
             throw new SchemaNotFoundException("Schema '$swaggerJson' not found");
@@ -41,6 +43,8 @@ class SwaggerRouteDefinition extends RouteDefinition
         if (is_null($cache)) {
             $cache = new NoCacheEngine();
         }
+
+        $this->defaultProcessor = $defaultProcessor;
 
         $routePattern = $cache->get('SERVERHANDLERROUTES', false);
         if ($routePattern === false) {
@@ -132,7 +136,7 @@ class SwaggerRouteDefinition extends RouteDefinition
         }
 
         if (empty($produces)) {
-            return JsonOutputProcessor::class;
+            return $this->defaultProcessor;
         }
 
         $produces = $produces[0];

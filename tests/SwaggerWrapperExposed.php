@@ -2,9 +2,9 @@
 
 namespace Tests;
 
-use ByJG\RestServer\SwaggerWrapper;
+use ByJG\RestServer\Route\SwaggerRouteDefinition;
 
-class SwaggerWrapperExposed extends SwaggerWrapper
+class SwaggerWrapperExposed extends SwaggerRouteDefinition
 {
     public function sortPaths($pathList)
     {

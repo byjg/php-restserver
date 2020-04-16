@@ -5,30 +5,14 @@ namespace Tests;
 use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\Exception\SchemaInvalidException;
 use ByJG\RestServer\Exception\SchemaNotFoundException;
-use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
 use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
-use ByJG\RestServer\RoutePattern;
-use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Route\RoutePattern;
+use ByJG\RestServer\Route\SwaggerRouteDefinition;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\InvalidArgumentException;
 
 class ServerRequestHandlerSwaggerTest extends TestCase
 {
-    /**
-     * @var HttpRequestHandler
-     */
-    protected $object;
-
-    public function setUp()
-    {
-        $this->object = new HttpRequestHandler();
-    }
-
-    public function tearDown()
-    {
-        $this->object = null;
-    }
-
     /**
      * @throws OperationIdInvalidException
      * @throws SchemaInvalidException
@@ -37,10 +21,10 @@ class ServerRequestHandlerSwaggerTest extends TestCase
      */
     public function testGenerateRoutesSwagger()
     {
-        $this->object->setPathOutputProcessor('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class);
-        $this->object->setRoutesSwagger(__DIR__ . '/swagger-example.json');
+        //$this->object->setPathOutputProcessor('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class);
+        $object = new SwaggerRouteDefinition(__DIR__ . '/swagger-example.json');
 
-        $this->assert();
+        $this->assert($object);
     }
 
     /**
@@ -51,14 +35,13 @@ class ServerRequestHandlerSwaggerTest extends TestCase
      */
     public function testGenerateRoutesOpenApi()
     {
-        $this->object->setPathOutputProcessor('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class);
-        $this->object->setDefaultOutputProcessor(new XmlOutputProcessor());
-        $this->object->setRoutesSwagger(__DIR__ . '/openapi-example.json');
+        //$this->object->setPathOutputProcessor('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class);
+        $object = new SwaggerRouteDefinition(__DIR__ . '/openapi-example.json', XmlOutputProcessor::class);
 
-        $this->assert();
+        $this->assert($object);
     }
 
-    protected function assert()
+    protected function assert(SwaggerRouteDefinition $object)
     {
         $this->assertEquals(
             [
@@ -66,144 +49,144 @@ class ServerRequestHandlerSwaggerTest extends TestCase
                     "GET",
                     "/v2/pet/findByStatus",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "findPetsByStatus",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "findPetsByStatus"
                 ),
                 new RoutePattern(
                     "GET",
                     "/v2/pet/findByTags",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "findPetsByTags",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "findPetsByTags"
                 ),
                 new RoutePattern(
                     "POST",
                     "/v2/pet",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "addPet",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "addPet"
                 ),
                 new RoutePattern(
                     "PUT",
                     "/v2/pet",
                     "ByJG\RestServer\OutputProcessor\JsonOutputProcessor",
-                    "updatePet",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "updatePet"
                 ),
                 new RoutePattern(
                     "GET",
                     "/v2/store/inventory",
                     "ByJG\RestServer\OutputProcessor\JsonOutputProcessor",
-                    "getInventory",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "getInventory"
                 ),
                 new RoutePattern(
                     "POST",
                     "/v2/store/order",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "placeOrder",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "placeOrder"
                 ),
                 new RoutePattern(
                     "POST",
                     "/v2/user/createWithArray",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "createUsersWithArrayInput",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "createUsersWithArrayInput"
                 ),
                 new RoutePattern(
                     "POST",
                     "/v2/user/createWithList",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "createUsersWithListInput",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "createUsersWithListInput"
                 ),
                 new RoutePattern(
                     "GET",
                     "/v2/user/login",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "loginUser",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "loginUser"
                 ),
                 new RoutePattern(
                     "GET",
                     "/v2/user/logout",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "logoutUser",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "logoutUser"
                 ),
                 new RoutePattern(
                     "POST",
                     "/v2/user",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "createUser",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "createUser"
                 ),
                 new RoutePattern(
                     "POST",
                     "/v2/pet/{petId}/uploadImage",
                     "ByJG\RestServer\OutputProcessor\JsonOutputProcessor",
-                    "uploadFile",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "uploadFile"
                 ),
                 new RoutePattern(
                     "GET",
                     "/v2/pet/{petId}",
                     "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "getPetById",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "getPetById"
                 ),
                 new RoutePattern(
                     "POST",
                     "/v2/pet/{petId}",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "updatePetWithForm",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "updatePetWithForm"
                 ),
                 new RoutePattern(
                     "DELETE",
                     "/v2/pet/{petId}",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "deletePet",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "deletePet"
                 ),
                 new RoutePattern(
                     "GET",
                     "/v2/store/order/{orderId}",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "getOrderById",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "getOrderById"
                 ),
                 new RoutePattern(
                     "DELETE",
                     "/v2/store/order/{orderId}",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "deleteOrder",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "deleteOrder"
                 ),
                 new RoutePattern(
                     "GET",
                     "/v2/user/{username}",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "getUserByName",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "getUserByName"
                 ),
                 new RoutePattern(
                     "PUT",
                     "/v2/user/{username}",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "updateUser",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "updateUser"
                 ),
                 new RoutePattern(
                     "DELETE",
                     "/v2/user/{username}",
                     "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "deleteUser",
-                    "PetStore\Pet"
+                    "PetStore\Pet",
+                    "deleteUser"
                 ),
             ],
-            $this->object->getRoutes()
+            $object->getRoutes()
         );
     }
 }
