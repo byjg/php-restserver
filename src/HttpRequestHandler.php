@@ -70,9 +70,10 @@ class HttpRequestHandler implements RequestHandler
 
                 // Class
                 $class = $selectedRoute["class"];
+                $request->appendVars($vars);
 
                 // Execute the request
-                $this->executeRequest($outputProcessor, $class, $request, $vars);
+                $this->executeRequest($outputProcessor, $class, $request);
 
                 break;
 
@@ -90,20 +91,14 @@ class HttpRequestHandler implements RequestHandler
      * @param OutputProcessorInterface $outputProcessor
      * @param $class
      * @param HttpRequest $request
-     * @param array $vars
      * @throws ClassNotFoundException
      * @throws InvalidClassException
      */
-    protected function executeRequest(OutputProcessorInterface $outputProcessor, $class, HttpRequest $request, $vars)
+    protected function executeRequest(OutputProcessorInterface $outputProcessor, $class, HttpRequest $request)
     {
         // Write Header info
         $outputProcessor->writeContentType();
         ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
-
-        // Set all default values
-        foreach (array_keys($vars) as $key) {
-            $_REQUEST[$key] = $_GET[$key] = $vars[$key];
-        }
 
         // Create the Request and Response methods
         $response = new HttpResponse();
@@ -155,7 +150,34 @@ class HttpRequestHandler implements RequestHandler
         // Check if script exists or if is itself
         // --------------------------------------------------------------------------
 
-        return $this->process($routeDefinition);
+        if (!$this->deliveryPhysicalFile()) {
+            return $this->process($routeDefinition);
+        }
+
+        return true;
+    }
+
+    protected function deliveryPhysicalFile()
+    {
+        $debugBacktrace =  debug_backtrace();
+        if (!empty($_SERVER['SCRIPT_FILENAME'])
+            && file_exists($_SERVER['SCRIPT_FILENAME'])
+            && basename($_SERVER['SCRIPT_FILENAME']) !== basename($debugBacktrace[1]['file'])
+        ) {
+            $file = $_SERVER['SCRIPT_FILENAME'];
+            if (strrchr($file, '.') === ".php") {
+                require_once($file);
+            } else {
+                if (!defined("RESTSERVER_TEST")) {
+                    header("Content-Type: " . $this->mimeContentType($file));
+                }
+
+                echo file_get_contents($file);
+            }
+            return true;
+        }
+
+        return false;
     }
 
     /**

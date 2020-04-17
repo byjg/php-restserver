@@ -24,4 +24,9 @@ class AssertOutputProcessor extends JsonOutputProcessor
         // Disable the output for test
         return;
     }
+
+    public function writeContentType()
+    {
+        // Do nothing
+    }
 }
