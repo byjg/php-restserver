@@ -5,6 +5,7 @@ namespace Tests;
 use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\Exception\SchemaInvalidException;
 use ByJG\RestServer\Exception\SchemaNotFoundException;
+use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
 use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
 use ByJG\RestServer\Route\RoutePattern;
 use ByJG\RestServer\Route\SwaggerRouteDefinition;
@@ -21,8 +22,8 @@ class ServerRequestHandlerSwaggerTest extends TestCase
      */
     public function testGenerateRoutesSwagger()
     {
-        //$this->object->setPathOutputProcessor('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class);
         $object = new SwaggerRouteDefinition(__DIR__ . '/swagger-example.json');
+        $object->withOutputProcessorFor('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class);
 
         $this->assert($object);
     }
@@ -35,8 +36,8 @@ class ServerRequestHandlerSwaggerTest extends TestCase
      */
     public function testGenerateRoutesOpenApi()
     {
-        //$this->object->setPathOutputProcessor('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class);
         $object = new SwaggerRouteDefinition(__DIR__ . '/openapi-example.json', XmlOutputProcessor::class);
+        $object->withOutputProcessorFor('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class);
 
         $this->assert($object);
     }

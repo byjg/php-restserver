@@ -9,7 +9,6 @@ use ByJG\RestServer\Exception\SchemaInvalidException;
 use ByJG\RestServer\Exception\SchemaNotFoundException;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
-use ByJG\RestServer\SwaggerWrapper;
 use ByJG\Util\Uri;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -19,6 +18,7 @@ class SwaggerRouteDefinition extends RouteDefinition
     protected $cache;
     protected $schema;
     protected $defaultProcessor;
+    protected $overrideOutputProcessor = [];
 
     /**
      * @param $swaggerJson
@@ -45,6 +45,18 @@ class SwaggerRouteDefinition extends RouteDefinition
         }
 
         $this->defaultProcessor = $defaultProcessor;
+    }
+
+    /**
+     * @param $method
+     * @param $path
+     * @param string $processor
+     * @return $this
+     */
+    public function withOutputProcessorFor($method, $path, $processor)
+    {
+        $this->overrideOutputProcessor[strtoupper($method) . " " . $path] = $processor;
+        return $this;
     }
 
     public function getRoutes()
@@ -89,7 +101,7 @@ class SwaggerRouteDefinition extends RouteDefinition
                     );
                 }
 
-                $outputProcessor = $this->getMethodOutputProcessor($properties);
+                $outputProcessor = $this->getMethodOutputProcessor($method, $basePath. $path, $properties);
 
                 $routes[] = new RoutePattern(
                     strtoupper($method),
@@ -132,8 +144,13 @@ class SwaggerRouteDefinition extends RouteDefinition
      * @return string
      * @throws OperationIdInvalidException
      */
-    protected function getMethodOutputProcessor($properties)
+    protected function getMethodOutputProcessor($method, $path, $properties)
     {
+        $key = strtoupper($method) . " " . $path;
+        if (isset($this->overrideOutputProcessor[$key])) {
+            return $this->overrideOutputProcessor[$key];
+        }
+
         $produces = null;
         if (isset($properties['produces'])) {
             $produces = (array) $properties['produces'];
