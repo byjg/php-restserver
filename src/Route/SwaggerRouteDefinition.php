@@ -9,7 +9,6 @@ use ByJG\RestServer\Exception\SchemaInvalidException;
 use ByJG\RestServer\Exception\SchemaNotFoundException;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
-use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\SwaggerWrapper;
 use ByJG\Util\Uri;
 use Psr\SimpleCache\CacheInterface;
@@ -17,6 +16,7 @@ use Psr\SimpleCache\InvalidArgumentException;
 
 class SwaggerRouteDefinition extends RouteDefinition
 {
+    protected $cache;
     protected $schema;
     protected $defaultProcessor;
 
@@ -40,18 +40,25 @@ class SwaggerRouteDefinition extends RouteDefinition
             throw new SchemaInvalidException("Schema '$swaggerJson' is invalid");
         }
 
-        if (is_null($cache)) {
-            $cache = new NoCacheEngine();
+        if (is_null($this->cache)) {
+            $this->cache = new NoCacheEngine();
         }
 
         $this->defaultProcessor = $defaultProcessor;
+    }
 
-        $routePattern = $cache->get('SERVERHANDLERROUTES', false);
-        if ($routePattern === false) {
-            $routePattern = $this->generateRoutes();
-            $cache->set('SERVERHANDLERROUTES', $routePattern);
+    public function getRoutes()
+    {
+        if (empty($this->routes)) {
+            $routePattern = $this->cache->get('SERVERHANDLERROUTES', false);
+            if ($routePattern === false) {
+                $routePattern = $this->generateRoutes();
+                $this->cache->set('SERVERHANDLERROUTES', $routePattern);
+            }
+            $this->setRoutes($routePattern);
         }
-        $this->setRoutes($routePattern);
+
+        return parent::getRoutes();
     }
 
     /**
@@ -125,7 +132,7 @@ class SwaggerRouteDefinition extends RouteDefinition
      * @return string
      * @throws OperationIdInvalidException
      */
-    public function getMethodOutputProcessor($properties)
+    protected function getMethodOutputProcessor($properties)
     {
         $produces = null;
         if (isset($properties['produces'])) {

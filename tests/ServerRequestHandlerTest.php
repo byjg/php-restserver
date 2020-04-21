@@ -91,7 +91,7 @@ class ServerRequestHandlerTest extends TestCase
     {
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/test";
-        $_SERVER['SCRIPT_FILENAME'] = null;
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
         $this->object->handle($this->definition, false, false);
         $this->assertTrue($this->reach);
@@ -108,7 +108,7 @@ class ServerRequestHandlerTest extends TestCase
     {
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/test/45";
-        $_SERVER['SCRIPT_FILENAME'] = null;
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
         $this->object->handle($this->definition, false, false);
         $this->assertEquals(45, $this->reach);
@@ -126,7 +126,7 @@ class ServerRequestHandlerTest extends TestCase
     {
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_SERVER['REQUEST_URI'] = "http://localhost/test";
-        $_SERVER['SCRIPT_FILENAME'] = null;
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
         $this->object->handle($this->definition, false, false);
     }
@@ -143,7 +143,7 @@ class ServerRequestHandlerTest extends TestCase
     {
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/doesnotexists";
-        $_SERVER['SCRIPT_FILENAME'] = null;
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
         $this->object->handle($this->definition, false, false);
     }
@@ -160,7 +160,7 @@ class ServerRequestHandlerTest extends TestCase
     {
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/error";
-        $_SERVER['SCRIPT_FILENAME'] = null;
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
         $this->object->handle($this->definition, false, false);
     }
@@ -179,6 +179,7 @@ class ServerRequestHandlerTest extends TestCase
         $_SERVER['SCRIPT_FILENAME'] = __DIR__ . "/mimefiles/test.json";
 
         $this->assertTrue($this->object->handle($this->definition, false, false));
+        $this->assertTrue($this->object->tryDeliveryPhysicalFile());
     }
 
     /**
@@ -187,6 +188,7 @@ class ServerRequestHandlerTest extends TestCase
      * @throws \ByJG\RestServer\Exception\Error405Exception
      * @throws \ByJG\RestServer\Exception\Error520Exception
      * @throws \ByJG\RestServer\Exception\InvalidClassException
+     * @expectedException \ByJG\RestServer\Exception\Error404Exception
      */
     public function testHandle7()
     {

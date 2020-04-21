@@ -53,7 +53,10 @@ class HttpRequestHandler implements RequestHandler
         // Processing
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
-                throw new Error404Exception("404 Route '$uri' Not found");
+                if ($this->tryDeliveryPhysicalFile() === false) {
+                    throw new Error404Exception("404 Route '$uri' Not found");
+                }
+                return true;
 
             case Dispatcher::METHOD_NOT_ALLOWED:
                 throw new Error405Exception('405 Method Not Allowed');
@@ -149,31 +152,27 @@ class HttpRequestHandler implements RequestHandler
         // --------------------------------------------------------------------------
         // Check if script exists or if is itself
         // --------------------------------------------------------------------------
-
-        if (!$this->deliveryPhysicalFile()) {
-            return $this->process($routeDefinition);
-        }
-
-        return true;
+        return $this->process($routeDefinition);
     }
 
-    protected function deliveryPhysicalFile()
+    /**
+     * @return bool
+     * @throws Error404Exception
+     */
+    protected function tryDeliveryPhysicalFile()
     {
-        $debugBacktrace =  debug_backtrace();
-        if (!empty($_SERVER['SCRIPT_FILENAME'])
-            && file_exists($_SERVER['SCRIPT_FILENAME'])
-            && basename($_SERVER['SCRIPT_FILENAME']) !== basename($debugBacktrace[1]['file'])
-        ) {
-            $file = $_SERVER['SCRIPT_FILENAME'];
-            if (strrchr($file, '.') === ".php") {
-                require_once($file);
-            } else {
-                if (!defined("RESTSERVER_TEST")) {
-                    header("Content-Type: " . $this->mimeContentType($file));
-                }
+        $file = $_SERVER['SCRIPT_FILENAME'];
+        if (!empty($file) && file_exists($file)) {
+            $mime = $this->mimeContentType($file);
 
-                echo file_get_contents($file);
+            if ($mime === false) {
+                return false;
             }
+
+            if (!defined("RESTSERVER_TEST")) {
+                header("Content-Type: $mime");
+            }
+            echo file_get_contents($file);
             return true;
         }
 
@@ -189,12 +188,20 @@ class HttpRequestHandler implements RequestHandler
      */
     protected function mimeContentType($filename)
     {
+        $prohibitedTypes = [
+            "php",
+            "vb",
+            "cs",
+            "rb",
+            "py",
+            "py3",
+            "lua"
+        ];
 
-        $mimeTypes = array(
+        $mimeTypes = [
             'txt' => 'text/plain',
             'htm' => 'text/html',
             'html' => 'text/html',
-            'php' => 'text/html',
             'css' => 'text/css',
             'js' => 'application/javascript',
             'json' => 'application/json',
@@ -237,22 +244,24 @@ class HttpRequestHandler implements RequestHandler
             // open office
             'odt' => 'application/vnd.oasis.opendocument.text',
             'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
-        );
+        ];
 
         if (!file_exists($filename)) {
             throw new Error404Exception();
         }
 
         $ext = substr(strrchr($filename, "."), 1);
-        if (array_key_exists($ext, $mimeTypes)) {
-            return $mimeTypes[$ext];
-        } elseif (function_exists('finfo_open')) {
-            $finfo = finfo_open(FILEINFO_MIME);
-            $mimetype = finfo_file($finfo, $filename);
-            finfo_close($finfo);
-            return $mimetype;
-        } else {
-            return 'application/octet-stream';
+        if (!in_array($ext, $prohibitedTypes)) {
+            if (array_key_exists($ext, $mimeTypes)) {
+                return $mimeTypes[$ext];
+            } elseif (function_exists('finfo_open')) {
+                $finfo = finfo_open(FILEINFO_MIME);
+                $mimetype = finfo_file($finfo, $filename);
+                finfo_close($finfo);
+                return $mimetype;
+            }
         }
+
+        return false;
     }
 }
