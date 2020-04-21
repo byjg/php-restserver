@@ -13,7 +13,7 @@ use ByJG\Util\Uri;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
-class SwaggerRouteDefinition extends RouteDefinition
+class OpenApiRouteDefinition extends RouteDefinition
 {
     protected $cache;
     protected $schema;
@@ -29,7 +29,7 @@ class SwaggerRouteDefinition extends RouteDefinition
      * @throws SchemaInvalidException
      * @throws SchemaNotFoundException
      */
-    public function __construct($swaggerJson, $defaultProcessor = JsonOutputProcessor::class, CacheInterface $cache = null)
+    public function __construct($swaggerJson)
     {
         if (!file_exists($swaggerJson)) {
             throw new SchemaNotFoundException("Schema '$swaggerJson' not found");
@@ -40,11 +40,9 @@ class SwaggerRouteDefinition extends RouteDefinition
             throw new SchemaInvalidException("Schema '$swaggerJson' is invalid");
         }
 
-        if (is_null($this->cache)) {
-            $this->cache = new NoCacheEngine();
-        }
+        $this->cache = new NoCacheEngine();
 
-        $this->defaultProcessor = $defaultProcessor;
+        $this->defaultProcessor = JsonOutputProcessor::class;
     }
 
     /**
@@ -53,9 +51,27 @@ class SwaggerRouteDefinition extends RouteDefinition
      * @param string $processor
      * @return $this
      */
-    public function withOutputProcessorFor($method, $path, $processor)
+    public function withOutputProcessorForRoute($method, $path, $processor)
     {
         $this->overrideOutputProcessor[strtoupper($method) . " " . $path] = $processor;
+        return $this;
+    }
+
+    public function withOutputProcessorForMimeType($mimeType, $processor)
+    {
+        $this->overrideOutputProcessor[$mimeType] = $processor;
+        return $this;
+    }
+
+    public function withDefaultProcessor($processor)
+    {
+        $this->defaultProcessor = $processor;
+        return $this;
+    }
+
+    public function withCache(CacheInterface $cache)
+    {
+        $this->cache = $cache;
         return $this;
     }
 
@@ -164,6 +180,10 @@ class SwaggerRouteDefinition extends RouteDefinition
         }
 
         $produces = $produces[0];
+
+        if (isset($this->overrideOutputProcessor[$produces])) {
+            return $this->overrideOutputProcessor[$produces];
+        }
 
         return BaseOutputProcessor::getFromContentType($produces);
     }

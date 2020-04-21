@@ -11,10 +11,10 @@ Endpoints
 - GET /test
 - GET /testclosure
 
-## Basic Swagger
+## Basic OpeApi
 
 ```
-php -S localhost:8080 app-swagger.php 
+php -S localhost:8080 app-openapi.php 
 ```
 
 Endpoints

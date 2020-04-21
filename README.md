@@ -22,7 +22,7 @@ You can get this working in a few minutes. Just follow this steps:
 1. Create the Routes
     - Using Clousures (Easiest)
     - Using Classes
-    - Using the Swagger documentation (the most reliable and for long-term and maintable applications)
+    - Using the OpenApi 2 (former Swagger) and OpenApi 3 documentation (the most reliable and for long-term and maintable applications)
     
 2. Process the Request and output the Response
 
@@ -40,8 +40,9 @@ require_once __DIR__ . '/../vendor/autoload.php';
 $restServer = new \ByJG\RestServer\HttpRequestHandler();
 
 $restServer->addRoute(
-    \ByJG\RestServer\RoutePattern::get(
+    \ByJG\RestServer\Route\RoutePattern::get(
         '/testclosure',                   // The route
+        \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class,
         function ($response, $request) {  // The Closure for Process the request 
             $response->write('OK');
         }
@@ -60,10 +61,11 @@ require_once __DIR__ . '/../vendor/autoload.php';
 $restServer = new \ByJG\RestServer\HttpRequestHandler();
 
 $restServer->addRoute(
-    \ByJG\RestServer\RoutePattern::get(
+    \ByJG\RestServer\Route\RoutePattern::get(
         '/test',                          // The Route
-        'SomeMethod',                     // The method will process the request
-        '\\My\\ClassName'                 // The class that have the method
+        \ByJG\RestServer\OutputProcessor\XmlOutputProcessor::class,
+        '\\My\\ClassName',                 // The class that have the method
+        'SomeMethod'                     // The method will process the request
     )
 );
 
@@ -92,12 +94,13 @@ class ClassName
 }
 ```
 
-## Auto-Generate from a "swagger.json" definition
+## Auto-Generate from an OpenApi definition
 
-[Swagger](https://swagguer.io) is the world's largest framework of API developer tools for the 
-OpenAPI Specification(OAS), enabling development across 
-the entire API lifecycle, from design and documentation, 
+[OpenApi](https://www.openapis.org/) is the world's largest framework of API developer tools for the 
+OpenAPI Specification(OAS), enabling development across the entire API lifecycle, from design and documentation, 
 to test and deployment.
+
+Restserver supports both specifications 2.0 (former Swagger) and 3.0. 
 
 There are several tools for create and maintain the definition. Once you're using this concept/methodology
 you can apply here and generate automatically the routes without duplicate your work.
@@ -122,7 +125,7 @@ The "operationId" must have the `Namespace\\Class::method` like the example belo
 ```
 
 We recommend you use the [zircote/swagger-php](https://github.com/zircote/swagger-php) tool
-for auto generate your JSON file from PHPDocs comments.
+to generate automatically your JSON file from PHPDocs comments.
 Is the best way for maintain your code documented and with the Swagger definition updated. 
 Since the Zircode Swagger PHP version 2.0.14 you can
 generate the proper "operationId" for you. Just run on command line:
@@ -131,7 +134,7 @@ generate the proper "operationId" for you. Just run on command line:
 swagger --operationid
 ```
 
-After you have the proper swagger.json just call the `ServiceRequestHandler`
+After you have the proper swagger.json just call the `HttpRequestHandler`
 and set automatic routes:
 
 ```php
@@ -139,11 +142,10 @@ and set automatic routes:
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '/swagger.json');
+
 $restServer = new \ByJG\RestServer\HttpRequestHandler();
-
-$restServer->setRoutesSwagger(__DIR__ . '/swagger.json');
-
-$restServer->handle();
+$restServer->handle($routeDefinition);
 ```
 
 ## Caching the Routes
@@ -152,11 +154,8 @@ It is possible to cache the route by adding any PSR-16 instance on the second pa
 
 ```php
 <?php
-$restServer = new \ByJG\RestServer\HttpRequestHandler();
-$restServer->setRoutesSwagger(
-    __DIR__ . '/swagger.json',
-    new \ByJG\Cache\Psr16\FileSystemCacheEngine()
-);
+$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '/swagger.json'); 
+$routeDefinition->withCache(new \ByJG\Cache\Psr16\FileSystemCacheEngine());
 ```
 
 ## Customizing the Handlers
@@ -167,14 +166,16 @@ As the Swagger process is fully automated, you can define the handler by Mime Ty
 
 ```php
 <?php
-$restServer->setMimeTypeOutputProcessor("application/json", \ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor::class);
+$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '/swagger.json');
+$routeDefinition->withOutputProcessorForMimeType("application/json", \ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor::class);
 ```
 
 *Route*
 
 ```php
 <?php
-$restServer->setPathOutputProcessor("GET", "/pet/{petId}", \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class);
+$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '/swagger.json');
+$routeDefinition->withOutputProcessorForRoute("GET", "/pet/{petId}", \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class);
 ```
 
 # 2. Processing the Request and Response
@@ -225,18 +226,22 @@ For example:
 ```php
 <?php
 
+/**
+ * @param \ByJG\RestServer\HttpResponse $response
+ * @param \ByJG\RestServer\HttpRequest $request
+ */
 function ($response, $request) {
     $response->getResponseBag()->serializationRule(ResponseBag::SINGLE_OBJECT);
     
     // Output an array
     $array = ["field" => "value"];
-    $response()->write($array);
+    $response->write($array);
 
     // Output a stdClass
     $obj = new \stdClass();
     $obj->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
     $obj->OtherField = "OK";
-    $response()->write($obj);
+    $response->write($obj);
 
     // Model  
     // Can be an object :
@@ -289,11 +294,11 @@ require_once __DIR__ . '/../vendor/autoload.php';
 $restServer = new \ByJG\RestServer\HttpRequestHandler();
 
 $restServer->addRoute(
-    \ByJG\RestServer\RoutePattern::get(
+    \ByJG\RestServer\Route\RoutePattern::get(
         '/test',                          // The Route
-        'SomeMethod',                     // The method will process the request
+        \ByJG\RestServer\OutputProcessor\XmlOutputProcessor::class,          // The Handler
         '\\My\\ClassName',                // The class that have the method
-        \ByJG\RestServer\OutputProcessor\XmlOutputProcessor::class           // The Handler
+        'SomeMethod'                     // The method will process the request
     )
 );
 
@@ -325,7 +330,7 @@ Creating the pattern:
 all matches values can be obtained by
 
 ```php
-$this->getRequest()->get('variable')
+$this->getRequest()->get('variable');
 ```
 
 # Running the rest server

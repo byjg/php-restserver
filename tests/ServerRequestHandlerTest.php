@@ -12,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 require __DIR__ . '/AssertOutputProcessor.php';
 require __DIR__ . '/HttpRequestHandlerExposed.php';
-require __DIR__ . '/SwaggerWrapperExposed.php';
+require __DIR__ . '/OpenApiWrapperExposed.php';
 
 define("RESTSERVER_TEST", "RESTSERVER_TEST");
 
