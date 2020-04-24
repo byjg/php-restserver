@@ -63,6 +63,8 @@ class MockHttpRequest extends HttpRequest
         $this->server["QUERY_STRING"] = $this->psrRequest->getUri()->getQuery();
         $this->server["HTTP_HOST"] = $this->psrRequest->getHeaderLine("Host");
         $this->server["HTTP_USER_AGENT"] = $this->psrRequest->getHeaderLine("User-Agent");
+        $this->server["REQUEST_TIME"] = time();
+        $this->server["REQUEST_TIME_FLOAT"] = microtime(true);
 
         // Headers and Cookies
         $this->cookie = [];
@@ -77,7 +79,7 @@ class MockHttpRequest extends HttpRequest
         $this->phpRequest = [];
         $this->get = [];
         $this->post = [];
-        
+
         if (!empty($this->server["QUERY_STRING"])) {
             parse_str($this->server["QUERY_STRING"], $this->phpRequest);
             parse_str($this->server["QUERY_STRING"], $this->get);
@@ -88,6 +90,13 @@ class MockHttpRequest extends HttpRequest
             parse_str($this->psrRequest->getBody()->getContents(), $post);
             array_merge($this->phpRequest, $post);
         }
+
+        // Overriding PHP Values
+        $_SERVER = $this->server;
+        $_GET = $this->get;
+        $_POST = $this->post;
+        $_REQUEST = $this->phpRequest;
+        $_COOKIE = $this->cookie;
 
         $this->initializePhpFileVar();
     }
