@@ -118,9 +118,12 @@ class MockRequestHandler extends HttpRequestHandler
     protected function callParentHandle(RouteDefinitionInterface $routeDefinition)
     {
         $this->useErrorHandler = false;
-        parent::handle($this->mockRoutes($routeDefinition), true, false);
-        $content = ob_get_contents();
-        ob_end_clean();
+        try {
+            parent::handle($this->mockRoutes($routeDefinition), true, false);
+        } finally {
+            $content = ob_get_contents();
+            ob_end_clean();
+        }
 
 
         $rawResponse = explode("\r\n", $content);
