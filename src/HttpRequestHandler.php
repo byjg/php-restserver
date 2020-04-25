@@ -23,14 +23,14 @@ class HttpRequestHandler implements RequestHandler
     protected $useErrorHandler = true;
 
     /**
-     * @param RouteDefinition $routeDefinition
+     * @param RouteDefinitionInterface $routeDefinition
      * @throws ClassNotFoundException
      * @throws Error404Exception
      * @throws Error405Exception
      * @throws Error520Exception
      * @throws InvalidClassException
      */
-    protected function process(RouteDefinition $routeDefinition)
+    protected function process(RouteDefinitionInterface $routeDefinition)
     {
         // Initialize ErrorHandler with default error handler
         if ($this->useErrorHandler) {
@@ -54,12 +54,14 @@ class HttpRequestHandler implements RequestHandler
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
                 if ($this->tryDeliveryPhysicalFile() === false) {
-                    throw new Error404Exception("404 Route '$uri' Not found");
+                    $this->prepareToOutput();
+                    throw new Error404Exception("Route '$uri' not found");
                 }
                 return true;
 
             case Dispatcher::METHOD_NOT_ALLOWED:
-                throw new Error405Exception('405 Method Not Allowed');
+                $this->prepareToOutput();
+                throw new Error405Exception('Method not allowed');
 
             case Dispatcher::FOUND:
                 // ... 200 Process:
@@ -68,8 +70,8 @@ class HttpRequestHandler implements RequestHandler
                 // Get the Selected Route
                 $selectedRoute = $routeInfo[1];
 
-                // Default Handler for errors
-                $outputProcessor = BaseOutputProcessor::getFromClassName($selectedRoute["output_processor"]);
+                // Default Handler for errors and
+                $outputProcessor = $this->prepareToOutput($selectedRoute["output_processor"]);
 
                 // Class
                 $class = $selectedRoute["class"];
@@ -83,6 +85,19 @@ class HttpRequestHandler implements RequestHandler
             default:
                 throw new Error520Exception('Unknown');
         }
+    }
+
+    protected function prepareToOutput($class = null)
+    {
+        if (empty($class)) {
+            $outputProcessor = BaseOutputProcessor::getFromHttpAccept();
+        } else {
+            $outputProcessor = BaseOutputProcessor::getFromClassName($class);
+        }
+        $outputProcessor->writeContentType();
+        ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
+
+        return $outputProcessor;
     }
 
     protected function getHttpRequest()
@@ -99,10 +114,6 @@ class HttpRequestHandler implements RequestHandler
      */
     protected function executeRequest(OutputProcessorInterface $outputProcessor, $class, HttpRequest $request)
     {
-        // Write Header info
-        $outputProcessor->writeContentType();
-        ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
-
         // Create the Request and Response methods
         $response = new HttpResponse();
 

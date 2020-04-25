@@ -18,7 +18,8 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
             "text/xml" => XmlOutputProcessor::class,
             "application/xml" => XmlOutputProcessor::class,
             "text/html" => HtmlOutputProcessor::class,
-            "application/json" => JsonOutputProcessor::class
+            "application/json" => JsonOutputProcessor::class,
+            "*/*" => JsonOutputProcessor::class,
         ];
 
         if (!isset($mimeTypeOutputProcessor[$contentType])) {
@@ -26,6 +27,15 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         }
 
         return $mimeTypeOutputProcessor[$contentType];
+    }
+    
+    public static function getFromHttpAccept()
+    {
+        $accept = isset($_SERVER["HTTP_ACCEPT"]) ? $_SERVER["HTTP_ACCEPT"] : "application/json";
+        
+        $acceptList = explode(",", $accept);
+        
+        return self::getFromClassName(self::getFromContentType($acceptList[0]));
     }
 
     /**
@@ -49,6 +59,9 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
 
     public function writeContentType()
     {
+        if (defined("RESTSERVER_TEST")) {
+            return;
+        }
         header("Content-Type: " . $this->contentType);
     }
 
@@ -57,28 +70,27 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         return $this->contentType;
     }
 
-    protected function writeHeader($headerList)
+    protected function writeHeader(HttpResponse $response)
     {
-        foreach ($headerList as $header) {
+        foreach ($response->getHeaders() as $header) {
             if (is_array($header)) {
                 $this->header($header[0], $header[1]);
                 continue;
             }
             $this->header($header);
         }
+
+        http_response_code($response->getResponseCode());
     }
 
-    protected function writeData($data)
+    public function writeData($data)
     {
         echo $data;
     }
 
     public function processResponse(HttpResponse $response)
     {
-        $instanceHeaders = $response->getHeaders();
-        $this->writeHeader($instanceHeaders);
-
-        http_response_code($response->getResponseCode());
+        $this->writeHeader($response);
 
         $serialized = $response
             ->getResponseBag()

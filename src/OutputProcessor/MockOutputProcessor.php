@@ -18,15 +18,20 @@ class MockOutputProcessor extends BaseOutputProcessor
         $this->originalOutputProcessor = new $class();
     }
 
-    protected function writeHeader($headerList)
+    protected function writeHeader(HttpResponse $response)
     {
-        foreach ($headerList as $header) {
+        echo "HTTP/1.1 " . $response->getResponseCode() . "\r\n";
+        echo "Content-Type: " . $this->getContentType() . "\r\n";
+
+        foreach ($response->getHeaders() as $header) {
             if (is_array($header)) {
                 echo "${header[0]}: ${header[1]}\n";
                 continue;
             }
             echo "$header\n";
         }
+
+        echo "\r\n";
     }
 
     public function getContentType()
@@ -59,27 +64,4 @@ class MockOutputProcessor extends BaseOutputProcessor
     {
         return $this->originalOutputProcessor->getFormatter();
     }
-
-    /**
-     * @param HttpResponse $response
-     * @return string
-     */
-    public function processResponse(HttpResponse $response)
-    {
-        echo "HTTP/1.1 " . $response->getResponseCode() . "\r\n";
-        echo "Content-Type: " . $this->getContentType() . "\r\n";
-        $instanceHeaders = $response->getHeaders();
-        $this->writeHeader($instanceHeaders);
-
-        echo "\r\n";
-
-        $serialized = $response
-            ->getResponseBag()
-            ->process($this->buildNull, $this->onlyString);
-
-        $this->writeData(
-            $this->getFormatter()->process($serialized)
-        );
-    }
-
 }
