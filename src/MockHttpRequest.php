@@ -154,7 +154,7 @@ class MockHttpRequest extends HttpRequest
             }
 
             $strut = [
-                'name' => $name[1],
+                'name' => $filename[1],
                 'type' => (empty($contentType) ? "" : trim($contentType[1])),
                 'size' => strlen($content),
                 'tmp_name' => sys_get_temp_dir() . "/" . $filename[1],

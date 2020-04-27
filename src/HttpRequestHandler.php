@@ -24,6 +24,7 @@ class HttpRequestHandler implements RequestHandler
 
     /**
      * @param RouteDefinitionInterface $routeDefinition
+     * @return bool
      * @throws ClassNotFoundException
      * @throws Error404Exception
      * @throws Error405Exception

@@ -25,7 +25,7 @@ class MockHttpRequestTest extends TestCase
             [
                 "upfile" =>
                     [
-                        'name' => 'upfile',
+                        'name' => 'penguim.png',
                         'type' => 'image/png',
                         'size' => 19187,
                         'tmp_name' => '/tmp/penguim.png',
