@@ -2,6 +2,7 @@
 
 namespace ByJG\RestServer;
 
+use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\Util\Psr7\Request;
 
 class MockHttpRequest extends HttpRequest
@@ -87,8 +88,7 @@ class MockHttpRequest extends HttpRequest
 
         if ($this->psrRequest->getHeaderLine("content-type") == "application/x-www-form-urlencoded") {
             parse_str($this->psrRequest->getBody()->getContents(), $this->post);
-            parse_str($this->psrRequest->getBody()->getContents(), $post);
-            array_merge($this->phpRequest, $post);
+            $this->phpRequest = array_merge($this->phpRequest, $this->post);
         }
 
         // Overriding PHP Values
@@ -128,12 +128,41 @@ class MockHttpRequest extends HttpRequest
             if (empty($block))
                 continue;
 
-            if (strpos($block, 'application/octet-stream') !== false) {
-                preg_match("/name=\"([^\"]*)\".*stream[\n|\r]+([^\n\r].*)?$/s", $block, $matches);
-            } else {
-                preg_match('/name=\"([^\"]*)\"[\n|\r]+([^\n\r].*)?\r$/s', $block, $matches);
+            $name = [];
+            preg_match('/\bname=\"([^\"]*)\"\s*;/s', $block, $name);
+
+            $filename = [];
+            preg_match('/\bfilename=\"([^\"]*)\"\s*;/s', $block, $filename);
+
+            $contentType = [];
+            preg_match('/Content-Type\s*:([^\r\n]*)/s', $block, $contentType);
+
+            $content = [];
+            preg_match('/\r?\n\r?\n(.*)$/s', $block, $content);
+
+            if (empty($name)) {
+                throw new OperationIdInvalidException("The multipart should provide a name");
             }
-            $_FILES[$matches[1]] = $matches[2];
+
+            $content = (empty($content) ? "" : $content[1]);
+            if (empty($filename)) { // Is post...
+                $this->post[$name[1]] = $content;
+                $this->phpRequest[$name[1]] = $content;
+                $_POST[$name[1]] = $this->post[$name[1]];
+                $_REQUEST[$name[1]] = $this->post[$name[1]];
+                continue;
+            }
+
+            $strut = [
+                'name' => $name[1],
+                'type' => (empty($contentType) ? "" : trim($contentType[1])),
+                'size' => strlen($content),
+                'tmp_name' => sys_get_temp_dir() . "/" . $filename[1],
+                'error' => null
+            ];
+            file_put_contents($strut["tmp_name"], $content);
+
+            $_FILES[$name[1]] = $strut;
         }
     }
 }
