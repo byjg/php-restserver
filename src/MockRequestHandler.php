@@ -11,8 +11,11 @@ use ByJG\RestServer\OutputProcessor\MockOutputProcessor;
 use ByJG\RestServer\Route\RouteDefinition;
 use ByJG\RestServer\Route\RouteDefinitionInterface;
 use ByJG\RestServer\Route\RoutePattern;
+use ByJG\Util\Psr7\Message;
+use ByJG\Util\Psr7\MessageException;
 use ByJG\Util\Psr7\Response;
 use MintWare\Streams\MemoryStream;
+use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\RequestInterface;
 
 class MockRequestHandler extends HttpRequestHandler
@@ -41,7 +44,7 @@ class MockRequestHandler extends HttpRequestHandler
      * @throws Error405Exception
      * @throws Error520Exception
      * @throws InvalidClassException
-     * @throws \ByJG\Util\Psr7\MessageException
+     * @throws MessageException
      */
     public static function mock(RouteDefinitionInterface $routes, RequestInterface $request)
     {
@@ -59,7 +62,7 @@ class MockRequestHandler extends HttpRequestHandler
      * @throws Error405Exception
      * @throws Error520Exception
      * @throws InvalidClassException
-     * @throws \ByJG\Util\Psr7\MessageException
+     * @throws MessageException
      */
     public function handle(RouteDefinitionInterface $routeDefinition, $outputBuffer = true, $session = true)
     {
@@ -107,13 +110,13 @@ class MockRequestHandler extends HttpRequestHandler
 
     /**
      * @param RouteDefinitionInterface $routeDefinition
-     * @return Response
+     * @return Message|MessageInterface
      * @throws ClassNotFoundException
      * @throws Error404Exception
      * @throws Error405Exception
      * @throws Error520Exception
      * @throws InvalidClassException
-     * @throws \ByJG\Util\Psr7\MessageException
+     * @throws MessageException
      */
     protected function callParentHandle(RouteDefinitionInterface $routeDefinition)
     {
@@ -134,9 +137,9 @@ class MockRequestHandler extends HttpRequestHandler
 
         while (!empty($line = array_shift($rawResponse))) {
             $parts = explode(":", $line);
-            $response->withHeader($parts[0], trim($parts[1]));
+            $response = $response->withHeader($parts[0], trim($parts[1]));
         }
-        $response->withBody(new MemoryStream(implode("\r\n", $rawResponse)));
+        $response = $response->withBody(new MemoryStream(implode("\r\n", $rawResponse)));
 
         return $response;
     }

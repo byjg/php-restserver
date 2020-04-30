@@ -10,7 +10,7 @@ Auto-Generate routes from swagger.json definition.
 # Installation
 
 ```bash
-composer require "byjg/restserver=3.0.*"
+composer require "byjg/restserver=4.0.*"
 ```
 # Understanding the RestServer library
 
@@ -37,9 +37,8 @@ The are several handlers implemented and you can implement your own.
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$restServer = new \ByJG\RestServer\HttpRequestHandler();
-
-$restServer->addRoute(
+$routeDefinition = new \ByJG\RestServer\Route\RouteDefinition();
+$routeDefinition->addRoute(
     \ByJG\RestServer\Route\RoutePattern::get(
         '/testclosure',                   // The route
         \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class,
@@ -49,7 +48,8 @@ $restServer->addRoute(
     )
 );
 
-$restServer->handle();
+$restServer = new \ByJG\RestServer\HttpRequestHandler();
+$restServer->handle($routeDefinition);
 ```
 
 ## Using Classes
@@ -58,9 +58,8 @@ $restServer->handle();
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$restServer = new \ByJG\RestServer\HttpRequestHandler();
-
-$restServer->addRoute(
+$routeDefintion = new \ByJG\RestServer\Route\RouteDefinition();
+$routeDefintion->addRoute(
     \ByJG\RestServer\Route\RoutePattern::get(
         '/test',                          // The Route
         \ByJG\RestServer\OutputProcessor\XmlOutputProcessor::class,
@@ -69,7 +68,8 @@ $restServer->addRoute(
     )
 );
 
-$restServer->handle();
+$restServer = new \ByJG\RestServer\HttpRequestHandler();
+$restServer->handle($routeDefintion);
 ```
 
 the class will handle this:
@@ -167,7 +167,10 @@ As the Swagger process is fully automated, you can define the handler by Mime Ty
 ```php
 <?php
 $routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '/swagger.json');
-$routeDefinition->withOutputProcessorForMimeType("application/json", \ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor::class);
+$routeDefinition->withOutputProcessorForMimeType(
+    "application/json",
+    \ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor::class
+);
 ```
 
 *Route*
@@ -175,7 +178,11 @@ $routeDefinition->withOutputProcessorForMimeType("application/json", \ByJG\RestS
 ```php
 <?php
 $routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '/swagger.json');
-$routeDefinition->withOutputProcessorForRoute("GET", "/pet/{petId}", \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class);
+$routeDefinition->withOutputProcessorForRoute(
+    "GET",
+    "/pet/{petId}",
+    \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class
+);
 ```
 
 # 2. Processing the Request and Response
@@ -272,9 +279,9 @@ The result will be something like:
 }
 ```
 
-# The Handlers
+# The OutputProcessors
 
-The Handler will be parse the `$response->write($obj)` and output in the proper format. 
+An OutputProcessor will parse the `$response->write($obj)` and output in the proper format. 
 The available handlers are:
 
 - JsonOutputProcessor
@@ -291,9 +298,8 @@ You can choose another Handlers. See below for a list of Available Response Hand
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$restServer = new \ByJG\RestServer\HttpRequestHandler();
-
-$restServer->addRoute(
+$routeDefinition = new \ByJG\RestServer\Route\RouteDefinition();
+$routeDefinition->addRoute(
     \ByJG\RestServer\Route\RoutePattern::get(
         '/test',                          // The Route
         \ByJG\RestServer\OutputProcessor\XmlOutputProcessor::class,          // The Handler
@@ -302,7 +308,8 @@ $restServer->addRoute(
     )
 );
 
-$restServer->handle();
+$restServer = new \ByJG\RestServer\HttpRequestHandler();
+$restServer->handle($routeDefinition);
 ```
 
 
@@ -318,8 +325,8 @@ You can define route with constant and/or variable. For example:
 | /myroute/{id}          | Matches /myroute + any character combination and set to ID |
 | /myroute/{id:[0-9]+}   | Matches /myroute + any number combination and set to ID |
 
-All variables defined above will be available throught the $_GET. In the example above,
-if the route matches the "id" will available in the `$request->get('id');`
+All variables defined above will be available as a parameter. In the example above,
+if the route matches the "id" you can get using `$request->param('id');`
 
 Creating the pattern:
 
@@ -330,12 +337,12 @@ Creating the pattern:
 all matches values can be obtained by
 
 ```php
-$this->getRequest()->get('variable');
+$this->getRequest()->param('variable');
 ```
 
 # Running the rest server
 
-You need to setup your restserver to handle ALL requests to a single PHP file. Normally is "app.php" 
+You need to set up your restserver to handle ALL requests to a single PHP file. Normally is "app.php" 
 
 ## PHP Built-in server
 
