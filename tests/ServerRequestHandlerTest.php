@@ -5,21 +5,28 @@ namespace Tests;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\RoutePattern;
-use ByJG\RestServer\ServerRequestHandler;
+use ByJG\RestServer\Route\RouteDefinition;
+use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Route\RoutePattern;
 use PHPUnit\Framework\TestCase;
 
-require __DIR__ . '/AssertHandler.php';
-require __DIR__ . '/SwaggerWrapperExposed.php';
+require __DIR__ . '/AssertOutputProcessor.php';
+require __DIR__ . '/HttpRequestHandlerExposed.php';
+require __DIR__ . '/OpenApiWrapperExposed.php';
 
 define("RESTSERVER_TEST", "RESTSERVER_TEST");
 
 class ServerRequestHandlerTest extends TestCase
 {
     /**
-     * @var ServerRequestHandler
+     * @var HttpRequestHandler
      */
     protected $object;
+
+    /**
+     * @var RouteDefinition
+     */
+    protected $definition;
 
     protected $reach = false;
 
@@ -27,12 +34,14 @@ class ServerRequestHandlerTest extends TestCase
 
     public function setUp()
     {
-        $this->object = new ServerRequestHandler();
-        $this->object->setDefaultHandler(new AssertHandler());
-
-        $this->object->addRoute(
+        $this->object = new HttpRequestHandlerExposed();
+        
+        $this->definition = new RouteDefinition();
+        
+        $this->definition->addRoute(
             RoutePattern::get(
                 '/test',
+                AssertOutputProcessor::class,
                 function ($response, $request) {
                     $this->assertInstanceOf(HttpResponse::class, $response);
                     $this->assertInstanceOf(HttpRequest::class, $request);
@@ -41,24 +50,25 @@ class ServerRequestHandlerTest extends TestCase
             )
         );
 
-        $this->object->addRoute(
+        $this->definition->addRoute(
             RoutePattern::get(
                 '/test/{id}',
+                AssertOutputProcessor::class,
                 function ($response, $request) {
                     $this->assertInstanceOf(HttpResponse::class, $response);
                     $this->assertInstanceOf(HttpRequest::class, $request);
-                    $this->reach = $request->get('id');
+                    $this->reach = $request->param('id');
                 }
             )
         );
 
-        $this->object->addRoute(
+        $this->definition->addRoute(
             new RoutePattern(
                 'GET',
                 '/error',
-                AssertHandler::class,
-                'method',
-                '\\My\\Class'
+                AssertOutputProcessor::class,
+                '\\My\\Class',
+                'method'
             )
         );
     }
@@ -81,9 +91,9 @@ class ServerRequestHandlerTest extends TestCase
     {
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/test";
-        $_SERVER['SCRIPT_FILENAME'] = null;
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
-        $this->object->handle(null, false, false);
+        $this->object->handle($this->definition, false, false);
         $this->assertTrue($this->reach);
     }
 
@@ -98,9 +108,9 @@ class ServerRequestHandlerTest extends TestCase
     {
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/test/45";
-        $_SERVER['SCRIPT_FILENAME'] = null;
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
-        $this->object->handle(null, false, false);
+        $this->object->handle($this->definition, false, false);
         $this->assertEquals(45, $this->reach);
     }
 
@@ -116,9 +126,9 @@ class ServerRequestHandlerTest extends TestCase
     {
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_SERVER['REQUEST_URI'] = "http://localhost/test";
-        $_SERVER['SCRIPT_FILENAME'] = null;
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
-        $this->object->handle(null, false, false);
+        $this->object->handle($this->definition, false, false);
     }
 
     /**
@@ -133,9 +143,9 @@ class ServerRequestHandlerTest extends TestCase
     {
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/doesnotexists";
-        $_SERVER['SCRIPT_FILENAME'] = null;
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
-        $this->object->handle(null, false, false);
+        $this->object->handle($this->definition, false, false);
     }
 
     /**
@@ -150,9 +160,9 @@ class ServerRequestHandlerTest extends TestCase
     {
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/error";
-        $_SERVER['SCRIPT_FILENAME'] = null;
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
-        $this->object->handle(null, false, false);
+        $this->object->handle($this->definition, false, false);
     }
 
     /**
@@ -168,7 +178,8 @@ class ServerRequestHandlerTest extends TestCase
         $_SERVER['REQUEST_URI'] = "file://" . __DIR__ . "/mimefiles/test.json";
         $_SERVER['SCRIPT_FILENAME'] = __DIR__ . "/mimefiles/test.json";
 
-        $this->assertTrue($this->object->handle(null, false, false));
+        $this->assertTrue($this->object->handle($this->definition, false, false));
+        $this->assertTrue($this->object->tryDeliveryPhysicalFile());
     }
 
     /**
@@ -177,6 +188,7 @@ class ServerRequestHandlerTest extends TestCase
      * @throws \ByJG\RestServer\Exception\Error405Exception
      * @throws \ByJG\RestServer\Exception\Error520Exception
      * @throws \ByJG\RestServer\Exception\InvalidClassException
+     * @expectedException \ByJG\RestServer\Exception\Error404Exception
      */
     public function testHandle7()
     {
@@ -184,105 +196,9 @@ class ServerRequestHandlerTest extends TestCase
         $_SERVER['REQUEST_URI'] = "file://" . __DIR__ . "/mimefiles/test.php";
         $_SERVER['SCRIPT_FILENAME'] = __DIR__ . "/mimefiles/test.php";
 
-        $this->assertTrue($this->object->handle(null, false, false));
+        $this->assertTrue($this->object->handle($this->definition, false, false));
     }
 
-    public function testSortPaths()
-    {
-        // Expose the method
-        $testObject = new SwaggerWrapperExposed(__DIR__ . "/swagger-example.json", null);
-
-        $pathList = [
-            "/rest/accessible/recentPosts",
-            "/rest/accessible/postsWithFilter",
-            "/rest/audio/{id}",
-            "/rest/audio/all",
-            "/rest/audio",
-            "/rest/audio/upload",
-            "/rest/backgroundaudio/{id}",
-            "/rest/backgroundaudio/all",
-            "/rest/backgroundaudio",
-            "/rest/blog/{id}",
-            "/rest/blog/all",
-            "/rest/blog",
-            "/rest/dictionary/{id}",
-            "/rest/dictionary/all",
-            "/rest/dictionary",
-            "/rest/registerblog/tts",
-            "/rest/registerblog/availlang",
-            "/rest/registerblog/platforms",
-            "/rest/registerblog/sanitizewpurl",
-            "/rest/registerblog/checkplugin",
-            "/rest/registerblog/checkfeed",
-            "/rest/login",
-            "/rest/narrator/{id}",
-            "/rest/narrator/{id:unique}",
-            "/rest/narrator/all",
-            "/rest/narrator",
-            "/rest/newsletter/email",
-            "/rest/platform/{id}",
-            "/rest/platform/all",
-            "/rest/platform",
-            "/rest/post/{id}",
-            "/rest/post/all",
-            "/rest/post",
-            "/rest/post/activeaudio/{id}",
-            "/rest/audiowidget/{objectid}",
-            "/rest/audiowidget/blog",
-            "/rest/audiowidget/send",
-            "/rest/audiowidget/post/{blogId}",
-            "/rest/audiowidget/notify/{blogId}/{event}",
-            "/rest/logplayer",
-        ];
-
-        $pathResult = $testObject->sortPaths($pathList);
-
-        $this->assertEquals(
-            [
-                "/rest/accessible/postsWithFilter",
-                "/rest/accessible/recentPosts",
-                "/rest/audio/all",
-                "/rest/audio/upload",
-                "/rest/audiowidget/blog",
-                "/rest/audiowidget/send",
-                "/rest/audio",
-                "/rest/backgroundaudio/all",
-                "/rest/backgroundaudio",
-                "/rest/blog/all",
-                "/rest/blog",
-                "/rest/dictionary/all",
-                "/rest/dictionary",
-                "/rest/login",
-                "/rest/logplayer",
-                "/rest/narrator/all",
-                "/rest/narrator",
-                "/rest/newsletter/email",
-                "/rest/platform/all",
-                "/rest/platform",
-                "/rest/post/all",
-                "/rest/post",
-                "/rest/registerblog/availlang",
-                "/rest/registerblog/checkfeed",
-                "/rest/registerblog/checkplugin",
-                "/rest/registerblog/platforms",
-                "/rest/registerblog/sanitizewpurl",
-                "/rest/registerblog/tts",
-                "/rest/audio/{id}",
-                "/rest/audiowidget/notify/{blogId}/{event}",
-                "/rest/audiowidget/post/{blogId}",
-                "/rest/audiowidget/{objectid}",
-                "/rest/backgroundaudio/{id}",
-                "/rest/blog/{id}",
-                "/rest/dictionary/{id}",
-                '/rest/narrator/{id:unique}',
-                "/rest/narrator/{id}",
-                "/rest/platform/{id}",
-                "/rest/post/activeaudio/{id}",
-                "/rest/post/{id}",
-            ],
-            $pathResult
-        );
-    }
 
     public function mimeDataProvider()
     {

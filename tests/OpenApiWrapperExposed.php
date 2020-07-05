@@ -2,9 +2,9 @@
 
 namespace Tests;
 
-use ByJG\RestServer\SwaggerWrapper;
+use ByJG\RestServer\Route\OpenApiRouteDefinition;
 
-class SwaggerWrapperExposed extends SwaggerWrapper
+class OpenApiWrapperExposed extends OpenApiRouteDefinition
 {
     public function sortPaths($pathList)
     {

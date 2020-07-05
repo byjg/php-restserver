@@ -1,8 +1,8 @@
 <?php
 
-namespace ByJG\RestServer\HandleOutput;
+namespace ByJG\RestServer\OutputProcessor;
 
-class JsonCleanHandler extends JsonHandler
+class JsonCleanOutputProcessor extends JsonOutputProcessor
 {
     public function __construct()
     {

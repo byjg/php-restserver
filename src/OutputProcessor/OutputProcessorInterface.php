@@ -5,7 +5,7 @@
  * and open the template in the editor.
  */
 
-namespace ByJG\RestServer\HandleOutput;
+namespace ByJG\RestServer\OutputProcessor;
 
 use ByJG\RestServer\HttpResponse;
 use ByJG\Serializer\Formatter\FormatterInterface;
@@ -15,13 +15,18 @@ use Whoops\Handler\Handler;
  *
  * @author jg
  */
-interface HandleOutputInterface
+interface OutputProcessorInterface
 {
 
     /**
      * @return void
      */
-    public function writeHeader();
+    public function writeContentType();
+
+    /**
+     * @return string
+     */
+    public function getContentType();
 
     /**
      * @param HttpResponse $class
@@ -38,10 +43,4 @@ interface HandleOutputInterface
      * @return FormatterInterface
      */
     public function getFormatter();
-
-    /**
-     * @param $data
-     * @return mixed
-     */
-    public function writeData($data);
 }

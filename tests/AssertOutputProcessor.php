@@ -2,9 +2,9 @@
 
 namespace Tests;
 
-use ByJG\RestServer\HandleOutput\JsonHandler;
+use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 
-class AssertHandler extends JsonHandler
+class AssertOutputProcessor extends JsonOutputProcessor
 {
     /**
      * @param null $headerList
@@ -23,5 +23,10 @@ class AssertHandler extends JsonHandler
     {
         // Disable the output for test
         return;
+    }
+
+    public function writeContentType()
+    {
+        // Do nothing
     }
 }

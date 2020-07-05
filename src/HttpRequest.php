@@ -10,7 +10,8 @@ class HttpRequest
     protected $server;
     protected $session;
     protected $cookie;
-    protected $request;
+    protected $param;
+    protected $phpRequest;
 
     /**
      *
@@ -19,16 +20,18 @@ class HttpRequest
      * @param array $server
      * @param array $session
      * @param array $cookie
+     * @param array $param
      */
-    public function __construct($get, $post, $server, $session, $cookie)
+    public function __construct($get, $post, $server, $session, $cookie, $param = [])
     {
         $this->get = $get;
         $this->post = $post;
         $this->server = $server;
         $this->session = $session;
         $this->cookie = $cookie;
+        $this->param = $param;
 
-        $this->request = array_merge($get, $post, $server, $session, $cookie);
+        $this->phpRequest = array_merge($get, $post, $server, $session, $cookie);
     }
 
     /**
@@ -114,10 +117,25 @@ class HttpRequest
      */
     public function request($value)
     {
-        if (!isset($this->request[$value])) {
+        if (!isset($this->phpRequest[$value])) {
             return false;
         } else {
-            return $this->request[$value];
+            return $this->phpRequest[$value];
+        }
+    }
+
+    /**
+     * Get a value from the params found in the URL
+     *
+     * @param string $value
+     * @return string|boolean
+     */
+    public function param($value)
+    {
+        if (!isset($this->param[$value])) {
+            return false;
+        } else {
+            return $this->param[$value];
         }
     }
 
@@ -210,5 +228,10 @@ class HttpRequest
             $this->uploadedFiles = new UploadedFiles();
         }
         return $this->uploadedFiles;
+    }
+
+    public function appendVars($array)
+    {
+        $this->param = array_merge($this->param, $array);
     }
 }

@@ -2,7 +2,11 @@
 
 namespace My;
 
+use ByJG\RestServer\Exception\Error404Exception;
+use ByJG\RestServer\MockRequestHandler;
 use ByJG\RestServer\Route\RouteDefinition;
+use ByJG\Util\Psr7\Request;
+use ByJG\Util\Uri;
 
 /**
  * Basic Handler Object
@@ -33,12 +37,25 @@ $routeDefintion->addRoute(\ByJG\RestServer\Route\RoutePattern::get(
     \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class,
     function ($response, $request) {
         $response->write('OK');
+        throw new Error404Exception("Bla");
     }
 ));
 
+$request = Request::getInstance(Uri::getInstanceFromString("http://localhost/testxml"));
+
 // Handle Request
-$restServer = new \ByJG\RestServer\HttpRequestHandler();
-$restServer->handle($routeDefintion);
+$response = MockRequestHandler::mock($routeDefintion, $request);
+
+print_r($response->getStatusCode());
+echo "\n";
+print_r($response->getHeaders());
+print_r($response->getBody()->getContents());
+
+
+$request = Request::getInstance(Uri::getInstanceFromString("http://localhost/testclosure"));
+
+// Handle Request
+$response = MockRequestHandler::mock($routeDefintion, $request);
 
 /**
  * Class ClassName

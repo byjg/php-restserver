@@ -1,17 +1,15 @@
 <?php
 
-namespace ByJG\RestServer\HandleOutput;
+namespace ByJG\RestServer\OutputProcessor;
 
 use ByJG\Serializer\Formatter\PlainTextFormatter;
 use Whoops\Handler\PrettyPageHandler;
 
-class HtmlHandler extends BaseHandler
+class HtmlOutputProcessor extends BaseOutputProcessor
 {
     public function __construct()
     {
-        $this->header = [
-            'Content-Type: text/html'
-        ];
+        $this->contentType = "text/html";
     }
 
     public function getErrorHandler()
