@@ -21,7 +21,7 @@
     "nikic/fast-route": "v1.2.*",
     "filp/whoops": "2.1.*",
     "byjg/cache-engine": "4.0.*",
-    "byjg/webrequest": "2.0.*",
+    "byjg/webrequest": "^2.0.2",
     "ext-json": "*"
   },
   "suggest": {
