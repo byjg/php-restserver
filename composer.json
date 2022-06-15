@@ -1,12 +1,6 @@
 {
   "name": "byjg/restserver",
   "description": "Create RESTFull services with different and customizable output handlers (JSON, XML, Html, etc.). Auto-Generate routes from swagger.json definition.",
-  "authors": [
-    {
-      "name": "João Gilberto Magalhães",
-      "email": "joao@byjg.com.br"
-    }
-  ],
   "autoload": {
     "psr-4": {
       "ByJG\\RestServer\\": "src/"
