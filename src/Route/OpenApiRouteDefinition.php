@@ -187,4 +187,9 @@ class OpenApiRouteDefinition extends RouteDefinition
 
         return BaseOutputProcessor::getFromContentType($produces);
     }
+
+    public function getSchema()
+    {
+        return $this->schema;
+    }
 }
