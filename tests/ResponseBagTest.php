@@ -14,12 +14,12 @@ class ResponseBagTest extends TestCase
      */
     private $object;
 
-    public function setUp()
+    public function setup(): void
     {
         $this->object = new ResponseBag();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->object = null;
     }

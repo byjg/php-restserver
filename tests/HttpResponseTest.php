@@ -13,12 +13,12 @@ class HttpResponseTest extends TestCase
      */
     protected $object;
 
-    public function setUp()
+    public function setup(): void
     {
         $this->object = new HttpResponse();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->object = null;
     }

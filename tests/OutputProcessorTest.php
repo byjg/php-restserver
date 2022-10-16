@@ -20,7 +20,7 @@ class OutputProcessorTest extends TestCase
 
     protected $result;
 
-    public function setUp()
+    public function setup(): void
     {
         $this->object = [
             "name" => "teste",
@@ -33,7 +33,7 @@ class OutputProcessorTest extends TestCase
         $this->httpResponse->write($this->object);
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->object = null;
         $this->result = null;

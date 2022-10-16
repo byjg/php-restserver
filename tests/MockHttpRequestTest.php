@@ -28,7 +28,7 @@ class MockHttpRequestTest extends TestCase
                         'name' => 'penguim.png',
                         'type' => 'image/png',
                         'size' => 19187,
-                        'tmp_name' => '/tmp/penguim.png',
+                        'tmp_name' => sys_get_temp_dir() . '/penguim.png',
                         'error' => null,
                     ]
             ],

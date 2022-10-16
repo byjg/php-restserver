@@ -2,7 +2,10 @@
 
 namespace Tests;
 
+use ByJG\RestServer\Exception\ClassNotFoundException;
+use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error404Exception;
+use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Route\RouteDefinition;
@@ -32,7 +35,7 @@ class ServerRequestHandlerTest extends TestCase
 
     public $headers = null;
 
-    public function setUp()
+    public function setup(): void
     {
         $this->object = new HttpRequestHandlerExposed();
         
@@ -73,7 +76,7 @@ class ServerRequestHandlerTest extends TestCase
         );
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->object = null;
         $this->reach = false;
@@ -120,10 +123,11 @@ class ServerRequestHandlerTest extends TestCase
      * @throws \ByJG\RestServer\Exception\Error405Exception
      * @throws \ByJG\RestServer\Exception\Error520Exception
      * @throws \ByJG\RestServer\Exception\InvalidClassException
-     * @expectedException \ByJG\RestServer\Exception\Error405Exception
      */
     public function testHandle3()
     {
+        $this->expectException(Error405Exception::class);
+
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_SERVER['REQUEST_URI'] = "http://localhost/test";
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
@@ -137,10 +141,11 @@ class ServerRequestHandlerTest extends TestCase
      * @throws \ByJG\RestServer\Exception\Error405Exception
      * @throws \ByJG\RestServer\Exception\Error520Exception
      * @throws \ByJG\RestServer\Exception\InvalidClassException
-     * @expectedException \ByJG\RestServer\Exception\Error404Exception
      */
     public function testHandle4()
     {
+        $this->expectException(Error404Exception::class);
+
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/doesnotexists";
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
@@ -154,10 +159,11 @@ class ServerRequestHandlerTest extends TestCase
      * @throws \ByJG\RestServer\Exception\Error405Exception
      * @throws \ByJG\RestServer\Exception\Error520Exception
      * @throws \ByJG\RestServer\Exception\InvalidClassException
-     * @expectedException \ByJG\RestServer\Exception\ClassNotFoundException
      */
     public function testHandle5()
     {
+        $this->expectException(ClassNotFoundException::class);
+
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/error";
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
@@ -188,10 +194,11 @@ class ServerRequestHandlerTest extends TestCase
      * @throws \ByJG\RestServer\Exception\Error405Exception
      * @throws \ByJG\RestServer\Exception\Error520Exception
      * @throws \ByJG\RestServer\Exception\InvalidClassException
-     * @expectedException \ByJG\RestServer\Exception\Error404Exception
      */
     public function testHandle7()
     {
+        $this->expectException(Error404Exception::class);
+
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "file://" . __DIR__ . "/mimefiles/test.php";
         $_SERVER['SCRIPT_FILENAME'] = __DIR__ . "/mimefiles/test.php";
@@ -221,11 +228,10 @@ class ServerRequestHandlerTest extends TestCase
         $this->assertEquals($expected, $this->object->mimeContentType($entry));
     }
 
-    /**
-     * @expectedException \ByJG\RestServer\Exception\Error404Exception
-     */
     public function testMimeContentTypeNotFound()
     {
+        $this->expectException(Error404Exception::class);
+
         $this->assertEquals("", $this->object->mimeContentType("test/aaaa"));
     }
 }

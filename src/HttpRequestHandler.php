@@ -44,7 +44,11 @@ class HttpRequestHandler implements RequestHandler
         // Get the URL parameters
         $httpMethod = $request->server('REQUEST_METHOD');
         $uri = parse_url($request->server('REQUEST_URI'), PHP_URL_PATH);
-        parse_str(parse_url($request->server('REQUEST_URI'), PHP_URL_QUERY), $queryStr);
+        $query = parse_url($request->server('REQUEST_URI'), PHP_URL_QUERY);
+        $queryStr = [];
+        if (!empty($query)) {
+            parse_str($query, $queryStr);
+        }
 
         // Generic Dispatcher for RestServer
         $dispatcher = $routeDefinition->getDispatcher();

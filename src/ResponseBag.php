@@ -48,11 +48,13 @@ class ResponseBag
             $collection = $collection[0];
         }
         
-        $object = new SerializerObject($collection);
-        return $object
-            ->setOnlyString($onlyString)
-            ->setBuildNull($buildNull)
-            ->build();
+        $object = SerializerObject::instance($collection)
+            ->withOnlyString($onlyString);
+
+        if (!$buildNull) {
+            $object->withDoNotSerializeNull();
+        }
+        return $object->serialize();
     }
 
     public function getCollection()
