@@ -1,18 +1,22 @@
 # PHP Rest Server
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/byjg/restserver/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/byjg/restserver/?branch=master)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/40968662-27b2-4a31-9872-a29bdd68da2b/mini.png)](https://insight.sensiolabs.com/projects/40968662-27b2-4a31-9872-a29bdd68da2b)
-[![Build Status](https://travis-ci.com/byjg/restserver.svg?branch=master)](https://travis-ci.com/byjg/restserver)
+
+[![Build Status](https://github.com/byjg/restserver/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/restserver/actions/workflows/phpunit.yml)
+[![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
+[![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/restserver/)
+[![GitHub license](https://img.shields.io/github/license/byjg/restserver.svg)](https://opensource.byjg.com/opensource/licensing.html)
+[![GitHub release](https://img.shields.io/github/release/byjg/restserver.svg)](https://github.com/byjg/restserver/releases/)
 
 
 Create RESTFull services with different and customizable output handlers (JSON, XML, Html, etc.).
 Auto-Generate routes from swagger.json definition.
 
-# Installation
+## Installation
 
 ```bash
 composer require "byjg/restserver=4.0.*"
 ```
-# Understanding the RestServer library
+
+## Understanding the RestServer library
 
 Basically the RestServer library enables you to create a full feature RESTFul 
 application on top of the well-known [FastRoute](https://github.com/nikic/FastRoute) library.
@@ -23,15 +27,15 @@ You can get this working in a few minutes. Just follow this steps:
     - Using Clousures (Easiest)
     - Using Classes
     - Using the OpenApi 2 (former Swagger) and OpenApi 3 documentation (the most reliable and for long-term and maintable applications)
-    
+
 2. Process the Request and output the Response
 
 Each "Path" or "Route" can have your own handle for output the response. 
 The are several handlers implemented and you can implement your own.
 
-# 1. Creating the Routes
+## 1. Creating the Routes
 
-## Using Closures
+### Using Closures
 
 ```php
 <?php
@@ -52,7 +56,7 @@ $restServer = new \ByJG\RestServer\HttpRequestHandler();
 $restServer->handle($routeDefinition);
 ```
 
-## Using Classes
+### Using Classes
 
 ```php
 <?php
@@ -94,7 +98,7 @@ class ClassName
 }
 ```
 
-## Auto-Generate from an OpenApi definition
+### Auto-Generate from an OpenApi definition
 
 [OpenApi](https://www.openapis.org/) is the world's largest framework of API developer tools for the 
 OpenAPI Specification(OAS), enabling development across the entire API lifecycle, from design and documentation, 
@@ -148,7 +152,7 @@ $restServer = new \ByJG\RestServer\HttpRequestHandler();
 $restServer->handle($routeDefinition);
 ```
 
-## Caching the Routes
+### Caching the Routes
 
 It is possible to cache the route by adding any PSR-16 instance on the second parameter of the constructor:
 
@@ -158,7 +162,7 @@ $routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '
 $routeDefinition->withCache(new \ByJG\Cache\Psr16\FileSystemCacheEngine());
 ```
 
-## Customizing the Handlers
+### Customizing the Handlers
 
 As the Swagger process is fully automated, you can define the handler by Mime Type or Route:
 
@@ -185,7 +189,7 @@ $routeDefinition->withOutputProcessorForRoute(
 );
 ```
 
-# 2. Processing the Request and Response
+## 2. Processing the Request and Response
 
 You need to implement a method, function or clousure with two parameters - Response and Request - in that order. 
 
@@ -222,7 +226,7 @@ informations to the requester.
 - addHeader($header, $value): Add an header entry;
 - setResponseCode($value): Set the HTTP response code (eg. 200, 401, etc)
 
-## Output your data 
+### Output your data
 
 To output your data you *have to* use the `$response->write($object)`. 
 The write method supports you output a object, stdclass, array or string. The Handler object will
@@ -279,7 +283,7 @@ The result will be something like:
 }
 ```
 
-# The OutputProcessors
+## The OutputProcessors
 
 An OutputProcessor will parse the `$response->write($obj)` and output in the proper format. 
 The available handlers are:
@@ -289,7 +293,7 @@ The available handlers are:
 - HtmlHandler
 - JsonCleanOutputProcessor
 
-## Using Custom Response Handler
+### Using Custom Response Handler
 
 The Default Response Handler will process all "$response->write" into a JSON.
 You can choose another Handlers. See below for a list of Available Response Handlers.
@@ -312,12 +316,9 @@ $restServer = new \ByJG\RestServer\HttpRequestHandler();
 $restServer->handle($routeDefinition);
 ```
 
-
-# Defining a Route
-
+## Defining a Route
 
 You can define route with constant and/or variable. For example:
-
 
 | Pattern                | Description |
 |------------------------|---------------------------------|
@@ -340,28 +341,28 @@ all matches values can be obtained by
 $this->getRequest()->param('variable');
 ```
 
-# Running the rest server
+## Running the rest server
 
 You need to set up your restserver to handle ALL requests to a single PHP file. Normally is "app.php" 
 
-## PHP Built-in server
+### PHP Built-in server
 
-```
+```bash
 cd web
 php -S localhost:8080 app.php
 ```
 
-## Nginx 
+### Nginx
 
-```
+```nginx
 location / {
   try_files $uri $uri/ /app.php$is_args$args;
 }
 ```
 
-## Apache .htaccess
+### Apache .htaccess
 
-```
+```apache
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
