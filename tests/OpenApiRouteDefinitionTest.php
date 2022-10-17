@@ -36,7 +36,7 @@ class OpenApiRouteDefinitionTest extends TestCase
      */
     public function testGenerateRoutesOpenApi3()
     {
-        $object = new OpenApiRouteDefinition(__DIR__ . '/openapi-example.json');
+        $object = new OpenApiRouteDefinition(__DIR__ . '/openapi-example.yaml');
         $object
             ->withOutputProcessorForRoute('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class)
             ->withDefaultProcessor(XmlOutputProcessor::class);
@@ -66,7 +66,7 @@ class OpenApiRouteDefinitionTest extends TestCase
      */
     public function testGenerateRoutesOverrideMimeOpenApi3()
     {
-        $object = new OpenApiRouteDefinition(__DIR__ . '/openapi-example.json');
+        $object = new OpenApiRouteDefinition(__DIR__ . '/openapi-example.yaml');
 
         $object
             ->withOutputProcessorForMimeType('application/xml', JsonCleanOutputProcessor::class)

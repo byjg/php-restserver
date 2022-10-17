@@ -9,6 +9,7 @@ use ByJG\RestServer\Exception\SchemaInvalidException;
 use ByJG\RestServer\Exception\SchemaNotFoundException;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
+use ByJG\Serializer\SerializerObject;
 use ByJG\Util\Uri;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -21,7 +22,7 @@ class OpenApiRouteDefinition extends RouteDefinition
     protected $overrideOutputProcessor = [];
 
     /**
-     * @param $swaggerJson
+     * @param $openApiDefinition
      * @param string $defaultProcessor
      * @param CacheInterface|null $cache
      * @throws InvalidArgumentException
@@ -29,15 +30,27 @@ class OpenApiRouteDefinition extends RouteDefinition
      * @throws SchemaInvalidException
      * @throws SchemaNotFoundException
      */
-    public function __construct($swaggerJson)
+    public function __construct($openApiDefinition)
     {
-        if (!file_exists($swaggerJson)) {
-            throw new SchemaNotFoundException("Schema '$swaggerJson' not found");
+        if (!file_exists($openApiDefinition)) {
+            throw new SchemaNotFoundException("Schema '$openApiDefinition' not found");
         }
 
-        $this->schema = json_decode(file_get_contents($swaggerJson), true);
+        $ext = substr(strrchr($openApiDefinition, "."), 1);
+        $contents = file_get_contents($openApiDefinition);
+
+        if ($ext == "json") {
+            $this->schema = SerializerObject::instance($contents)->fromJson()->serialize();
+        } elseif ($ext == "yaml" || $ext == "yml") {
+            $this->schema = SerializerObject::instance($contents)->fromYaml()->serialize();
+        } else {
+            throw new SchemaInvalidException(
+                "Cannot determine file type. Valids extensions are 'json', 'yaml' or 'yml'"
+            );
+        }
+
         if (!isset($this->schema['paths'])) {
-            throw new SchemaInvalidException("Schema '$swaggerJson' is invalid");
+            throw new SchemaInvalidException("Schema '$openApiDefinition' is invalid");
         }
 
         $this->cache = new NoCacheEngine();
