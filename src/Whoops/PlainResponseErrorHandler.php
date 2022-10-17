@@ -44,17 +44,17 @@ class PlainResponseErrorHandler extends Handler
      */
     public function handle()
     {
-        $response = Formatter::formatExceptionPlain(
-            $this->getInspector()
+        $response = Formatter::formatExceptionAsDataArray(
+            $this->getInspector(),
+            false
         );
 
-        $debug = $this->getDataTable();
-        if (count($debug) > 0) {
-            $response .= "\n\n" . json_encode(["debug" => $debug]);
-        }
+        $refClass = new \ReflectionClass($response["type"]);
+        $className = $refClass->getShortName();
 
         $this->setProperHeader($this->getException());
-        echo $response;
+        echo "<html><h1>${className}</h1><p>${response['message']}</p></html>";
+
         return Handler::QUIT;
     }
 }

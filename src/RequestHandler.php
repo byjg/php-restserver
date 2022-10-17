@@ -9,4 +9,8 @@ use ByJG\RestServer\Route\RouteDefinitionInterface;
 interface RequestHandler
 {
     public function handle(RouteDefinitionInterface $routeDefinition, $outputBuffer = true, $session = true);
+
+    public function withDoNotUseErrorHandler();
+
+    public function withDetailedErrorHandler();
 }

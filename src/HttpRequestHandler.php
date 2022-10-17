@@ -21,6 +21,7 @@ class HttpRequestHandler implements RequestHandler
     const NOT_FOUND = "NOT FOUND";
 
     protected $useErrorHandler = true;
+    protected $detailedErrorHandler = false;
 
     /**
      * @param RouteDefinitionInterface $routeDefinition
@@ -100,7 +101,11 @@ class HttpRequestHandler implements RequestHandler
             $outputProcessor = BaseOutputProcessor::getFromClassName($class);
         }
         $outputProcessor->writeContentType();
-        ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
+        if ($this->detailedErrorHandler) {
+            ErrorHandler::getInstance()->setHandler($outputProcessor->getDetailedErrorHandler());
+        } else {
+            ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
+        }
 
         return $outputProcessor;
     }
@@ -279,5 +284,15 @@ class HttpRequestHandler implements RequestHandler
         }
 
         return false;
+    }
+
+    public function withDoNotUseErrorHandler()
+    {
+        $this->useErrorHandler = false;
+    }
+
+    public function withDetailedErrorHandler()
+    {
+        $this->detailedErrorHandler = true;
     }
 }

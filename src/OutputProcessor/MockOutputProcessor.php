@@ -52,10 +52,19 @@ class MockOutputProcessor extends BaseOutputProcessor
     /**
      * @return Handler
      */
+    public function getDetailedErrorHandler()
+    {
+        return $this->originalOutputProcessor->getDetailedErrorHandler();
+    }
+
+    /**
+     * @return Handler
+     */
     public function getErrorHandler()
     {
         return $this->originalOutputProcessor->getErrorHandler();
     }
+
 
     /**
      * @return FormatterInterface

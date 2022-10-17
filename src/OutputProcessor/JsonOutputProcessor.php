@@ -2,8 +2,9 @@
 
 namespace ByJG\RestServer\OutputProcessor;
 
-use ByJG\RestServer\Whoops\JsonResponseErrorHandler;
+use ByJG\RestServer\Whoops\JsonLimitedResponseHandler;
 use ByJG\Serializer\Formatter\JsonFormatter;
+use Whoops\Handler\JsonResponseHandler;
 
 class JsonOutputProcessor extends BaseOutputProcessor
 {
@@ -12,9 +13,14 @@ class JsonOutputProcessor extends BaseOutputProcessor
         $this->contentType = "application/json";
     }
 
+    public function getDetailedErrorHandler()
+    {
+        return new JsonResponseHandler();
+    }
+
     public function getErrorHandler()
     {
-        return new JsonResponseErrorHandler();
+        return new JsonLimitedResponseHandler();
     }
 
     public function getFormatter()

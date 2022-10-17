@@ -37,6 +37,11 @@ interface OutputProcessorInterface
     /**
      * @return Handler
      */
+    public function getDetailedErrorHandler();
+
+        /**
+     * @return Handler
+     */
     public function getErrorHandler();
 
     /**
