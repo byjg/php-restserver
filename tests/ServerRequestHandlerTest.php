@@ -10,6 +10,8 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Route\RouteDefinition;
 use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
+use ByJG\RestServer\OutputProcessor\MockOutputProcessor;
 use ByJG\RestServer\Route\RoutePattern;
 use PHPUnit\Framework\TestCase;
 
@@ -39,6 +41,8 @@ class ServerRequestHandlerTest extends TestCase
     {
         $this->object = new HttpRequestHandlerExposed();
         
+        $this->reach = false;
+        
         $this->definition = new RouteDefinition();
         
         $this->definition->addRoute(
@@ -57,6 +61,20 @@ class ServerRequestHandlerTest extends TestCase
             RoutePattern::get(
                 '/test/{id}',
                 AssertOutputProcessor::class,
+                function ($response, $request) {
+                    $this->assertInstanceOf(HttpResponse::class, $response);
+                    $this->assertInstanceOf(HttpRequest::class, $request);
+                    $this->reach = $request->param('id');
+                }
+            )
+        );
+
+        $this->definition->addRoute(
+            RoutePattern::get(
+                '/corstest/{id}',
+                function () {
+                    return new AssertOutputProcessor(true);
+                },
                 function ($response, $request) {
                     $this->assertInstanceOf(HttpResponse::class, $response);
                     $this->assertInstanceOf(HttpRequest::class, $request);
@@ -206,6 +224,102 @@ class ServerRequestHandlerTest extends TestCase
         $this->assertTrue($this->object->handle($this->definition, false, false));
     }
 
+    public function testHandleCors()
+    {
+        $expected = [
+            "HTTP/1.1 200",
+            "Content-Type: application/json",
+            "Access-Control-Allow-Origin: http://localhost",
+            "Access-Control-Allow-Credentials: true",
+            "Access-Control-Max-Age: 86400",
+            "",
+            "[]"
+        ];
+
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = "http://localhost/corstest/tCors";
+        $_SERVER['HTTP_ORIGIN'] = "http://localhost";
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
+
+        $this->object->withCorsOrigins("localhost")
+            ->withDefaultOutputProcessor(function () {
+                return new MockOutputProcessor(JsonOutputProcessor::class);
+            });
+            $this->object->handle($this->definition, true, false);
+
+        $result = ob_get_contents();
+        ob_clean();
+
+        $this->assertEquals('tCors', $this->reach);
+
+        $this->assertEquals(implode("\r\n", $expected), $result);
+
+    }
+
+    public function testHandleCorsOptions()
+    {
+        $expected = [
+            "HTTP/1.1 200",
+            "Content-Type: application/json",
+            "Access-Control-Allow-Origin: http://localhost",
+            "Access-Control-Allow-Credentials: true",
+            "Access-Control-Max-Age: 86400",
+            "Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE,PATCH",
+            "Access-Control-Allow-Headers: Authorization,Content-Type,Accept,Origin,User-Agent,Cache-Control,Keep-Alive,X-Requested-With,If-Modified-Since",
+            "",
+            "[]"
+        ];
+
+        $_SERVER['REQUEST_METHOD'] = 'OPTIONS';
+        $_SERVER['REQUEST_URI'] = "http://localhost/corstest/tCors";
+        $_SERVER['HTTP_ORIGIN'] = "http://localhost";
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
+
+        $this->object->withCorsOrigins(["server\.com", "localhost"])
+            ->withDefaultOutputProcessor(function () {
+                return new MockOutputProcessor(JsonOutputProcessor::class);
+            })
+            ->handle($this->definition, true, false);
+
+        $result = ob_get_contents();
+        ob_clean();
+
+        $this->assertEquals(implode("\r\n", $expected), $result);
+
+        // $this->assertEquals($a, $b);
+        // $this->assertEquals('tCors', $this->reach);
+
+    }
+
+    public function testFailedCorsValidation()
+    {
+        $expected = [
+            "HTTP/1.1 200",
+            "Content-Type: application/json",
+            "",
+            "[]"
+        ];
+
+        $_SERVER['REQUEST_METHOD'] = 'OPTIONS';
+        $_SERVER['REQUEST_URI'] = "http://localhost/corstest/tCors";
+        $_SERVER['HTTP_ORIGIN'] = "http://localhost";
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
+
+        $this->object->withCorsOrigins("anotherhost")
+            ->withDefaultOutputProcessor(function () {
+                return new MockOutputProcessor(JsonOutputProcessor::class);
+            })
+            ->handle($this->definition, true, false);
+
+        $result = ob_get_contents();
+        ob_clean();
+
+        $this->assertEquals(implode("\r\n", $expected), $result);
+
+        // $this->assertEquals($a, $b);
+        // $this->assertEquals('tCors', $this->reach);
+
+    }
 
     public function mimeDataProvider()
     {

@@ -386,6 +386,26 @@ The currently implementation are:
 - JSON
 - XML
 
+## CORS support
+
+Restserver can handle CORS and send the proper headers to the browser:
+
+```php
+<?php
+$httpHandler = new \ByJG\RestServer\HttpRequestHandler();
+$httpHandler
+    ->withCorsOrigins([/* list of accepted origing */])  // Required to enable CORS
+    ->withAcceptCorsMethods([/* list of methods */])     // Optional. Default all methods. Don't need to pass 'OPTIONS'
+    ->withAcceptCorsHeaders([/* list of headers */])     // Optional. Default all headers
+    ->handle(/* definition */)
+```
+
+Note that the method `withCorsOrigins` accept a list of hosts regular expressions. e.g.
+
+- `example\.com` - Accept only example.com
+- `example\.(com|org)` - Accept both example.com and example.org
+- `example\.com(\.br)?` -Accept both example.com and example.com.br
+
 ## Running the rest server
 
 You need to set up your restserver to handle ALL requests to a single PHP file. Normally is "app.php" 

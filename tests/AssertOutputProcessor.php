@@ -2,17 +2,29 @@
 
 namespace Tests;
 
+use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
+use ByJG\RestServer\OutputProcessor\MockOutputProcessor;
 
-class AssertOutputProcessor extends JsonOutputProcessor
+class AssertOutputProcessor extends MockOutputProcessor
 {
+    protected $output = false;
+
+    public function __construct($output = false)
+    {
+        $this->output = $output;
+        parent::__construct(new JsonOutputProcessor());
+    }
+
     /**
-     * @param null $headerList
+     * @param HttpResponse $headerList
      * @return null|void
      */
     public function writeHeader($headerList = null)
     {
-        return null;
+        if ($this->output) {
+            parent::writeHeader($headerList);
+        }
     }
 
     /**
@@ -21,12 +33,15 @@ class AssertOutputProcessor extends JsonOutputProcessor
      */
     public function writeData($data)
     {
-        // Disable the output for test
-        return;
+        if ($this->output) {
+            parent::writeData($data);
+        }
     }
 
     public function writeContentType()
     {
-        // Do nothing
+        if ($this->output) {
+            parent::writeContentType();
+        }
     }
 }

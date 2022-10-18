@@ -6,6 +6,7 @@ use ByJG\RestServer\MockHttpRequest;
 use ByJG\Util\Helper\RequestFormUrlEncoded;
 use ByJG\Util\Helper\RequestMultiPart;
 use ByJG\Util\MultiPartItem;
+use ByJG\Util\Psr7\Request;
 use ByJG\Util\Uri;
 use PHPUnit\Framework\TestCase;
 

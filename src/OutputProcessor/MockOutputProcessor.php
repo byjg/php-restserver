@@ -23,14 +23,15 @@ class MockOutputProcessor extends BaseOutputProcessor
         echo "HTTP/1.1 " . $response->getResponseCode() . "\r\n";
         echo "Content-Type: " . $this->getContentType() . "\r\n";
 
-        foreach ($response->getHeaders() as $header) {
-            if (is_array($header)) {
-                echo "${header[0]}: ${header[1]}\n";
-                continue;
+        foreach ($response->getHeaders() as $header => $value) {
+            if (is_array($value)) {
+                foreach ($value as $headerValue) {
+                    echo "$header: $headerValue\r\n";
+                }
+            } else {
+                echo "$header: $value\r\n";
             }
-            echo "$header\n";
         }
-
         echo "\r\n";
     }
 

@@ -72,12 +72,15 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
 
     protected function writeHeader(HttpResponse $response)
     {
-        foreach ($response->getHeaders() as $header) {
-            if (is_array($header)) {
-                $this->header($header[0], $header[1]);
-                continue;
+        foreach ($response->getHeaders() as $header => $value) {
+            if (is_array($value)) {
+                header("$header: " . array_shift($value), true);
+                foreach ($value as $headerValue) {
+                    header("$header: $headerValue", false);
+                }
+            } else {
+                header("$header: $value", true);
             }
-            $this->header($header);
         }
 
         http_response_code($response->getResponseCode());

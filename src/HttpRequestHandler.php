@@ -9,10 +9,10 @@ use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
-use ByJG\RestServer\Route\RouteDefinition;
 use ByJG\RestServer\Route\RouteDefinitionInterface;
 use Closure;
 use FastRoute\Dispatcher;
+use InvalidArgumentException;
 
 class HttpRequestHandler implements RequestHandler
 {
@@ -22,6 +22,22 @@ class HttpRequestHandler implements RequestHandler
 
     protected $useErrorHandler = true;
     protected $detailedErrorHandler = false;
+    protected $corsOrigins = [];
+    protected $corsMethods = [ 'GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    protected $corsHeaders = [
+        'Authorization',
+        'Content-Type',
+        'Accept',
+        'Origin',
+        'User-Agent',
+        'Cache-Control',
+        'Keep-Alive',
+        'X-Requested-With',
+        'If-Modified-Since'
+    ];
+
+    protected $defaultOutputProcessor = null;
+    protected $defaultOutputProcessorArgs = [];
 
     /**
      * @param RouteDefinitionInterface $routeDefinition
@@ -66,7 +82,11 @@ class HttpRequestHandler implements RequestHandler
                 return true;
 
             case Dispatcher::METHOD_NOT_ALLOWED:
-                $this->prepareToOutput();
+                $outputProcessor = $this->prepareToOutput();
+                if (strtoupper($httpMethod) == "OPTIONS" && !empty($this->corsOrigins)) {
+                    $this->executeRequest($outputProcessor, function () {}, $request);
+                    return;
+                }
                 throw new Error405Exception('Method not allowed');
 
             case Dispatcher::FOUND:
@@ -95,10 +115,12 @@ class HttpRequestHandler implements RequestHandler
 
     protected function prepareToOutput($class = null)
     {
-        if (empty($class)) {
-            $outputProcessor = BaseOutputProcessor::getFromHttpAccept();
-        } else {
+        if (!empty($class)) {
             $outputProcessor = BaseOutputProcessor::getFromClassName($class);
+        } elseif (!empty($this->defaultOutputProcessor)) {
+            $outputProcessor = BaseOutputProcessor::getFromClassName($this->defaultOutputProcessor);
+        } else {
+            $outputProcessor = BaseOutputProcessor::getFromHttpAccept();
         }
         $outputProcessor->writeContentType();
         if ($this->detailedErrorHandler) {
@@ -126,6 +148,28 @@ class HttpRequestHandler implements RequestHandler
     {
         // Create the Request and Response methods
         $response = new HttpResponse();
+
+        if (!empty($this->corsOrigins)) {
+            // Allow from any origin
+            if (!empty($request->server('HTTP_ORIGIN'))) {
+                foreach ((array)$this->corsOrigins as $origin) {
+                    if (preg_match("~^.*//$origin$~", $request->server('HTTP_ORIGIN'))) {
+                        $response->addHeader("Access-Control-Allow-Origin", $request->server('HTTP_ORIGIN'));
+                        $response->addHeader('Access-Control-Allow-Credentials', 'true');
+                        $response->addHeader('Access-Control-Max-Age', '86400');    // cache for 1 day
+
+                        // Access-Control headers are received during OPTIONS requests
+                        if ($request->server('REQUEST_METHOD') == 'OPTIONS') {
+                            $response->addHeader("Access-Control-Allow-Methods", implode(",", array_merge(['OPTIONS'], $this->corsMethods)));
+                            $response->addHeader("Access-Control-Allow-Headers", implode(",", $this->corsHeaders));
+                            $outputProcessor->processResponse($response);
+                            return;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
 
         // Process Closure
         if ($class instanceof Closure) {
@@ -294,5 +338,39 @@ class HttpRequestHandler implements RequestHandler
     public function withDetailedErrorHandler()
     {
         $this->detailedErrorHandler = true;
+    }
+
+    public function withCorsOrigins($origins)
+    {
+        $this->corsOrigins = $origins;
+        return $this;
+    }
+
+    public function withAcceptCorsHeaders($headers)
+    {
+        $this->corsHeaders = $headers;
+        return $this;
+    }
+
+    public function withAcceptCorsMethods($methods)
+    {
+        $this->corsMethods = $methods;
+        return $this;
+    }
+
+    public function withDefaultOutputProcessor($processor, $args = [])
+    {
+        if (!($processor instanceof \Closure)) {
+            if (!is_string($processor)) {
+                throw new InvalidArgumentException("Default processor needs to class name of an OutputProcessor");
+            }
+            if (!is_subclass_of($processor, BaseOutputProcessor::class)) {
+                throw new InvalidArgumentException("Needs to be a class of " . BaseOutputProcessor::class);
+            }
+        }
+
+        $this->defaultOutputProcessor = $processor;
+
+        return $this;
     }
 }

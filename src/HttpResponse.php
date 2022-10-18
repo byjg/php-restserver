@@ -122,23 +122,21 @@ class HttpResponse
         $this->response = new ResponseBag();
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param string $header
+     * @param string|array $value
+     * @return void
+     */
     public function addHeader($header, $value)
     {
-        $this->headers[$header][] = $value;
+        $this->headers[$header] = $value;
     }
 
     public function getHeaders()
     {
-        $result = [];
-        foreach ($this->headers as $header => $values) {
-            $replace = true;
-            foreach ($values as $value) {
-                $result[] = [ "$header: $value", $replace ];
-                $replace = false;
-            }
-        }
-
-        return $result;
+        return $this->headers;
     }
 
     public function setResponseCode($code)
