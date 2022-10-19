@@ -20,6 +20,7 @@ class JsonLimitedResponseHandler extends ParentJsonErrorHandler
 
     use WhoopsDebugTrait;
     use WhoopsHeaderTrait;
+    use ClassNameBeautifier;
 
     /**
      * @return int
@@ -31,12 +32,11 @@ class JsonLimitedResponseHandler extends ParentJsonErrorHandler
             false
         );
 
-        $refClass = new \ReflectionClass($errorData["type"]);
-        $className = $refClass->getShortName();
+        $title = $this->getClassAsTitle($errorData["type"]);
 
         $response = array(
             'error' => [
-                "type" => $className,
+                "type" => $title,
                 "message" => $errorData["message"]
             ]
         );
