@@ -3,6 +3,7 @@
 namespace ByJG\RestServer;
 
 use ByJG\RestServer\Exception\ClassNotFoundException;
+use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error520Exception;
@@ -176,8 +177,7 @@ class HttpRequestHandler implements RequestHandler
         }
 
         if ($blockExecutionBecauseOfCors) {
-            $outputProcessor->processResponse($response);
-            return;
+            throw new Error401Exception("CORS verification failed. Request Blocked.");
         }
 
         // Process Closure

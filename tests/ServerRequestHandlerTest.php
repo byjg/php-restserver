@@ -4,6 +4,7 @@ namespace Tests;
 
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error400Exception;
+use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\HttpRequest;
@@ -292,14 +293,10 @@ class ServerRequestHandlerTest extends TestCase
 
     }
 
-    public function testFailedCorsValidation()
+    public function testFailedCorsWrongAllowedServer()
     {
-        $expected = [
-            "HTTP/1.1 200",
-            "Content-Type: application/json",
-            "",
-            "[]"
-        ];
+        $this->expectException(Error401Exception::class);
+        $this->expectExceptionMessage("CORS verification failed. Request Blocked.");
 
         $_SERVER['REQUEST_METHOD'] = 'OPTIONS';
         $_SERVER['REQUEST_URI'] = "http://localhost/corstest/tCors";
@@ -310,26 +307,13 @@ class ServerRequestHandlerTest extends TestCase
             ->withDefaultOutputProcessor(function () {
                 return new MockOutputProcessor(JsonOutputProcessor::class);
             })
-            ->handle($this->definition, true, false);
-
-        $result = ob_get_contents();
-        ob_clean();
-
-        $this->assertEquals(implode("\r\n", $expected), $result);
-
-        // $this->assertEquals($a, $b);
-        // $this->assertEquals('tCors', $this->reach);
-
+            ->handle($this->definition, false, false);
     }
 
-    public function testFailedCorsValidation_2()
+    public function testFailedCorsNoOriginSetup()
     {
-        $expected = [
-            "HTTP/1.1 200",
-            "Content-Type: application/json",
-            "",
-            "[]"
-        ];
+        $this->expectException(Error401Exception::class);
+        $this->expectExceptionMessage("CORS verification failed. Request Blocked.");
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/corstest/tCors";
@@ -340,15 +324,7 @@ class ServerRequestHandlerTest extends TestCase
             ->withDefaultOutputProcessor(function () {
                 return new MockOutputProcessor(JsonOutputProcessor::class);
             })
-            ->handle($this->definition, true, false);
-
-        $result = ob_get_contents();
-        ob_clean();
-
-        $this->assertEquals(implode("\r\n", $expected), $result);
-
-        // $this->assertEquals($a, $b);
-        // $this->assertEquals('tCors', $this->reach);
+            ->handle($this->definition, false, false);
 
     }
 
