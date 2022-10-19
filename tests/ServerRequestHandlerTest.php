@@ -79,7 +79,7 @@ class ServerRequestHandlerTest extends TestCase
                     $this->assertInstanceOf(HttpResponse::class, $response);
                     $this->assertInstanceOf(HttpRequest::class, $request);
                     $this->reach = $request->param('id');
-                    $response->write("Enter");
+                    $response->write("Success!");
                 }
             )
         );
@@ -234,7 +234,7 @@ class ServerRequestHandlerTest extends TestCase
             "Access-Control-Allow-Credentials: true",
             "Access-Control-Max-Age: 86400",
             "",
-            "[\"Enter\"]"
+            "[\"Success!\"]"
         ];
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
@@ -307,6 +307,36 @@ class ServerRequestHandlerTest extends TestCase
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
         $this->object->withCorsOrigins("anotherhost")
+            ->withDefaultOutputProcessor(function () {
+                return new MockOutputProcessor(JsonOutputProcessor::class);
+            })
+            ->handle($this->definition, true, false);
+
+        $result = ob_get_contents();
+        ob_clean();
+
+        $this->assertEquals(implode("\r\n", $expected), $result);
+
+        // $this->assertEquals($a, $b);
+        // $this->assertEquals('tCors', $this->reach);
+
+    }
+
+    public function testFailedCorsValidation_2()
+    {
+        $expected = [
+            "HTTP/1.1 200",
+            "Content-Type: application/json",
+            "",
+            "[]"
+        ];
+
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = "http://localhost/corstest/tCors";
+        $_SERVER['HTTP_ORIGIN'] = "http://localhost";
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
+
+        $this->object
             ->withDefaultOutputProcessor(function () {
                 return new MockOutputProcessor(JsonOutputProcessor::class);
             })

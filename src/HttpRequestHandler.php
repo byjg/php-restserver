@@ -150,10 +150,11 @@ class HttpRequestHandler implements RequestHandler
         $response = new HttpResponse();
         $blockExecutionBecauseOfCors = false;
 
-        if (!empty($this->corsOrigins)) {
+        if (!empty($request->server('HTTP_ORIGIN'))) {
+            $blockExecutionBecauseOfCors = true;
+
             // Allow from any origin
-            if (!empty($request->server('HTTP_ORIGIN'))) {
-                $blockExecutionBecauseOfCors = true;
+            if (!empty($this->corsOrigins)) {
                 foreach ((array)$this->corsOrigins as $origin) {
                     if (preg_match("~^.*//$origin$~", $request->server('HTTP_ORIGIN'))) {
                         $response->addHeader("Access-Control-Allow-Origin", $request->server('HTTP_ORIGIN'));
