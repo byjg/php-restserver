@@ -79,6 +79,7 @@ class ServerRequestHandlerTest extends TestCase
                     $this->assertInstanceOf(HttpResponse::class, $response);
                     $this->assertInstanceOf(HttpRequest::class, $request);
                     $this->reach = $request->param('id');
+                    $response->write("Enter");
                 }
             )
         );
@@ -233,7 +234,7 @@ class ServerRequestHandlerTest extends TestCase
             "Access-Control-Allow-Credentials: true",
             "Access-Control-Max-Age: 86400",
             "",
-            "[]"
+            "[\"Enter\"]"
         ];
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
