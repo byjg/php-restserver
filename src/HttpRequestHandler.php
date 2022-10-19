@@ -10,7 +10,7 @@ use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
-use ByJG\RestServer\Route\RouteDefinitionInterface;
+use ByJG\RestServer\Route\RouteListInterface;
 use Closure;
 use FastRoute\Dispatcher;
 use InvalidArgumentException;
@@ -41,7 +41,7 @@ class HttpRequestHandler implements RequestHandler
     protected $defaultOutputProcessorArgs = [];
 
     /**
-     * @param RouteDefinitionInterface $routeDefinition
+     * @param RouteListInterface $routeDefinition
      * @return bool
      * @throws ClassNotFoundException
      * @throws Error404Exception
@@ -49,7 +49,7 @@ class HttpRequestHandler implements RequestHandler
      * @throws Error520Exception
      * @throws InvalidClassException
      */
-    protected function process(RouteDefinitionInterface $routeDefinition)
+    protected function process(RouteListInterface $routeDefinition)
     {
         // Initialize ErrorHandler with default error handler
         if ($this->useErrorHandler) {
@@ -204,7 +204,7 @@ class HttpRequestHandler implements RequestHandler
     /**
      * Handle the ROUTE (see web/app-dist.php)
      *
-     * @param RouteDefinitionInterface $routeDefinition
+     * @param RouteListInterface $routeDefinition
      * @param bool $outputBuffer
      * @param bool $session
      * @return bool|void
@@ -214,7 +214,7 @@ class HttpRequestHandler implements RequestHandler
      * @throws Error520Exception
      * @throws InvalidClassException
      */
-    public function handle(RouteDefinitionInterface $routeDefinition, $outputBuffer = true, $session = false)
+    public function handle(RouteListInterface $routeDefinition, $outputBuffer = true, $session = false)
     {
         if ($outputBuffer) {
             ob_start();

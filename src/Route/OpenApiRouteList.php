@@ -14,7 +14,7 @@ use ByJG\Util\Uri;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
-class OpenApiRouteDefinition extends RouteDefinition
+class OpenApiRouteList extends RouteList
 {
     protected $cache;
     protected $schema;
@@ -132,7 +132,7 @@ class OpenApiRouteDefinition extends RouteDefinition
 
                 $outputProcessor = $this->getMethodOutputProcessor($method, $basePath. $path, $properties);
 
-                $routes[] = new RoutePattern(
+                $routes[] = new Route(
                     strtoupper($method),
                     $basePath . $path,
                     $outputProcessor,

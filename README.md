@@ -41,9 +41,9 @@ The are several handlers implemented and you can implement your own.
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$routeDefinition = new \ByJG\RestServer\Route\RouteDefinition();
+$routeDefinition = new \ByJG\RestServer\Route\RouteList();
 $routeDefinition->addRoute(
-    \ByJG\RestServer\Route\RoutePattern::get(
+    \ByJG\RestServer\Route\Route::get(
         '/testclosure',                   // The route
         \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class,
         function ($response, $request) {  // The Closure for Process the request 
@@ -62,9 +62,9 @@ $restServer->handle($routeDefinition);
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$routeDefintion = new \ByJG\RestServer\Route\RouteDefinition();
+$routeDefintion = new \ByJG\RestServer\Route\RouteList();
 $routeDefintion->addRoute(
-    \ByJG\RestServer\Route\RoutePattern::get(
+    \ByJG\RestServer\Route\Route::get(
         '/test',                          // The Route
         \ByJG\RestServer\OutputProcessor\XmlOutputProcessor::class,
         '\\My\\ClassName',                 // The class that have the method
@@ -146,7 +146,7 @@ and set automatic routes:
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '/swagger.json');
+$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteList(__DIR__ . '/swagger.json');
 
 $restServer = new \ByJG\RestServer\HttpRequestHandler();
 $restServer->handle($routeDefinition);
@@ -158,7 +158,7 @@ It is possible to cache the route by adding any PSR-16 instance on the second pa
 
 ```php
 <?php
-$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '/swagger.json'); 
+$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteList(__DIR__ . '/swagger.json'); 
 $routeDefinition->withCache(new \ByJG\Cache\Psr16\FileSystemCacheEngine());
 ```
 
@@ -170,7 +170,7 @@ As the Swagger process is fully automated, you can define the handler by Mime Ty
 
 ```php
 <?php
-$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '/swagger.json');
+$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteList(__DIR__ . '/swagger.json');
 $routeDefinition->withOutputProcessorForMimeType(
     "application/json",
     \ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor::class
@@ -181,7 +181,7 @@ $routeDefinition->withOutputProcessorForMimeType(
 
 ```php
 <?php
-$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '/swagger.json');
+$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteList(__DIR__ . '/swagger.json');
 $routeDefinition->withOutputProcessorForRoute(
     "GET",
     "/pet/{petId}",
@@ -302,9 +302,9 @@ You can choose another Handlers. See below for a list of Available Response Hand
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$routeDefinition = new \ByJG\RestServer\Route\RouteDefinition();
+$routeDefinition = new \ByJG\RestServer\Route\RouteList();
 $routeDefinition->addRoute(
-    \ByJG\RestServer\Route\RoutePattern::get(
+    \ByJG\RestServer\Route\Route::get(
         '/test',                          // The Route
         \ByJG\RestServer\OutputProcessor\XmlOutputProcessor::class,          // The Handler
         '\\My\\ClassName',                // The class that have the method

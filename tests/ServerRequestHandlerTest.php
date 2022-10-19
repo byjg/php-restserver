@@ -9,11 +9,11 @@ use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\Route\RouteDefinition;
+use ByJG\RestServer\Route\RouteList;
 use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\OutputProcessor\MockOutputProcessor;
-use ByJG\RestServer\Route\RoutePattern;
+use ByJG\RestServer\Route\Route;
 use PHPUnit\Framework\TestCase;
 
 require __DIR__ . '/AssertOutputProcessor.php';
@@ -30,7 +30,7 @@ class ServerRequestHandlerTest extends TestCase
     protected $object;
 
     /**
-     * @var RouteDefinition
+     * @var RouteList
      */
     protected $definition;
 
@@ -44,10 +44,10 @@ class ServerRequestHandlerTest extends TestCase
         
         $this->reach = false;
         
-        $this->definition = new RouteDefinition();
+        $this->definition = new RouteList();
         
         $this->definition->addRoute(
-            RoutePattern::get(
+            Route::get(
                 '/test',
                 AssertOutputProcessor::class,
                 function ($response, $request) {
@@ -59,7 +59,7 @@ class ServerRequestHandlerTest extends TestCase
         );
 
         $this->definition->addRoute(
-            RoutePattern::get(
+            Route::get(
                 '/test/{id}',
                 AssertOutputProcessor::class,
                 function ($response, $request) {
@@ -71,7 +71,7 @@ class ServerRequestHandlerTest extends TestCase
         );
 
         $this->definition->addRoute(
-            RoutePattern::get(
+            Route::get(
                 '/corstest/{id}',
                 function () {
                     return new AssertOutputProcessor(true);
@@ -86,7 +86,7 @@ class ServerRequestHandlerTest extends TestCase
         );
 
         $this->definition->addRoute(
-            new RoutePattern(
+            new Route(
                 'GET',
                 '/error',
                 AssertOutputProcessor::class,

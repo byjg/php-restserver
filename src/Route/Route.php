@@ -4,26 +4,26 @@ namespace ByJG\RestServer\Route;
 
 use Closure;
 
-class RoutePattern
+class Route
 {
     protected $method;
-    protected $pattern;
+    protected $path;
     protected $outputProcessor;
     protected $class;
 
     /**
-     * RoutePattern constructor.
+     * Route constructor.
      *
      * @param array|string $method
-     * @param string $pattern
+     * @param string $path
      * @param string $outputProcessor
      * @param Closure|string $class
      * @param string|null $methodName
      */
-    public function __construct($method, $pattern, $outputProcessor, $class, $methodName = "")
+    public function __construct($method, $path, $outputProcessor, $class, $methodName = "")
     {
         $this->setMethod($method);
-        $this->setPattern($pattern);
+        $this->setPath($path);
         $this->setOutputProcessor($outputProcessor);
         
         if ($class instanceof \Closure) {
@@ -43,7 +43,7 @@ class RoutePattern
 
     /**
      * @param mixed $method
-     * @return RoutePattern
+     * @return Route
      */
     protected function setMethod($method)
     {
@@ -54,18 +54,18 @@ class RoutePattern
     /**
      * @return mixed
      */
-    public function getPattern()
+    public function getPath()
     {
-        return $this->pattern;
+        return $this->path;
     }
 
     /**
-     * @param mixed $pattern
-     * @return RoutePattern
+     * @param mixed $path
+     * @return Route
      */
-    protected function setPattern($pattern)
+    protected function setPath($path)
     {
-        $this->pattern = $pattern;
+        $this->path = $path;
         return $this;
     }
 
@@ -79,7 +79,7 @@ class RoutePattern
 
     /**
      * @param mixed $outputProcessor
-     * @return RoutePattern
+     * @return Route
      */
     protected function setOutputProcessor($outputProcessor)
     {
@@ -97,7 +97,7 @@ class RoutePattern
 
     /**
      * @param mixed $class
-     * @return RoutePattern
+     * @return Route
      */
     protected function setClass($class)
     {
@@ -107,58 +107,58 @@ class RoutePattern
 
 
     /**
-     * RoutePattern Factory for "GET" method
+     * Route Factory for "GET" method
      *
-     * @param string $pattern
+     * @param string $path
      * @param string $outputProcessor
      * @param string $class
      * @param null $methodName
-     * @return RoutePattern
+     * @return Route
      */
-    public static function get($pattern, $outputProcessor, $class, $methodName = null)
+    public static function get($path, $outputProcessor, $class, $methodName = null)
     {
-        return new RoutePattern('GET', $pattern, $outputProcessor, $class, $methodName);
+        return new Route('GET', $path, $outputProcessor, $class, $methodName);
     }
 
     /**
-     * RoutePattern Factory for "POST" method
+     * Route Factory for "POST" method
      *
-     * @param string $pattern
+     * @param string $path
      * @param string $outputProcessor
      * @param string $class
      * @param null $methodName
-     * @return RoutePattern
+     * @return Route
      */
-    public static function post($pattern, $outputProcessor, $class, $methodName = null)
+    public static function post($path, $outputProcessor, $class, $methodName = null)
     {
-        return new RoutePattern('POST', $pattern, $outputProcessor, $class, $methodName);
+        return new Route('POST', $path, $outputProcessor, $class, $methodName);
     }
 
     /**
-     * RoutePattern Factory for "PUT" method
+     * Route Factory for "PUT" method
      *
-     * @param string $pattern
+     * @param string $path
      * @param string $outputProcessor
      * @param string $class
      * @param null $methodName
-     * @return RoutePattern
+     * @return Route
      */
-    public static function put($pattern, $outputProcessor, $class, $methodName = null)
+    public static function put($path, $outputProcessor, $class, $methodName = null)
     {
-        return new RoutePattern('PUT', $pattern, $outputProcessor, $class, $methodName);
+        return new Route('PUT', $path, $outputProcessor, $class, $methodName);
     }
 
     /**
-     * RoutePattern Factory for "DELETE" method
+     * Route Factory for "DELETE" method
      *
-     * @param string $pattern
+     * @param string $path
      * @param string $outputProcessor
      * @param string $class
      * @param null $methodName
-     * @return RoutePattern
+     * @return Route
      */
-    public static function delete($pattern, $outputProcessor, $class, $methodName = null)
+    public static function delete($path, $outputProcessor, $class, $methodName = null)
     {
-        return new RoutePattern('DELETE', $pattern, $outputProcessor, $class, $methodName);
+        return new Route('DELETE', $path, $outputProcessor, $class, $methodName);
     }
 }

@@ -8,9 +8,9 @@ use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\OutputProcessor\MockOutputProcessor;
-use ByJG\RestServer\Route\RouteDefinition;
-use ByJG\RestServer\Route\RouteDefinitionInterface;
-use ByJG\RestServer\Route\RoutePattern;
+use ByJG\RestServer\Route\RouteList;
+use ByJG\RestServer\Route\RouteListInterface;
+use ByJG\RestServer\Route\Route;
 use ByJG\Util\Psr7\Message;
 use ByJG\Util\Psr7\MessageException;
 use ByJG\Util\Psr7\Response;
@@ -36,7 +36,7 @@ class MockRequestHandler extends HttpRequestHandler
 
 
     /**
-     * @param RouteDefinitionInterface $routes
+     * @param RouteListInterface $routes
      * @param RequestInterface $request
      * @return Response
      * @throws ClassNotFoundException
@@ -46,14 +46,14 @@ class MockRequestHandler extends HttpRequestHandler
      * @throws InvalidClassException
      * @throws MessageException
      */
-    public static function mock(RouteDefinitionInterface $routes, RequestInterface $request)
+    public static function mock(RouteListInterface $routes, RequestInterface $request)
     {
         $handler = new MockRequestHandler($request);
         return $handler->handle($routes, true, true);
     }
 
     /**
-     * @param RouteDefinitionInterface $routeDefinition
+     * @param RouteListInterface $routeDefinition
      * @param bool $outputBuffer
      * @param bool $session
      * @return bool|Response|void
@@ -64,7 +64,7 @@ class MockRequestHandler extends HttpRequestHandler
      * @throws InvalidClassException
      * @throws MessageException
      */
-    public function handle(RouteDefinitionInterface $routeDefinition, $outputBuffer = true, $session = true)
+    public function handle(RouteListInterface $routeDefinition, $outputBuffer = true, $session = true)
     {
         return $this->callParentHandle($routeDefinition);
     }
@@ -78,13 +78,13 @@ class MockRequestHandler extends HttpRequestHandler
     }
 
     /**
-     * @param RouteDefinitionInterface $routeDefinition
-     * @return RouteDefinition
+     * @param RouteListInterface $routeDefinition
+     * @return RouteList
      */
-    protected function mockRoutes(RouteDefinitionInterface $routeDefinition)
+    protected function mockRoutes(RouteListInterface $routeDefinition)
     {
         // Redo Route Definition
-        $mockRoutes = new RouteDefinition();
+        $mockRoutes = new RouteList();
         foreach ($routeDefinition->getRoutes() as $route) {
             $class = $route->getClass();
             $methodName = "";
@@ -93,9 +93,9 @@ class MockRequestHandler extends HttpRequestHandler
                 $class = $class[0];
             }
             $mockRoutes->addRoute(
-                new RoutePattern(
+                new Route(
                     $route->getMethod(),
-                    $route->getPattern(),
+                    $route->getPath(),
                     function () use ($route) {
                         return new MockOutputProcessor($route->getOutputProcessor());
                     },
@@ -109,7 +109,7 @@ class MockRequestHandler extends HttpRequestHandler
     }
 
     /**
-     * @param RouteDefinitionInterface $routeDefinition
+     * @param RouteListInterface $routeDefinition
      * @return Message|MessageInterface
      * @throws ClassNotFoundException
      * @throws Error404Exception
@@ -118,7 +118,7 @@ class MockRequestHandler extends HttpRequestHandler
      * @throws InvalidClassException
      * @throws MessageException
      */
-    protected function callParentHandle(RouteDefinitionInterface $routeDefinition)
+    protected function callParentHandle(RouteListInterface $routeDefinition)
     {
         $this->useErrorHandler = false;
         try {
