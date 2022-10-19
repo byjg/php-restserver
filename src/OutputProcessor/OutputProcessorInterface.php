@@ -48,4 +48,10 @@ interface OutputProcessorInterface
      * @return FormatterInterface
      */
     public function getFormatter();
+
+    /**
+     * @param HttpResponse $response
+     * @return void
+     */
+    public function writeHeader(HttpResponse $response);
 }

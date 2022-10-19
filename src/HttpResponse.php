@@ -109,12 +109,13 @@ class HttpResponse
      */
     public function writeDebug($key, $string)
     {
+        // @todo Review this.
         if (is_null($this->responseDebug)) {
             $this->responseDebug = new ResponseBag();
             $this->response->add($this->responseDebug);
         }
         $this->responseDebug->add(['debug' => [$key => $string]]);
-        ErrorHandler::getInstance()->addExtraInfo($key, serialize($string));
+        // ErrorHandler::getInstance()->addExtraInfo($key, serialize($string));
     }
 
     public function emptyResponse()

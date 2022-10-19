@@ -70,7 +70,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         return $this->contentType;
     }
 
-    protected function writeHeader(HttpResponse $response)
+    public function writeHeader(HttpResponse $response)
     {
         foreach ($response->getHeaders() as $header => $value) {
             if (is_array($value)) {

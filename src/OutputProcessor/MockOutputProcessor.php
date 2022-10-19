@@ -18,7 +18,7 @@ class MockOutputProcessor extends BaseOutputProcessor
         $this->originalOutputProcessor = new $class();
     }
 
-    protected function writeHeader(HttpResponse $response)
+    public function writeHeader(HttpResponse $response)
     {
         echo "HTTP/1.1 " . $response->getResponseCode() . "\r\n";
         echo "Content-Type: " . $this->getContentType() . "\r\n";

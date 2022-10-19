@@ -269,7 +269,7 @@ class ServerRequestHandlerTest extends TestCase
             "Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE,PATCH",
             "Access-Control-Allow-Headers: Authorization,Content-Type,Accept,Origin,User-Agent,Cache-Control,Keep-Alive,X-Requested-With,If-Modified-Since",
             "",
-            "[]"
+            ""
         ];
 
         $_SERVER['REQUEST_METHOD'] = 'OPTIONS';
@@ -310,23 +310,66 @@ class ServerRequestHandlerTest extends TestCase
             ->handle($this->definition, false, false);
     }
 
-    public function testFailedCorsNoOriginSetup()
+    public function testDefaultCorsSetup()
     {
-        $this->expectException(Error401Exception::class);
-        $this->expectExceptionMessage("CORS verification failed. Request Blocked.");
+        $expected = [
+            "HTTP/1.1 200",
+            "Content-Type: application/json",
+            "Access-Control-Allow-Origin: http://anyhostisallowed",
+            "Access-Control-Allow-Credentials: true",
+            "Access-Control-Max-Age: 86400",
+            "",
+            "[\"Success!\"]"
+        ];
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/corstest/tCors";
-        $_SERVER['HTTP_ORIGIN'] = "http://localhost";
+        $_SERVER['HTTP_ORIGIN'] = "http://anyhostisallowed";
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
         $this->object
             ->withDefaultOutputProcessor(function () {
                 return new MockOutputProcessor(JsonOutputProcessor::class);
-            })
-            ->handle($this->definition, false, false);
+            });
+            $this->object->handle($this->definition, true, false);
 
+        $result = ob_get_contents();
+        ob_clean();
+
+        $this->assertEquals('tCors', $this->reach);
+
+        $this->assertEquals(implode("\r\n", $expected), $result);
     }
+
+    public function testCorsDisabled()
+    {
+        $expected = [
+            "HTTP/1.1 200",
+            "Content-Type: application/json",
+            "",
+            "[\"Success!\"]"
+        ];
+
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = "http://localhost/corstest/tCors";
+        $_SERVER['HTTP_ORIGIN'] = "http://anyhostisallowed";
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
+
+        $this->object
+            ->withCorsDisabled()
+            ->withDefaultOutputProcessor(function () {
+                return new MockOutputProcessor(JsonOutputProcessor::class);
+            });
+            $this->object->handle($this->definition, true, false);
+
+        $result = ob_get_contents();
+        ob_clean();
+
+        $this->assertEquals('tCors', $this->reach);
+
+        $this->assertEquals(implode("\r\n", $expected), $result);
+    }
+
 
     public function mimeDataProvider()
     {

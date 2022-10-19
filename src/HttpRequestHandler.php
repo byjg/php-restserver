@@ -21,9 +21,14 @@ class HttpRequestHandler implements RequestHandler
     const METHOD_NOT_ALLOWED = "NOT_ALLOWED";
     const NOT_FOUND = "NOT FOUND";
 
+    const CORS_OK = 'CORS_OK';
+    const CORS_FAILED = 'CORS_FAILED';
+    const CORS_OPTIONS = 'CORS_OPTIONS';
+
     protected $useErrorHandler = true;
     protected $detailedErrorHandler = false;
-    protected $corsOrigins = [];
+    protected $disableCors = false;
+    protected $corsOrigins = ['.*'];
     protected $corsMethods = [ 'GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     protected $corsHeaders = [
         'Authorization',
@@ -56,8 +61,9 @@ class HttpRequestHandler implements RequestHandler
             ErrorHandler::getInstance()->register();
         }
 
-        // Get HttpRequest
+        // Create the Request and Response methods
         $request = $this->getHttpRequest();
+        $response = new HttpResponse();
 
         // Get the URL parameters
         $httpMethod = $request->server('REQUEST_METHOD');
@@ -70,24 +76,31 @@ class HttpRequestHandler implements RequestHandler
 
         // Generic Dispatcher for RestServer
         $dispatcher = $routeDefinition->getDispatcher();
-
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
+
+        $corsStatus = $this->validateCors($response, $request);
+        if ($corsStatus != self::CORS_OK) {
+            $corsOutputProcessor = $this->initializeProcessor($response, $request);
+
+            if ($corsStatus == self::CORS_OPTIONS) {
+                $corsOutputProcessor->writeHeader($response);
+                return;
+            } elseif ($corsStatus == self::CORS_FAILED) {
+                throw new Error401Exception("CORS verification failed. Request Blocked.");
+            }
+        }
 
         // Processing
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
                 if ($this->tryDeliveryPhysicalFile() === false) {
-                    $this->prepareToOutput();
+                    $this->initializeProcessor($response, $request);
                     throw new Error404Exception("Route '$uri' not found");
                 }
                 return true;
 
             case Dispatcher::METHOD_NOT_ALLOWED:
-                $outputProcessor = $this->prepareToOutput();
-                if (strtoupper($httpMethod) == "OPTIONS" && !empty($this->corsOrigins)) {
-                    $this->executeRequest($outputProcessor, function () {}, $request);
-                    return;
-                }
+                $this->initializeProcessor($response, $request);
                 throw new Error405Exception('Method not allowed');
 
             case Dispatcher::FOUND:
@@ -98,14 +111,14 @@ class HttpRequestHandler implements RequestHandler
                 $selectedRoute = $routeInfo[1];
 
                 // Default Handler for errors and
-                $outputProcessor = $this->prepareToOutput($selectedRoute["output_processor"]);
+                $outputProcessor = $this->initializeProcessor($response, $request, $selectedRoute["output_processor"]);
 
                 // Class
                 $class = $selectedRoute["class"];
                 $request->appendVars($vars);
 
                 // Execute the request
-                $this->executeRequest($outputProcessor, $class, $request);
+                $this->executeRequest($outputProcessor, $class, $response, $request);
 
                 break;
 
@@ -114,7 +127,7 @@ class HttpRequestHandler implements RequestHandler
         }
     }
 
-    protected function prepareToOutput($class = null)
+    protected function initializeProcessor(HttpResponse $response, HttpRequest $request, $class = null)
     {
         if (!empty($class)) {
             $outputProcessor = BaseOutputProcessor::getFromClassName($class);
@@ -130,6 +143,8 @@ class HttpRequestHandler implements RequestHandler
             ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
         }
 
+        ErrorHandler::getInstance()->setOutputProcessor($outputProcessor, $response);
+        
         return $outputProcessor;
     }
 
@@ -139,47 +154,52 @@ class HttpRequestHandler implements RequestHandler
     }
 
     /**
+     * Undocumented function
+     *
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @return string
+     */
+    protected function validateCors(HttpResponse $response, HttpRequest $request)
+    {
+        $corsStatus = self::CORS_OK;
+
+        if ($this->disableCors) {
+            return self::CORS_OK;
+        }
+
+        if (!empty($request->server('HTTP_ORIGIN'))) {
+            $corsStatus = self::CORS_FAILED;
+
+            foreach ((array)$this->corsOrigins as $origin) {
+                if (preg_match("~^.*//$origin$~", $request->server('HTTP_ORIGIN'))) {
+                    $response->addHeader("Access-Control-Allow-Origin", $request->server('HTTP_ORIGIN'));
+                    $response->addHeader('Access-Control-Allow-Credentials', 'true');
+                    $response->addHeader('Access-Control-Max-Age', '86400');    // cache for 1 day
+
+                    // Access-Control headers are received during OPTIONS requests
+                    if ($request->server('REQUEST_METHOD') == 'OPTIONS') {
+                        $response->addHeader("Access-Control-Allow-Methods", implode(",", array_merge(['OPTIONS'], $this->corsMethods)));
+                        $response->addHeader("Access-Control-Allow-Headers", implode(",", $this->corsHeaders));
+                        return self::CORS_OPTIONS;
+                    }
+                    $corsStatus = self::CORS_OK;
+                    break;
+                }
+            }
+        }
+        return $corsStatus;
+    }
+
+    /**
      * @param OutputProcessorInterface $outputProcessor
      * @param $class
      * @param HttpRequest $request
      * @throws ClassNotFoundException
      * @throws InvalidClassException
      */
-    protected function executeRequest(OutputProcessorInterface $outputProcessor, $class, HttpRequest $request)
+    protected function executeRequest(OutputProcessorInterface $outputProcessor, $class, HttpResponse $response, HttpRequest $request)
     {
-        // Create the Request and Response methods
-        $response = new HttpResponse();
-        $blockExecutionBecauseOfCors = false;
-
-        if (!empty($request->server('HTTP_ORIGIN'))) {
-            $blockExecutionBecauseOfCors = true;
-
-            // Allow from any origin
-            if (!empty($this->corsOrigins)) {
-                foreach ((array)$this->corsOrigins as $origin) {
-                    if (preg_match("~^.*//$origin$~", $request->server('HTTP_ORIGIN'))) {
-                        $response->addHeader("Access-Control-Allow-Origin", $request->server('HTTP_ORIGIN'));
-                        $response->addHeader('Access-Control-Allow-Credentials', 'true');
-                        $response->addHeader('Access-Control-Max-Age', '86400');    // cache for 1 day
-
-                        // Access-Control headers are received during OPTIONS requests
-                        if ($request->server('REQUEST_METHOD') == 'OPTIONS') {
-                            $response->addHeader("Access-Control-Allow-Methods", implode(",", array_merge(['OPTIONS'], $this->corsMethods)));
-                            $response->addHeader("Access-Control-Allow-Headers", implode(",", $this->corsHeaders));
-                            $outputProcessor->processResponse($response);
-                            return;
-                        }
-                        $blockExecutionBecauseOfCors = false;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if ($blockExecutionBecauseOfCors) {
-            throw new Error401Exception("CORS verification failed. Request Blocked.");
-        }
-
         // Process Closure
         if ($class instanceof Closure) {
             $class($response, $request);
@@ -339,14 +359,22 @@ class HttpRequestHandler implements RequestHandler
         return false;
     }
 
-    public function withDoNotUseErrorHandler()
+    public function withCorsDisabled()
+    {
+        $this->disableCors = true;
+        return $this;
+    }
+
+    public function withErrorHandlerDisabled()
     {
         $this->useErrorHandler = false;
+        return $this;
     }
 
     public function withDetailedErrorHandler()
     {
         $this->detailedErrorHandler = true;
+        return $this;
     }
 
     public function withCorsOrigins($origins)
