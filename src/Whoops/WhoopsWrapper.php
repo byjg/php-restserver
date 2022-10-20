@@ -20,6 +20,11 @@ class WhoopsWrapper extends Handler
     /** @var HttpResponse */
     protected $response;
 
+    public function __construct()
+    {
+        $this->effectiveHandler = new PlainResponseErrorHandler();
+    }
+
     /**
      * Set the effective handler
      *

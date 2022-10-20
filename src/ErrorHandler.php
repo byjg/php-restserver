@@ -23,12 +23,12 @@ class ErrorHandler
      *
      * @var WhoopsWrapper
      */
-    protected $handler = null;
+    protected $wrapper = null;
 
     protected function __construct()
     {
         $this->whoops = new Run();
-        $this->handler = new WhoopsWrapper();
+        $this->wrapper = new WhoopsWrapper();
 
         $this->whoops->popHandler();
         $this->whoops->pushHandler($this->handler);
@@ -41,7 +41,7 @@ class ErrorHandler
      */
     public function setHandler(Handler $handler)
     {
-        $this->handler->setHandler($handler);
+        $this->wrapper->setHandler($handler);
     }
 
     /**
@@ -62,7 +62,7 @@ class ErrorHandler
 
     public function setOutputProcessor(BaseOutputProcessor $processor, HttpResponse $response)
     {
-        $this->handler->setOutputProcessor($processor, $response);
+        $this->wrapper->setOutputProcessor($processor, $response);
     }
 
     // @todo Review

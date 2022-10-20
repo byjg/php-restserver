@@ -2,6 +2,8 @@
 
 namespace My;
 
+use ByJG\RestServer\Exception\Error403Exception;
+use ByJG\RestServer\Exception\Error501Exception;
 use ByJG\RestServer\Route\RouteList;
 
 /**
@@ -32,12 +34,14 @@ $routeDefintion->addRoute(\ByJG\RestServer\Route\Route::get(
     "/testclosure",
     \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class,
     function ($response, $request) {
+        // throw new Error501Exception("Teste");
         $response->write('OK');
     }
 ));
 
 // Handle Request
 $restServer = new \ByJG\RestServer\HttpRequestHandler();
+// $restServer->withCorsOrigins('localhost.*');
 $restServer->handle($routeDefintion);
 
 /**
