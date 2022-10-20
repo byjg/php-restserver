@@ -31,7 +31,7 @@ class ErrorHandler
         $this->wrapper = new WhoopsWrapper();
 
         $this->whoops->popHandler();
-        $this->whoops->pushHandler($this->handler);
+        $this->whoops->pushHandler($this->wrapper);
     }
 
     /**
