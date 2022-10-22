@@ -19,7 +19,6 @@ class JsonLimitedResponseHandler extends ParentJsonErrorHandler
 {
 
     use WhoopsDebugTrait;
-    use WhoopsHeaderTrait;
     use ClassNameBeautifier;
 
     /**
@@ -40,8 +39,6 @@ class JsonLimitedResponseHandler extends ParentJsonErrorHandler
                 "message" => $errorData["message"]
             ]
         );
-
-        $this->setProperHeader($this->getException());
 
         echo json_encode($response, defined('JSON_PARTIAL_OUTPUT_ON_ERROR') ? JSON_PARTIAL_OUTPUT_ON_ERROR : 0);
 

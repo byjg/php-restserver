@@ -14,6 +14,8 @@ use ByJG\RestServer\Middleware\MiddlewareResult;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
 use ByJG\RestServer\Route\RouteListInterface;
+use ByJG\RestServer\Writer\HttpWriter;
+use ByJG\RestServer\Writer\WriterInterface;
 use Closure;
 use FastRoute\Dispatcher;
 use InvalidArgumentException;
@@ -32,6 +34,14 @@ class HttpRequestHandler implements RequestHandler
 
     protected $afterMiddlewareList = [];
     protected $beforeMiddlewareList = [];
+
+    /** @var WriterInterface */
+    protected $writer;
+
+    public function __construct()
+    {
+        $this->writer = new HttpWriter();
+    }
 
     /**
      * @param RouteListInterface $routeDefinition
@@ -66,21 +76,26 @@ class HttpRequestHandler implements RequestHandler
         $dispatcher = $routeDefinition->getDispatcher();
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 
-        // Process Before Middleware
-        $middlewareResult = MiddlewareManagement::processBefore(
-            $this->beforeMiddlewareList,
-            $routeInfo[0],
-            $response,
-            $request
-        );
-        
         // Get OutputProcessor
         $outputProcessor = $this->initializeProcessor(
             $response,
             $request,
             null //$middlewareResult->getOutputProcessorClass()
         );
-
+        
+        // Process Before Middleware
+        try {
+            $middlewareResult = MiddlewareManagement::processBefore(
+                $this->beforeMiddlewareList,
+                $routeInfo[0],
+                $response,
+                $request
+            );
+        } catch (\Exception $ex) {
+            $outputProcessor->processResponse($response);
+            throw $ex;
+        }
+        
         if ($middlewareResult->getStatus() != MiddlewareResult::CONTINUE) {
             $outputProcessor->processResponse($response);
             return true;
@@ -133,6 +148,7 @@ class HttpRequestHandler implements RequestHandler
         } else {
             $outputProcessor = BaseOutputProcessor::getFromHttpAccept();
         }
+        $outputProcessor->setWriter($this->writer);
         $outputProcessor->writeContentType();
         if ($this->detailedErrorHandler) {
             ErrorHandler::getInstance()->setHandler($outputProcessor->getDetailedErrorHandler());
@@ -257,6 +273,12 @@ class HttpRequestHandler implements RequestHandler
 
         $this->defaultOutputProcessor = $processor;
 
+        return $this;
+    }
+
+    public function withWriter(WriterInterface $writer)
+    {
+        $this->writer = $writer;
         return $this;
     }
 }

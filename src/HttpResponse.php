@@ -24,6 +24,7 @@ class HttpResponse
      * @var int
      */
     protected $responseCode = 200;
+    protected $responseCodeDescription = 'OK';
 
     public function __construct()
     {
@@ -140,13 +141,19 @@ class HttpResponse
         return $this->headers;
     }
 
-    public function setResponseCode($code)
+    public function setResponseCode($code, $description = "")
     {
         $this->responseCode = $code;
+        $this->responseCodeDescription = $description;
     }
 
     public function getResponseCode()
     {
         return $this->responseCode;
+    }
+
+    public function getResponseCodeDescription()
+    {
+        return $this->responseCodeDescription;
     }
 }

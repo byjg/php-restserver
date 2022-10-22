@@ -2,6 +2,8 @@
 
 namespace ByJG\RestServer\Middleware;
 
+use ByJG\RestServer\Exception\Error404Exception;
+use ByJG\RestServer\Exception\Error415Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\OutputProcessor\HtmlOutputProcessor;
@@ -113,19 +115,21 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
         ];
 
         if (!file_exists($filename)) {
-            return null;
+            throw new Error404Exception("File does not exists");
         }
 
         $ext = substr(strrchr($filename, "."), 1);
-        if (!in_array($ext, $prohibitedTypes)) {
-            if (array_key_exists($ext, $mimeTypes)) {
-                return $mimeTypes[$ext];
-            } elseif (function_exists('finfo_open')) {
-                $finfo = finfo_open(FILEINFO_MIME);
-                $mimetype = finfo_file($finfo, $filename);
-                finfo_close($finfo);
-                return $mimetype;
-            }
+        if (in_array($ext, $prohibitedTypes)) {
+            throw new Error415Exception("File type not supported");
+        }
+
+        if (array_key_exists($ext, $mimeTypes)) {
+            return $mimeTypes[$ext];
+        } elseif (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME);
+            $mimetype = finfo_file($finfo, $filename);
+            finfo_close($finfo);
+            return $mimetype;
         }
 
         return null;

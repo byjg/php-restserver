@@ -5,6 +5,7 @@ namespace ByJG\RestServer\OutputProcessor;
 use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\ResponseBag;
+use ByJG\RestServer\Writer\WriterInterface;
 
 abstract class BaseOutputProcessor implements OutputProcessorInterface
 {
@@ -12,6 +13,14 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
     protected $onlyString = false;
     protected $header = [];
     protected $contentType = "";
+
+    /** @var WriterInterface */
+    protected $writer;
+
+    public function setWriter(WriterInterface $writer)
+    {
+        $this->writer = $writer;
+    }
 
     public static function getFromContentType($contentType)
     {
@@ -24,7 +33,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         ];
 
         if (!isset($mimeTypeOutputProcessor[$contentType])) {
-            throw new OperationIdInvalidException("There is no output rocessor for $contentType");
+            throw new OperationIdInvalidException("There is no output processor for $contentType");
         }
 
         return $mimeTypeOutputProcessor[$contentType];
@@ -60,10 +69,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
 
     public function writeContentType()
     {
-        if (defined("RESTSERVER_TEST")) {
-            return;
-        }
-        header("Content-Type: " . $this->contentType);
+        $this->writer->header("Content-Type: $this->contentType", true);
     }
 
     public function getContentType()
@@ -73,23 +79,23 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
 
     public function writeHeader(HttpResponse $response)
     {
+        $this->writer->responseCode($response->getResponseCode(), $response->getResponseCodeDescription());
+
         foreach ($response->getHeaders() as $header => $value) {
             if (is_array($value)) {
-                header("$header: " . array_shift($value), true);
+                $this->writer->header("$header: " . array_shift($value), true);
                 foreach ($value as $headerValue) {
-                    header("$header: $headerValue", false);
+                    $this->writer->header("$header: $headerValue", false);
                 }
             } else {
-                header("$header: $value", true);
+                $this->writer->header("$header: $value", true);
             }
         }
-
-        http_response_code($response->getResponseCode());
     }
 
     public function writeData($data)
     {
-        echo $data;
+        $this->writer->echo($data);
     }
 
     public function processResponse(HttpResponse $response)
@@ -107,5 +113,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
                 $this->getFormatter()->process($serialized)
             );
         }
+
+        $this->writer->flush();
     }
 }

@@ -18,7 +18,6 @@ class PlainResponseErrorHandler extends Handler
 {
 
     use WhoopsDebugTrait;
-    use WhoopsHeaderTrait;
     use ClassNameBeautifier;
 
     /**
@@ -52,7 +51,6 @@ class PlainResponseErrorHandler extends Handler
 
         $title = $this->getClassAsTitle($response["type"]);
 
-        $this->setProperHeader($this->getException());
         echo "<html><h1>${title}</h1><p>${response['message']}</p></html>";
 
         return Handler::QUIT;

@@ -8,6 +8,7 @@
 namespace ByJG\RestServer\OutputProcessor;
 
 use ByJG\RestServer\HttpResponse;
+use ByJG\RestServer\Writer\WriterInterface;
 use ByJG\Serializer\Formatter\FormatterInterface;
 use Whoops\Handler\Handler;
 
@@ -17,6 +18,13 @@ use Whoops\Handler\Handler;
  */
 interface OutputProcessorInterface
 {
+    /**
+     * Undocumented function
+     *
+     * @param WriterInterface $writer
+     * @return void
+     */
+    public function setWriter(WriterInterface $writer);
 
     /**
      * @return void
