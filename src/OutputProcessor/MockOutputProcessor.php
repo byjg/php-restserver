@@ -20,10 +20,16 @@ class MockOutputProcessor extends BaseOutputProcessor
 
     public function writeHeader(HttpResponse $response)
     {
+        $headerList = $response->getHeaders();
+        $contentType = $this->getContentType();
+        if (isset($headerList["Content-Type"])) {
+            $contentType = $headerList["Content-Type"];
+            unset($headerList["Content-Type"]);
+        }
         echo "HTTP/1.1 " . $response->getResponseCode() . "\r\n";
-        echo "Content-Type: " . $this->getContentType() . "\r\n";
+        echo "Content-Type: " . $contentType . "\r\n";
 
-        foreach ($response->getHeaders() as $header => $value) {
+        foreach ($headerList as $header => $value) {
             if (is_array($value)) {
                 foreach ($value as $headerValue) {
                     echo "$header: $headerValue\r\n";
@@ -46,7 +52,7 @@ class MockOutputProcessor extends BaseOutputProcessor
      */
     public function writeContentType()
     {
-        // Do nothing;
+        return null;
     }
 
 

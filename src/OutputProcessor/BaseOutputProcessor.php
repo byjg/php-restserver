@@ -4,6 +4,7 @@ namespace ByJG\RestServer\OutputProcessor;
 
 use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\HttpResponse;
+use ByJG\RestServer\ResponseBag;
 
 abstract class BaseOutputProcessor implements OutputProcessorInterface
 {
@@ -99,8 +100,12 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
             ->getResponseBag()
             ->process($this->buildNull, $this->onlyString);
 
-        $this->writeData(
-            $this->getFormatter()->process($serialized)
-        );
+        if ($response->getResponseBag()->getSerializationRule() === ResponseBag::RAW) {
+            $this->writeData($serialized);
+        } else {
+            $this->writeData(
+                $this->getFormatter()->process($serialized)
+            );
+        }
     }
 }

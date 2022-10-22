@@ -3,7 +3,6 @@
 namespace Tests;
 
 use ByJG\RestServer\Exception\ClassNotFoundException;
-use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
@@ -11,13 +10,15 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Route\RouteList;
 use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Middleware\CorsMiddleware;
+use ByJG\RestServer\Middleware\ServerStaticMiddleware;
+use ByJG\RestServer\OutputProcessor\HtmlOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\OutputProcessor\MockOutputProcessor;
 use ByJG\RestServer\Route\Route;
 use PHPUnit\Framework\TestCase;
 
 require __DIR__ . '/AssertOutputProcessor.php';
-require __DIR__ . '/HttpRequestHandlerExposed.php';
 require __DIR__ . '/OpenApiWrapperExposed.php';
 
 define("RESTSERVER_TEST", "RESTSERVER_TEST");
@@ -40,7 +41,7 @@ class ServerRequestHandlerTest extends TestCase
 
     public function setup(): void
     {
-        $this->object = new HttpRequestHandlerExposed();
+        $this->object = new HttpRequestHandler();
         
         $this->reach = false;
         
@@ -200,12 +201,36 @@ class ServerRequestHandlerTest extends TestCase
      */
     public function testHandle6()
     {
+        $expected = [
+            "HTTP/1.1 200",
+            "Content-Type: application/json",
+            "",
+            ""
+        ];
+        $expectedData = [
+            "{",
+            '  "key": "file"',
+            "}",
+            "",
+            ];
+
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "file://" . __DIR__ . "/mimefiles/test.json";
         $_SERVER['SCRIPT_FILENAME'] = __DIR__ . "/mimefiles/test.json";
 
-        $this->assertTrue($this->object->handle($this->definition, false, false));
-        $this->assertTrue($this->object->tryDeliveryPhysicalFile());
+        $this->object
+            ->withMiddleware(new ServerStaticMiddleware())
+            ->withDefaultOutputProcessor(function () {
+                return new MockOutputProcessor(HtmlOutputProcessor::class);
+            });
+
+        $this->object->handle($this->definition, true, false);
+
+        $result = ob_get_contents();
+        ob_clean();
+        ob_end_flush();
+
+        $this->assertEquals(implode("\r\n", $expected) . implode("\n", $expectedData), $result);
     }
 
     /**
@@ -223,7 +248,7 @@ class ServerRequestHandlerTest extends TestCase
         $_SERVER['REQUEST_URI'] = "file://" . __DIR__ . "/mimefiles/test.php";
         $_SERVER['SCRIPT_FILENAME'] = __DIR__ . "/mimefiles/test.php";
 
-        $this->assertTrue($this->object->handle($this->definition, false, false));
+        $this->object->handle($this->definition, false, false);
     }
 
     public function testHandleCors()
@@ -243,14 +268,20 @@ class ServerRequestHandlerTest extends TestCase
         $_SERVER['HTTP_ORIGIN'] = "http://localhost";
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
-        $this->object->withCorsOrigins("localhost")
+        $this->object
+            ->withMiddleware(
+                (new CorsMiddleware())
+                    ->withCorsOrigins("localhost")
+            )
             ->withDefaultOutputProcessor(function () {
                 return new MockOutputProcessor(JsonOutputProcessor::class);
             });
-            $this->object->handle($this->definition, true, false);
+
+        $this->object->handle($this->definition, true, false);
 
         $result = ob_get_contents();
         ob_clean();
+        ob_end_flush();
 
         $this->assertEquals('tCors', $this->reach);
 
@@ -277,7 +308,11 @@ class ServerRequestHandlerTest extends TestCase
         $_SERVER['HTTP_ORIGIN'] = "http://localhost";
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
-        $this->object->withCorsOrigins(["server\.com", "localhost"])
+        $this->object
+            ->withMiddleware(
+                (new CorsMiddleware())
+                    ->withCorsOrigins(["server\.com", "localhost"])
+            )
             ->withDefaultOutputProcessor(function () {
                 return new MockOutputProcessor(JsonOutputProcessor::class);
             })
@@ -285,6 +320,7 @@ class ServerRequestHandlerTest extends TestCase
 
         $result = ob_get_contents();
         ob_clean();
+        ob_end_flush();
 
         $this->assertEquals(implode("\r\n", $expected), $result);
 
@@ -303,7 +339,11 @@ class ServerRequestHandlerTest extends TestCase
         $_SERVER['HTTP_ORIGIN'] = "http://localhost";
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
-        $this->object->withCorsOrigins("anotherhost")
+        $this->object
+            ->withMiddleware(
+                (new CorsMiddleware())
+                    ->withCorsOrigins("anotherhost")
+            )
             ->withDefaultOutputProcessor(function () {
                 return new MockOutputProcessor(JsonOutputProcessor::class);
             })
@@ -328,6 +368,7 @@ class ServerRequestHandlerTest extends TestCase
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
         $this->object
+            ->withMiddleware(new CorsMiddleware())
             ->withDefaultOutputProcessor(function () {
                 return new MockOutputProcessor(JsonOutputProcessor::class);
             });
@@ -335,6 +376,7 @@ class ServerRequestHandlerTest extends TestCase
 
         $result = ob_get_contents();
         ob_clean();
+        ob_end_flush();
 
         $this->assertEquals('tCors', $this->reach);
 
@@ -356,7 +398,6 @@ class ServerRequestHandlerTest extends TestCase
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
         $this->object
-            ->withCorsDisabled()
             ->withDefaultOutputProcessor(function () {
                 return new MockOutputProcessor(JsonOutputProcessor::class);
             });
@@ -364,6 +405,7 @@ class ServerRequestHandlerTest extends TestCase
 
         $result = ob_get_contents();
         ob_clean();
+        ob_end_flush();
 
         $this->assertEquals('tCors', $this->reach);
 
@@ -389,13 +431,13 @@ class ServerRequestHandlerTest extends TestCase
      */
     public function testMimeContentType($entry, $expected)
     {
-        $this->assertEquals($expected, $this->object->mimeContentType($entry));
+        $serverStatic = new ServerStaticMiddleware();
+        $this->assertEquals($expected, $serverStatic->mimeContentType($entry));
     }
 
     public function testMimeContentTypeNotFound()
     {
-        $this->expectException(Error404Exception::class);
-
-        $this->assertEquals("", $this->object->mimeContentType("test/aaaa"));
+        $serverStatic = new ServerStaticMiddleware();
+        $this->assertNull($serverStatic->mimeContentType("test/aaaa"));
     }
 }

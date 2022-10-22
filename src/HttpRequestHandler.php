@@ -3,11 +3,14 @@
 namespace ByJG\RestServer;
 
 use ByJG\RestServer\Exception\ClassNotFoundException;
-use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
+use ByJG\RestServer\Middleware\AfterMiddlewareInterface;
+use ByJG\RestServer\Middleware\BeforeMiddlewareInterface;
+use ByJG\RestServer\Middleware\MiddlewareManagement;
+use ByJG\RestServer\Middleware\MiddlewareResult;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
 use ByJG\RestServer\Route\RouteListInterface;
@@ -21,29 +24,14 @@ class HttpRequestHandler implements RequestHandler
     const METHOD_NOT_ALLOWED = "NOT_ALLOWED";
     const NOT_FOUND = "NOT FOUND";
 
-    const CORS_OK = 'CORS_OK';
-    const CORS_FAILED = 'CORS_FAILED';
-    const CORS_OPTIONS = 'CORS_OPTIONS';
-
     protected $useErrorHandler = true;
     protected $detailedErrorHandler = false;
-    protected $disableCors = false;
-    protected $corsOrigins = ['.*'];
-    protected $corsMethods = [ 'GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
-    protected $corsHeaders = [
-        'Authorization',
-        'Content-Type',
-        'Accept',
-        'Origin',
-        'User-Agent',
-        'Cache-Control',
-        'Keep-Alive',
-        'X-Requested-With',
-        'If-Modified-Since'
-    ];
 
     protected $defaultOutputProcessor = null;
     protected $defaultOutputProcessorArgs = [];
+
+    protected $afterMiddlewareList = [];
+    protected $beforeMiddlewareList = [];
 
     /**
      * @param RouteListInterface $routeDefinition
@@ -78,29 +66,34 @@ class HttpRequestHandler implements RequestHandler
         $dispatcher = $routeDefinition->getDispatcher();
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 
-        $corsStatus = $this->validateCors($response, $request);
-        if ($corsStatus != self::CORS_OK) {
-            $corsOutputProcessor = $this->initializeProcessor($response, $request);
+        // Process Before Middleware
+        $middlewareResult = MiddlewareManagement::processBefore(
+            $this->beforeMiddlewareList,
+            $routeInfo[0],
+            $response,
+            $request
+        );
+        
+        // Get OutputProcessor
+        $outputProcessor = $this->initializeProcessor(
+            $response,
+            $request,
+            null //$middlewareResult->getOutputProcessorClass()
+        );
 
-            if ($corsStatus == self::CORS_OPTIONS) {
-                $corsOutputProcessor->writeHeader($response);
-                return;
-            } elseif ($corsStatus == self::CORS_FAILED) {
-                throw new Error401Exception("CORS verification failed. Request Blocked.");
-            }
+        if ($middlewareResult->getStatus() != MiddlewareResult::CONTINUE) {
+            $outputProcessor->processResponse($response);
+            return true;
         }
 
         // Processing
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
-                if ($this->tryDeliveryPhysicalFile() === false) {
-                    $this->initializeProcessor($response, $request);
-                    throw new Error404Exception("Route '$uri' not found");
-                }
-                return true;
+                $outputProcessor->processResponse($response);
+                throw new Error404Exception("Route '$uri' not found");
 
             case Dispatcher::METHOD_NOT_ALLOWED:
-                $this->initializeProcessor($response, $request);
+                $outputProcessor->processResponse($response);
                 throw new Error405Exception('Method not allowed');
 
             case Dispatcher::FOUND:
@@ -110,13 +103,17 @@ class HttpRequestHandler implements RequestHandler
                 // Get the Selected Route
                 $selectedRoute = $routeInfo[1];
 
-                // Default Handler for errors and
-                $outputProcessor = $this->initializeProcessor($response, $request, $selectedRoute["output_processor"]);
-
                 // Class
                 $class = $selectedRoute["class"];
                 $request->appendVars($vars);
 
+                // Get OutputProcessor
+                $outputProcessor = $this->initializeProcessor(
+                    $response,
+                    $request,
+                    $selectedRoute["output_processor"]
+                );
+                
                 // Execute the request
                 $this->executeRequest($outputProcessor, $class, $response, $request);
 
@@ -154,51 +151,18 @@ class HttpRequestHandler implements RequestHandler
     }
 
     /**
-     * Undocumented function
-     *
-     * @param HttpResponse $response
-     * @param HttpRequest $request
-     * @return string
-     */
-    protected function validateCors(HttpResponse $response, HttpRequest $request)
-    {
-        $corsStatus = self::CORS_OK;
-
-        if ($this->disableCors) {
-            return self::CORS_OK;
-        }
-
-        if (!empty($request->server('HTTP_ORIGIN'))) {
-            $corsStatus = self::CORS_FAILED;
-
-            foreach ((array)$this->corsOrigins as $origin) {
-                if (preg_match("~^.*//$origin$~", $request->server('HTTP_ORIGIN'))) {
-                    $response->addHeader("Access-Control-Allow-Origin", $request->server('HTTP_ORIGIN'));
-                    $response->addHeader('Access-Control-Allow-Credentials', 'true');
-                    $response->addHeader('Access-Control-Max-Age', '86400');    // cache for 1 day
-
-                    // Access-Control headers are received during OPTIONS requests
-                    if ($request->server('REQUEST_METHOD') == 'OPTIONS') {
-                        $response->addHeader("Access-Control-Allow-Methods", implode(",", array_merge(['OPTIONS'], $this->corsMethods)));
-                        $response->addHeader("Access-Control-Allow-Headers", implode(",", $this->corsHeaders));
-                        return self::CORS_OPTIONS;
-                    }
-                    $corsStatus = self::CORS_OK;
-                    break;
-                }
-            }
-        }
-        return $corsStatus;
-    }
-
-    /**
      * @param OutputProcessorInterface $outputProcessor
      * @param $class
      * @param HttpRequest $request
      * @throws ClassNotFoundException
      * @throws InvalidClassException
      */
-    protected function executeRequest(OutputProcessorInterface $outputProcessor, $class, HttpResponse $response, HttpRequest $request)
+    protected function executeRequest(
+        OutputProcessorInterface $outputProcessor,
+        $class,
+        HttpResponse $response,
+        HttpRequest $request
+    )
     {
         // Process Closure
         if ($class instanceof Closure) {
@@ -218,6 +182,13 @@ class HttpRequestHandler implements RequestHandler
             throw new InvalidClassException("There is no method '$class::$function''");
         }
         $instance->$function($response, $request);
+
+        MiddlewareManagement::processAfter(
+            $this->afterMiddlewareList,
+            $response,
+            $request
+        );
+        
         $outputProcessor->processResponse($response);
     }
 
@@ -249,122 +220,6 @@ class HttpRequestHandler implements RequestHandler
         return $this->process($routeDefinition);
     }
 
-    /**
-     * @return bool
-     * @throws Error404Exception
-     */
-    protected function tryDeliveryPhysicalFile()
-    {
-        $file = $_SERVER['SCRIPT_FILENAME'];
-        if (!empty($file) && file_exists($file)) {
-            $mime = $this->mimeContentType($file);
-
-            if ($mime === false) {
-                return false;
-            }
-
-            if (!defined("RESTSERVER_TEST")) {
-                header("Content-Type: $mime");
-            }
-            echo file_get_contents($file);
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Get the Mime Type based on the filename
-     *
-     * @param string $filename
-     * @return string
-     * @throws Error404Exception
-     */
-    protected function mimeContentType($filename)
-    {
-        $prohibitedTypes = [
-            "php",
-            "vb",
-            "cs",
-            "rb",
-            "py",
-            "py3",
-            "lua"
-        ];
-
-        $mimeTypes = [
-            'txt' => 'text/plain',
-            'htm' => 'text/html',
-            'html' => 'text/html',
-            'css' => 'text/css',
-            'js' => 'application/javascript',
-            'json' => 'application/json',
-            'xml' => 'application/xml',
-            'swf' => 'application/x-shockwave-flash',
-            'flv' => 'video/x-flv',
-            // images
-            'png' => 'image/png',
-            'jpe' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'jpg' => 'image/jpeg',
-            'gif' => 'image/gif',
-            'bmp' => 'image/bmp',
-            'ico' => 'image/vnd.microsoft.icon',
-            'tiff' => 'image/tiff',
-            'tif' => 'image/tiff',
-            'svg' => 'image/svg+xml',
-            'svgz' => 'image/svg+xml',
-            // archives
-            'zip' => 'application/zip',
-            'rar' => 'application/x-rar-compressed',
-            'exe' => 'application/x-msdownload',
-            'msi' => 'application/x-msdownload',
-            'cab' => 'application/vnd.ms-cab-compressed',
-            // audio/video
-            'mp3' => 'audio/mpeg',
-            'qt' => 'video/quicktime',
-            'mov' => 'video/quicktime',
-            // adobe
-            'pdf' => 'application/pdf',
-            'psd' => 'image/vnd.adobe.photoshop',
-            'ai' => 'application/postscript',
-            'eps' => 'application/postscript',
-            'ps' => 'application/postscript',
-            // ms office
-            'doc' => 'application/msword',
-            'rtf' => 'application/rtf',
-            'xls' => 'application/vnd.ms-excel',
-            'ppt' => 'application/vnd.ms-powerpoint',
-            // open office
-            'odt' => 'application/vnd.oasis.opendocument.text',
-            'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
-        ];
-
-        if (!file_exists($filename)) {
-            throw new Error404Exception();
-        }
-
-        $ext = substr(strrchr($filename, "."), 1);
-        if (!in_array($ext, $prohibitedTypes)) {
-            if (array_key_exists($ext, $mimeTypes)) {
-                return $mimeTypes[$ext];
-            } elseif (function_exists('finfo_open')) {
-                $finfo = finfo_open(FILEINFO_MIME);
-                $mimetype = finfo_file($finfo, $filename);
-                finfo_close($finfo);
-                return $mimetype;
-            }
-        }
-
-        return false;
-    }
-
-    public function withCorsDisabled()
-    {
-        $this->disableCors = true;
-        return $this;
-    }
-
     public function withErrorHandlerDisabled()
     {
         $this->useErrorHandler = false;
@@ -377,21 +232,15 @@ class HttpRequestHandler implements RequestHandler
         return $this;
     }
 
-    public function withCorsOrigins($origins)
+    public function withMiddleware($middleware)
     {
-        $this->corsOrigins = $origins;
-        return $this;
-    }
+        if ($middleware instanceof BeforeMiddlewareInterface) {
+            $this->beforeMiddlewareList[] = $middleware;
+        }
+        if ($middleware instanceof AfterMiddlewareInterface) {
+            $this->afterMiddlewareList[] = $middleware;
+        }
 
-    public function withAcceptCorsHeaders($headers)
-    {
-        $this->corsHeaders = $headers;
-        return $this;
-    }
-
-    public function withAcceptCorsMethods($methods)
-    {
-        $this->corsMethods = $methods;
         return $this;
     }
 

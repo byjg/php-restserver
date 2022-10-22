@@ -6,7 +6,6 @@
 [![GitHub license](https://img.shields.io/github/license/byjg/restserver.svg)](https://opensource.byjg.com/opensource/licensing.html)
 [![GitHub release](https://img.shields.io/github/release/byjg/restserver.svg)](https://github.com/byjg/restserver/releases/)
 
-
 Create RESTFull services with different and customizable output handlers (JSON, XML, Html, etc.).
 Auto-Generate routes from swagger.json definition.
 
@@ -18,7 +17,7 @@ composer require "byjg/restserver=4.0.*"
 
 ## Understanding the RestServer library
 
-Basically the RestServer library enables you to create a full feature RESTFul 
+Basically the RestServer library enables you to create a full feature RESTFul
 application on top of the well-known [FastRoute](https://github.com/nikic/FastRoute) library.
 
 You can get this working in a few minutes. Just follow this steps:
@@ -30,7 +29,7 @@ You can get this working in a few minutes. Just follow this steps:
 
 2. Process the Request and output the Response
 
-Each "Path" or "Route" can have your own handle for output the response. 
+Each "Path" or "Route" can have your own handle for output the response.
 The are several handlers implemented and you can implement your own.
 
 ## 1. Creating the Routes
@@ -100,8 +99,8 @@ class ClassName
 
 ### Auto-Generate from an OpenApi definition
 
-[OpenApi](https://www.openapis.org/) is the world's largest framework of API developer tools for the 
-OpenAPI Specification(OAS), enabling development across the entire API lifecycle, from design and documentation, 
+[OpenApi](https://www.openapis.org/) is the world's largest framework of API developer tools for the
+OpenAPI Specification(OAS), enabling development across the entire API lifecycle, from design and documentation,
 to test and deployment.
 
 Restserver supports both specifications 2.0 (former Swagger) and 3.0. 
@@ -242,7 +241,7 @@ For example:
  * @param \ByJG\RestServer\HttpRequest $request
  */
 function ($response, $request) {
-    $response->getResponseBag()->serializationRule(ResponseBag::SINGLE_OBJECT);
+    $response->getResponseBag()->setSerializationRule(ResponseBag::SINGLE_OBJECT);
     
     // Output an array
     $array = ["field" => "value"];
@@ -386,18 +385,35 @@ The currently implementation are:
 - JSON
 - XML
 
-## CORS support
+## Middleware
 
-Restserver can handle CORS and send the proper headers to the browser:
+HttpServerHandler has the ability to inject processing Before and After process the request. Using this you can inject code, change headers
+or even block the processing.
+
+You need to implement the class `BeforeMiddlewareInterface` and `AfterMiddlewareInterface` and then add to the handler:
 
 ```php
 <?php
 $httpHandler = new \ByJG\RestServer\HttpRequestHandler();
 $httpHandler
-    ->withCorsOrigins([/* list of accepted origing */])  // Required to enable CORS
+    ->withMiddleware(/*... instance of BeforeMiddlewareInterface or AfterMiddlewareInterface ...*/);
+```
+
+You can add how many middleware you want, however they will be processing in the order you added them.
+
+### Existing Middleware
+
+#### CORS support
+
+Enable the Server Handler process the CORS headers and block the access if the origin doesn't match.
+
+```php
+<?php
+$corsMiddleware = new \ByJG\RestServer\Middleware\CorsMiddleware();
+$corsMiddleware
+    ->withCorsOrigins([/* list of accepted origin */])  // Required to enable CORS
     ->withAcceptCorsMethods([/* list of methods */])     // Optional. Default all methods. Don't need to pass 'OPTIONS'
     ->withAcceptCorsHeaders([/* list of headers */])     // Optional. Default all headers
-    ->handle(/* definition */)
 ```
 
 Note that the method `withCorsOrigins` accept a list of hosts regular expressions. e.g.
@@ -406,9 +422,30 @@ Note that the method `withCorsOrigins` accept a list of hosts regular expression
 - `example\.(com|org)` - Accept both example.com and example.org
 - `example\.com(\.br)?` -Accept both example.com and example.com.br
 
+#### Server Static Files
+
+By default, Http Server Handler will only process the defined routes. Using this middleware, if a route is not found,
+the middleware will try to find a file that matches with the request path and output it.
+
+```php
+<?php
+$serverStatic = new ServerStaticMiddleware();
+```
+
+### Creating your own middleware
+
+All middleware needs to implement the `BeforeMiddlewareInterface` or `AfterMiddlewareInterface`. When added to Http Server, the handler
+will determine if it will be processed before or after the request. If the same class implements both interface, then it will run before and after.
+
+The middleware is required to return a `MiddlewareResult` class. The possible values are:
+
+- Middleware::continue() - It will continue to process the next middleware and process the request.
+- Middleware::stopProcessingOthers() - It will stop processing the next middleware and it will abort gracefully processing the request.
+- Middleware::stopProcessing() - It will allow to process the next middleware, however it will abort gracefully processing the request.
+
 ## Running the rest server
 
-You need to set up your restserver to handle ALL requests to a single PHP file. Normally is "app.php" 
+You need to set up your restserver to handle ALL requests to a single PHP file. Normally is "app.php"
 
 ### PHP Built-in server
 
