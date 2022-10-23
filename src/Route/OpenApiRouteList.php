@@ -132,13 +132,9 @@ class OpenApiRouteList extends RouteList
 
                 $outputProcessor = $this->getMethodOutputProcessor($method, $basePath. $path, $properties);
 
-                $routes[] = new Route(
-                    strtoupper($method),
-                    $basePath . $path,
-                    $outputProcessor,
-                    $parts[0],
-                    $parts[1]
-                );
+                $routes[] = (new Route(strtoupper($method), $basePath . $path))
+                    ->withOutputProcessor($outputProcessor)
+                    ->withClass($parts[0], $parts[1]);
             }
         }
 

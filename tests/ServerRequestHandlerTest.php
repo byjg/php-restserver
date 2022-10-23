@@ -49,52 +49,38 @@ class ServerRequestHandlerTest extends TestCase
         $this->definition = new RouteList();
         
         $this->definition->addRoute(
-            Route::get(
-                '/test',
-                JsonOutputProcessor::class,
-                function ($response, $request) {
+            Route::get('/test')
+                ->withClosure(function ($response, $request) {
                     $this->assertInstanceOf(HttpResponse::class, $response);
                     $this->assertInstanceOf(HttpRequest::class, $request);
                     $response->write(["key" => "value"]);
                     $this->reach = true;
-                }
-            )
+                })
         );
 
         $this->definition->addRoute(
-            Route::get(
-                '/test/{id}',
-                JsonOutputProcessor::class,
-                function ($response, $request) {
+            Route::get('/test/{id}')
+                ->withClosure(function ($response, $request) {
                     $this->assertInstanceOf(HttpResponse::class, $response);
                     $this->assertInstanceOf(HttpRequest::class, $request);
                     $this->reach = $request->param('id');
                     $response->write(["key" => $request->param('id')]);
-                }
-            )
+                })
         );
 
         $this->definition->addRoute(
-            Route::get(
-                '/corstest/{id}',
-                JsonOutputProcessor::class,
-                function ($response, $request) {
+            Route::get('/corstest/{id}')
+                ->withClosure(function ($response, $request) {
                     $this->assertInstanceOf(HttpResponse::class, $response);
                     $this->assertInstanceOf(HttpRequest::class, $request);
                     $this->reach = $request->param('id');
                     $response->write("Success!");
-                }
-            )
+                })
         );
 
         $this->definition->addRoute(
-            new Route(
-                'GET',
-                '/error',
-                JsonOutputProcessor::class,
-                '\\My\\Class',
-                'method'
-            )
+            (new Route('GET', '/error'))
+                ->withClass('\\My\\Class', 'method')
         );
     }
 

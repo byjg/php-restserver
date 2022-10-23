@@ -41,14 +41,11 @@ The are several handlers implemented and you can implement your own.
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $routeDefinition = new \ByJG\RestServer\Route\RouteList();
-$routeDefinition->addRoute(
-    \ByJG\RestServer\Route\Route::get(
-        '/testclosure',                   // The route
-        \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class,
-        function ($response, $request) {  // The Closure for Process the request 
-            $response->write('OK');
-        }
-    )
+$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testclosure")
+    ->withOutputProcessor(\ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class)
+    ->withClosure(function ($response, $request) {
+        $response->write('OK');
+    })
 );
 
 $restServer = new \ByJG\RestServer\HttpRequestHandler();
@@ -62,13 +59,9 @@ $restServer->handle($routeDefinition);
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $routeDefintion = new \ByJG\RestServer\Route\RouteList();
-$routeDefintion->addRoute(
-    \ByJG\RestServer\Route\Route::get(
-        '/test',                          // The Route
-        \ByJG\RestServer\OutputProcessor\XmlOutputProcessor::class,
-        '\\My\\ClassName',                 // The class that have the method
-        'SomeMethod'                     // The method will process the request
-    )
+$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testxml")
+    ->withOutputProcessor(XmlOutputProcessor::class)
+    ->withClass(\My\ClassName::class, "someMethod")
 );
 
 $restServer = new \ByJG\RestServer\HttpRequestHandler();
@@ -302,13 +295,9 @@ You can choose another Handlers. See below for a list of Available Response Hand
 require_once __DIR__ . '/../vendor/autoload.php';
 
 $routeDefinition = new \ByJG\RestServer\Route\RouteList();
-$routeDefinition->addRoute(
-    \ByJG\RestServer\Route\Route::get(
-        '/test',                          // The Route
-        \ByJG\RestServer\OutputProcessor\XmlOutputProcessor::class,          // The Handler
-        '\\My\\ClassName',                // The class that have the method
-        'SomeMethod'                     // The method will process the request
-    )
+$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/test")
+    ->withOutputProcessor(XmlOutputProcessor::class)
+    ->withClass(\My\ClassName::class, "someMethod")
 );
 
 $restServer = new \ByJG\RestServer\HttpRequestHandler();

@@ -8,8 +8,8 @@ class Route
 {
     protected $method;
     protected $path;
-    protected $outputProcessor;
-    protected $class;
+    protected $outputProcessor = null;
+    protected $class = null;
 
     /**
      * Route constructor.
@@ -20,17 +20,28 @@ class Route
      * @param Closure|string $class
      * @param string|null $methodName
      */
-    public function __construct($method, $path, $outputProcessor, $class, $methodName = "")
+    public function __construct($method, $path)
     {
         $this->setMethod($method);
         $this->setPath($path);
+    }
+
+    public function withOutputProcessor($outputProcessor)
+    {
         $this->setOutputProcessor($outputProcessor);
-        
-        if ($class instanceof \Closure) {
-            $this->setClass($class);
-        } else {
-            $this->setClass([$class, $methodName]);
-        }
+        return $this;
+    }
+
+    public function withClosure(\Closure $closure)
+    {
+        $this->setClass($closure);
+        return $this;
+    }
+
+    public function withClass($class, $methodName)
+    {
+        $this->setClass([$class, $methodName]);
+        return $this;
     }
 
     /**
@@ -48,7 +59,6 @@ class Route
     protected function setMethod($method)
     {
         $this->method = $method;
-        return $this;
     }
 
     /**
@@ -66,7 +76,6 @@ class Route
     protected function setPath($path)
     {
         $this->path = $path;
-        return $this;
     }
 
     /**
@@ -84,7 +93,6 @@ class Route
     protected function setOutputProcessor($outputProcessor)
     {
         $this->outputProcessor = $outputProcessor;
-        return $this;
     }
 
     /**
@@ -102,7 +110,6 @@ class Route
     protected function setClass($class)
     {
         $this->class = $class;
-        return $this;
     }
 
 
@@ -115,9 +122,9 @@ class Route
      * @param null $methodName
      * @return Route
      */
-    public static function get($path, $outputProcessor, $class, $methodName = null)
+    public static function get($path)
     {
-        return new Route('GET', $path, $outputProcessor, $class, $methodName);
+        return new Route('GET', $path);
     }
 
     /**
@@ -129,9 +136,9 @@ class Route
      * @param null $methodName
      * @return Route
      */
-    public static function post($path, $outputProcessor, $class, $methodName = null)
+    public static function post($path)
     {
-        return new Route('POST', $path, $outputProcessor, $class, $methodName);
+        return new Route('POST', $path);
     }
 
     /**
@@ -143,9 +150,9 @@ class Route
      * @param null $methodName
      * @return Route
      */
-    public static function put($path, $outputProcessor, $class, $methodName = null)
+    public static function put($path)
     {
-        return new Route('PUT', $path, $outputProcessor, $class, $methodName);
+        return new Route('PUT', $path);
     }
 
     /**
@@ -157,8 +164,8 @@ class Route
      * @param null $methodName
      * @return Route
      */
-    public static function delete($path, $outputProcessor, $class, $methodName = null)
+    public static function delete($path)
     {
-        return new Route('DELETE', $path, $outputProcessor, $class, $methodName);
+        return new Route('DELETE', $path);
     }
 }

@@ -6,6 +6,7 @@ use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\Exception\SchemaInvalidException;
 use ByJG\RestServer\Exception\SchemaNotFoundException;
 use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
+use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
 use ByJG\RestServer\Route\Route;
 use ByJG\RestServer\Route\OpenApiRouteList;
@@ -177,146 +178,66 @@ class OpenApiRouteDefinitionTest extends TestCase
     {
         $this->assertEquals(
             [
-                new Route(
-                    "GET",
-                    "/v2/pet/findByStatus",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "findPetsByStatus"
-                ),
-                new Route(
-                    "GET",
-                    "/v2/pet/findByTags",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "findPetsByTags"
-                ),
-                new Route(
-                    "POST",
-                    "/v2/pet",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "addPet"
-                ),
-                new Route(
-                    "PUT",
-                    "/v2/pet",
-                    "ByJG\RestServer\OutputProcessor\JsonOutputProcessor",
-                    "PetStore\Pet",
-                    "updatePet"
-                ),
-                new Route(
-                    "GET",
-                    "/v2/store/inventory",
-                    "ByJG\RestServer\OutputProcessor\JsonOutputProcessor",
-                    "PetStore\Pet",
-                    "getInventory"
-                ),
-                new Route(
-                    "POST",
-                    "/v2/store/order",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "placeOrder"
-                ),
-                new Route(
-                    "POST",
-                    "/v2/user/createWithArray",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "createUsersWithArrayInput"
-                ),
-                new Route(
-                    "POST",
-                    "/v2/user/createWithList",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "createUsersWithListInput"
-                ),
-                new Route(
-                    "GET",
-                    "/v2/user/login",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "loginUser"
-                ),
-                new Route(
-                    "GET",
-                    "/v2/user/logout",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "logoutUser"
-                ),
-                new Route(
-                    "POST",
-                    "/v2/user",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "createUser"
-                ),
-                new Route(
-                    "POST",
-                    "/v2/pet/{petId}/uploadImage",
-                    "ByJG\RestServer\OutputProcessor\JsonOutputProcessor",
-                    "PetStore\Pet",
-                    "uploadFile"
-                ),
-                new Route(
-                    "GET",
-                    "/v2/pet/{petId}",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "getPetById"
-                ),
-                new Route(
-                    "POST",
-                    "/v2/pet/{petId}",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "updatePetWithForm"
-                ),
-                new Route(
-                    "DELETE",
-                    "/v2/pet/{petId}",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "deletePet"
-                ),
-                new Route(
-                    "GET",
-                    "/v2/store/order/{orderId}",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "getOrderById"
-                ),
-                new Route(
-                    "DELETE",
-                    "/v2/store/order/{orderId}",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "deleteOrder"
-                ),
-                new Route(
-                    "GET",
-                    "/v2/user/{username}",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "getUserByName"
-                ),
-                new Route(
-                    "PUT",
-                    "/v2/user/{username}",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "updateUser"
-                ),
-                new Route(
-                    "DELETE",
-                    "/v2/user/{username}",
-                    "ByJG\RestServer\OutputProcessor\XmlOutputProcessor",
-                    "PetStore\Pet",
-                    "deleteUser"
-                ),
+                (new Route("GET", "/v2/pet/findByStatus"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "findPetsByStatus"),
+                (new Route("GET", "/v2/pet/findByTags"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "findPetsByTags"),
+                (new Route("POST", "/v2/pet"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "addPet"),
+                (new Route("PUT", "/v2/pet"))
+                    ->withOutputProcessor(JsonOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "updatePet"),
+                (new Route("GET", "/v2/store/inventory"))
+                    ->withOutputProcessor(JsonOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "getInventory"),
+                (new Route("POST", "/v2/store/order"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "placeOrder"),
+                (new Route("POST", "/v2/user/createWithArray"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "createUsersWithArrayInput"),
+                (new Route("POST", "/v2/user/createWithList"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "createUsersWithListInput"),
+                (new Route("GET", "/v2/user/login"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "loginUser"),
+                (new Route("GET", "/v2/user/logout"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "logoutUser"),
+                (new Route("POST", "/v2/user"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "createUser"),
+                (new Route("POST", "/v2/pet/{petId}/uploadImage"))
+                    ->withOutputProcessor(JsonOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "uploadFile"),
+                (new Route("GET", "/v2/pet/{petId}"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "getPetById"),
+                (new Route("POST", "/v2/pet/{petId}"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "updatePetWithForm"),
+                (new Route("DELETE", "/v2/pet/{petId}"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "deletePet"),
+                (new Route("GET", "/v2/store/order/{orderId}"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "getOrderById"),
+                (new Route("DELETE", "/v2/store/order/{orderId}"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "deleteOrder"),
+                (new Route("GET", "/v2/user/{username}"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "getUserByName"),
+                (new Route("PUT", "/v2/user/{username}"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "updateUser"),
+                (new Route("DELETE", "/v2/user/{username}"))
+                    ->withOutputProcessor(XmlOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "deleteUser"),
             ],
             $object->getRoutes()
         );
@@ -326,146 +247,66 @@ class OpenApiRouteDefinitionTest extends TestCase
     {
         $this->assertEquals(
             [
-                new Route(
-                    "GET",
-                    "/v2/pet/findByStatus",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "findPetsByStatus"
-                ),
-                new Route(
-                    "GET",
-                    "/v2/pet/findByTags",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "findPetsByTags"
-                ),
-                new Route(
-                    "POST",
-                    "/v2/pet",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "addPet"
-                ),
-                new Route(
-                    "PUT",
-                    "/v2/pet",
-                    "ByJG\RestServer\OutputProcessor\JsonOutputProcessor",
-                    "PetStore\Pet",
-                    "updatePet"
-                ),
-                new Route(
-                    "GET",
-                    "/v2/store/inventory",
-                    "ByJG\RestServer\OutputProcessor\JsonOutputProcessor",
-                    "PetStore\Pet",
-                    "getInventory"
-                ),
-                new Route(
-                    "POST",
-                    "/v2/store/order",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "placeOrder"
-                ),
-                new Route(
-                    "POST",
-                    "/v2/user/createWithArray",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "createUsersWithArrayInput"
-                ),
-                new Route(
-                    "POST",
-                    "/v2/user/createWithList",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "createUsersWithListInput"
-                ),
-                new Route(
-                    "GET",
-                    "/v2/user/login",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "loginUser"
-                ),
-                new Route(
-                    "GET",
-                    "/v2/user/logout",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "logoutUser"
-                ),
-                new Route(
-                    "POST",
-                    "/v2/user",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "createUser"
-                ),
-                new Route(
-                    "POST",
-                    "/v2/pet/{petId}/uploadImage",
-                    "ByJG\RestServer\OutputProcessor\JsonOutputProcessor",
-                    "PetStore\Pet",
-                    "uploadFile"
-                ),
-                new Route(
-                    "GET",
-                    "/v2/pet/{petId}",
-                    "ByJG\RestServer\OutputProcessor\JsonOutputProcessor",
-                    "PetStore\Pet",
-                    "getPetById"
-                ),
-                new Route(
-                    "POST",
-                    "/v2/pet/{petId}",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "updatePetWithForm"
-                ),
-                new Route(
-                    "DELETE",
-                    "/v2/pet/{petId}",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "deletePet"
-                ),
-                new Route(
-                    "GET",
-                    "/v2/store/order/{orderId}",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "getOrderById"
-                ),
-                new Route(
-                    "DELETE",
-                    "/v2/store/order/{orderId}",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "deleteOrder"
-                ),
-                new Route(
-                    "GET",
-                    "/v2/user/{username}",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "getUserByName"
-                ),
-                new Route(
-                    "PUT",
-                    "/v2/user/{username}",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "updateUser"
-                ),
-                new Route(
-                    "DELETE",
-                    "/v2/user/{username}",
-                    "ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor",
-                    "PetStore\Pet",
-                    "deleteUser"
-                ),
+                (new Route("GET", "/v2/pet/findByStatus"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "findPetsByStatus"),
+                (new Route("GET", "/v2/pet/findByTags"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "findPetsByTags"),
+                (new Route("POST", "/v2/pet"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "addPet"),
+                (new Route("PUT", "/v2/pet"))
+                    ->withOutputProcessor(JsonOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "updatePet"),
+                (new Route("GET", "/v2/store/inventory"))
+                    ->withOutputProcessor(JsonOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "getInventory"),
+                (new Route("POST", "/v2/store/order"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "placeOrder"),
+                (new Route("POST", "/v2/user/createWithArray"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "createUsersWithArrayInput"),
+                (new Route("POST", "/v2/user/createWithList"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "createUsersWithListInput"),
+                (new Route("GET", "/v2/user/login"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "loginUser"),
+                (new Route("GET", "/v2/user/logout"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "logoutUser"),
+                (new Route("POST", "/v2/user"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "createUser"),
+                (new Route("POST", "/v2/pet/{petId}/uploadImage"))
+                    ->withOutputProcessor(JsonOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "uploadFile"),
+                (new Route("GET", "/v2/pet/{petId}"))
+                    ->withOutputProcessor(JsonOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "getPetById"),
+                (new Route("POST", "/v2/pet/{petId}"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "updatePetWithForm"),
+                (new Route("DELETE", "/v2/pet/{petId}"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "deletePet"),
+                (new Route("GET", "/v2/store/order/{orderId}"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "getOrderById"),
+                (new Route("DELETE", "/v2/store/order/{orderId}"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "deleteOrder"),
+                (new Route("GET", "/v2/user/{username}"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "getUserByName"),
+                (new Route("PUT", "/v2/user/{username}"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "updateUser"),
+                (new Route("DELETE", "/v2/user/{username}"))
+                    ->withOutputProcessor(JsonCleanOutputProcessor::class)
+                    ->withClass("PetStore\Pet", "deleteUser"),
             ],
             $object->getRoutes()
         );
