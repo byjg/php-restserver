@@ -14,10 +14,8 @@ use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\Middleware\CorsMiddleware;
 use ByJG\RestServer\Middleware\ServerStaticMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
-use ByJG\RestServer\OutputProcessor\MockOutputProcessor;
 use ByJG\RestServer\Route\Route;
 use ByJG\RestServer\Writer\MemoryWriter;
-use Exception;
 use PHPUnit\Framework\TestCase;
 
 require __DIR__ . '/OpenApiWrapperExposed.php';
@@ -207,7 +205,7 @@ class ServerRequestHandlerTest extends TestCase
     {
         $expectedHeader = [
             "HTTP/1.1 200 OK",
-            "Content-Type: application/json",
+            "Content-Type: application/json; charset=us-ascii",
         ];
         $expectedData =
             "{\n" .
@@ -339,9 +337,9 @@ class ServerRequestHandlerTest extends TestCase
     public function mimeDataProvider()
     {
         return [
-            [ __DIR__ . "/mimefiles/test.json", "application/json"],
-            [ __DIR__ . "/mimefiles/test.pdf", "application/pdf"],
-            [ __DIR__ . "/mimefiles/test.png", "image/png"],
+            [ __DIR__ . "/mimefiles/test.json", "application/json; charset=us-ascii"],
+            [ __DIR__ . "/mimefiles/test.pdf", "application/pdf; charset=binary"],
+            [ __DIR__ . "/mimefiles/test.png", "image/png; charset=binary"],
         ];
 
     }
@@ -360,8 +358,6 @@ class ServerRequestHandlerTest extends TestCase
 
     public function testFileNotFound()
     {
-        $this->expectException(Error404Exception::class);
-
         $serverStatic = new ServerStaticMiddleware();
         $this->assertNull($serverStatic->mimeContentType("test/aaaa"));
     }

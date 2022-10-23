@@ -2,6 +2,7 @@
 
 namespace My;
 
+use ByJG\RestServer\Middleware\ServerStaticMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
 use ByJG\RestServer\Route\RouteList;
@@ -37,6 +38,7 @@ $restServer = new \ByJG\RestServer\HttpRequestHandler();
 $restServer->withDefaultOutputProcessor(JsonOutputProcessor::class);
 // $restServer->withDetailedErrorHandler();
 // $restServer->withCorsOrigins('localhost.*');
+$restServer->withMiddleware(new ServerStaticMiddleware());
 $restServer->handle($routeDefinition);
 
 /**
