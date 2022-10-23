@@ -6,6 +6,7 @@ class StdoutWriter implements WriterInterface
 {
     protected $headerList = [];
     protected $data = '';
+    protected $statusCode = 0;
 
     public function header($header, $replace = true)
     {
@@ -30,6 +31,7 @@ class StdoutWriter implements WriterInterface
     public function responseCode($responseCode, $description)
     {
         $this->header("HTTP/1.1 $responseCode $description");
+        $this->statusCode = $responseCode;
     }
 
     public function echo($data)

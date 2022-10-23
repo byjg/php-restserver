@@ -19,4 +19,9 @@ class MemoryWriter extends StdoutWriter
     {
         return $this->headerList;
     }
+
+    public function getStatusCode()
+    {
+        return $this->statusCode;
+    }
 }

@@ -35,6 +35,9 @@ class HttpRequestHandler implements RequestHandler
     protected $afterMiddlewareList = [];
     protected $beforeMiddlewareList = [];
 
+    protected $httpRequest = null;
+    protected $httpResponse = null;
+
     /** @var WriterInterface */
     protected $writer;
 
@@ -59,14 +62,10 @@ class HttpRequestHandler implements RequestHandler
             ErrorHandler::getInstance()->register();
         }
 
-        // Create the Request and Response methods
-        $request = $this->getHttpRequest();
-        $response = new HttpResponse();
-
         // Get the URL parameters
-        $httpMethod = $request->server('REQUEST_METHOD');
-        $uri = parse_url($request->server('REQUEST_URI'), PHP_URL_PATH);
-        $query = parse_url($request->server('REQUEST_URI'), PHP_URL_QUERY);
+        $httpMethod = $this->getHttpRequest()->server('REQUEST_METHOD');
+        $uri = parse_url($this->getHttpRequest()->server('REQUEST_URI'), PHP_URL_PATH);
+        $query = parse_url($this->getHttpRequest()->server('REQUEST_URI'), PHP_URL_QUERY);
         $queryStr = [];
         if (!empty($query)) {
             parse_str($query, $queryStr);
@@ -77,38 +76,34 @@ class HttpRequestHandler implements RequestHandler
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 
         // Get OutputProcessor
-        $outputProcessor = $this->initializeProcessor(
-            $response,
-            $request,
-            null //$middlewareResult->getOutputProcessorClass()
-        );
+        $outputProcessor = $this->initializeProcessor();
         
         // Process Before Middleware
         try {
             $middlewareResult = MiddlewareManagement::processBefore(
                 $this->beforeMiddlewareList,
                 $routeInfo[0],
-                $response,
-                $request
+                $this->getHttpResponse(),
+                $this->getHttpRequest()
             );
         } catch (\Exception $ex) {
-            $outputProcessor->processResponse($response);
+            $outputProcessor->processResponse($this->getHttpResponse());
             throw $ex;
         }
         
         if ($middlewareResult->getStatus() != MiddlewareResult::CONTINUE) {
-            $outputProcessor->processResponse($response);
+            $outputProcessor->processResponse($this->getHttpResponse());
             return true;
         }
 
         // Processing
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
-                $outputProcessor->processResponse($response);
+                $outputProcessor->processResponse($this->getHttpResponse());
                 throw new Error404Exception("Route '$uri' not found");
 
             case Dispatcher::METHOD_NOT_ALLOWED:
-                $outputProcessor->processResponse($response);
+                $outputProcessor->processResponse($this->getHttpResponse());
                 throw new Error405Exception('Method not allowed');
 
             case Dispatcher::FOUND:
@@ -120,17 +115,15 @@ class HttpRequestHandler implements RequestHandler
 
                 // Class
                 $class = $selectedRoute["class"];
-                $request->appendVars($vars);
+                $this->getHttpRequest()->appendVars($vars);
 
                 // Get OutputProcessor
                 $outputProcessor = $this->initializeProcessor(
-                    $response,
-                    $request,
                     $selectedRoute["output_processor"]
                 );
                 
                 // Execute the request
-                $this->executeRequest($outputProcessor, $class, $response, $request);
+                $this->executeRequest($outputProcessor, $class);
 
                 break;
 
@@ -139,7 +132,7 @@ class HttpRequestHandler implements RequestHandler
         }
     }
 
-    protected function initializeProcessor(HttpResponse $response, HttpRequest $request, $class = null)
+    protected function initializeProcessor($class = null)
     {
         if (!empty($class)) {
             $outputProcessor = BaseOutputProcessor::getFromClassName($class);
@@ -156,34 +149,54 @@ class HttpRequestHandler implements RequestHandler
             ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
         }
 
-        ErrorHandler::getInstance()->setOutputProcessor($outputProcessor, $response);
+        ErrorHandler::getInstance()->setOutputProcessor($outputProcessor, $this->getHttpResponse());
         
         return $outputProcessor;
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return HttpRequest
+     */
     protected function getHttpRequest()
     {
-        return new HttpRequest($_GET, $_POST, $_SERVER, isset($_SESSION) ? $_SESSION : [], $_COOKIE);
+        if (is_null($this->httpRequest)) {
+            $this->httpRequest = new HttpRequest($_GET, $_POST, $_SERVER, isset($_SESSION) ? $_SESSION : [], $_COOKIE);
+        }
+
+        return $this->httpRequest;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return HttpResponse
+     */
+    protected function getHttpResponse()
+    {
+        if (is_null($this->httpResponse)) {
+            $this->httpResponse = new HttpResponse();
+        }
+
+        return $this->httpResponse;
     }
 
     /**
      * @param OutputProcessorInterface $outputProcessor
      * @param $class
-     * @param HttpRequest $request
      * @throws ClassNotFoundException
      * @throws InvalidClassException
      */
     protected function executeRequest(
         OutputProcessorInterface $outputProcessor,
-        $class,
-        HttpResponse $response,
-        HttpRequest $request
+        $class
     )
     {
         // Process Closure
         if ($class instanceof Closure) {
-            $class($response, $request);
-            $outputProcessor->processResponse($response);
+            $class($this->getHttpResponse(), $this->getHttpRequest());
+            $outputProcessor->processResponse($this->getHttpResponse());
             return;
         }
 
@@ -197,15 +210,15 @@ class HttpRequestHandler implements RequestHandler
         if (!method_exists($instance, $function)) {
             throw new InvalidClassException("There is no method '$class::$function''");
         }
-        $instance->$function($response, $request);
+        $instance->$function($this->getHttpResponse(), $this->getHttpRequest());
 
         MiddlewareManagement::processAfter(
             $this->afterMiddlewareList,
-            $response,
-            $request
+            $this->getHttpResponse(),
+            $this->getHttpRequest()
         );
         
-        $outputProcessor->processResponse($response);
+        $outputProcessor->processResponse($this->getHttpResponse());
     }
 
     /**
