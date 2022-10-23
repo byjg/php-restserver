@@ -8,6 +8,7 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\OutputProcessor\HtmlOutputProcessor;
 use ByJG\RestServer\ResponseBag;
+use ByJG\Util\Uri;
 use FastRoute\Dispatcher;
 
 class ServerStaticMiddleware implements BeforeMiddlewareInterface
@@ -30,8 +31,16 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
             return MiddlewareResult::continue();
         }
 
-        $file = $_SERVER['SCRIPT_FILENAME'];
-        if (!empty($file) && strpos($file, $_SERVER["SCRIPT_NAME"]) !== false && file_exists($file)) {
+        $requestUri = new Uri($_SERVER['REQUEST_URI']);
+        if ($requestUri->getScheme() === "file") {
+            $file = $requestUri->getPath();
+        } else {
+            $script = explode('/', $_SERVER['SCRIPT_FILENAME']);
+            $script[count($script)-1] = ltrim($requestUri->getPath(), '/');
+            $file = implode('/', $script);
+        }
+
+        if (file_exists($file)) {
             $mime = $this->mimeContentType($file);
 
             if (empty($mime)) {
