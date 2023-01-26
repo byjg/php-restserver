@@ -43,7 +43,7 @@ class JwtMiddleware implements BeforeMiddlewareInterface
         }
 
         try {
-            $request->appendVars($this->jwtWrapper->extractData());
+            $request->appendVars((array)$this->jwtWrapper->extractData());
         } catch (JwtWrapperException $ex) {
             throw new Error401Exception($ex->getMessage());
         }
