@@ -8,6 +8,7 @@ use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\ResponseBag;
 use ByJG\Util\JwtWrapper;
 use ByJG\Util\JwtWrapperException;
+use Exception;
 
 class JwtMiddleware implements BeforeMiddlewareInterface
 {
@@ -15,9 +16,10 @@ class JwtMiddleware implements BeforeMiddlewareInterface
     protected $ignorePath = [];
     protected $jwtWrapper;
 
-    protected function __construct(JwtWrapper $jwtWrapper)
+    public function __construct(JwtWrapper $jwtWrapper, $ignorePath = [])
     {
         $this->jwtWrapper = $jwtWrapper;
+        $this->ignorePath = $ignorePath;
     }
 
     /**
@@ -35,7 +37,7 @@ class JwtMiddleware implements BeforeMiddlewareInterface
     )
     {
         foreach ($this->ignorePath as $path) {
-            if (preg_match($path, $request->server('PATH_INFO'))) {
+            if (preg_match("~$path~", $request->getRequestPath())) {
                 return MiddlewareResult::continue();
             }
         }

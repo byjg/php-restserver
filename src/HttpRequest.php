@@ -217,6 +217,11 @@ class HttpRequest
         return $servername;
     }
 
+    public function getRequestPath()
+    {
+        return parse_url($this->server('REQUEST_URI'), PHP_URL_PATH);
+    }
+
     private $uploadedFiles;
 
     /**
