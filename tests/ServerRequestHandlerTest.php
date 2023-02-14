@@ -205,7 +205,7 @@ class ServerRequestHandlerTest extends TestCase
     {
         $expectedHeader = [
             "HTTP/1.1 200 OK",
-            "Content-Type: application/json; charset=us-ascii",
+            "Content-Type: application/json",
         ];
         $expectedData =
             "{\n" .
@@ -337,9 +337,9 @@ class ServerRequestHandlerTest extends TestCase
     public function mimeDataProvider()
     {
         return [
-            [ __DIR__ . "/mimefiles/test.json", "application/json; charset=us-ascii"],
-            [ __DIR__ . "/mimefiles/test.pdf", "application/pdf; charset=binary"],
-            [ __DIR__ . "/mimefiles/test.png", "image/png; charset=binary"],
+            [ __DIR__ . "/mimefiles/test.json", "application/json"],
+            [ __DIR__ . "/mimefiles/test.pdf", "application/pdf"],
+            [ __DIR__ . "/mimefiles/test.png", "image/png"],
         ];
 
     }
