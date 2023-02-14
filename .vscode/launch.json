@@ -16,7 +16,13 @@
                 "app-dist.php"
             ],
             "program": "",
-            "cwd": "${workspaceRoot}/web",
+            "cwd": "${workspaceRoot}/public",
+            "port": 9003,
+            "serverReadyAction": {
+                "pattern": "Development Server \\(http://localhost:([0-9]+)\\) started",
+                "uriFormat": "http://localhost:%s/testjson",
+                "action": "openExternally"
+            }
         },
         {
             "name": "Debug current Script in Console",

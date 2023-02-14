@@ -49,7 +49,7 @@ class MockRequestHandler extends HttpRequestHandler
     public static function mock(RouteListInterface $routes, RequestInterface $request)
     {
         $handler = new MockRequestHandler($request);
-        $handler->handle($routes, true, false);
+        $handler->handle($routes, false, false);
         return $handler;
     }
 

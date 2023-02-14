@@ -8,7 +8,8 @@ php -S localhost:8080 app-dist.php
 
 Endpoints
 
-- GET /test
+- GET /testjson
+- GET /testxml
 - GET /testclosure
 
 ## Basic OpeApi
