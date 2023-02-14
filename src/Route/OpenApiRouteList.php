@@ -124,9 +124,9 @@ class OpenApiRouteList extends RouteList
                 }
 
                 $parts = explode('::', $properties['operationId']);
-                if (count($parts) !== 2) {
+                if (count($parts) !== 2 && count($parts) !== 4) {
                     throw new OperationIdInvalidException(
-                        'OperationId needs to be in the format Namespace\\class::method'
+                        'OperationId needs to be in the format Namespace\\class::method or Method::Path::Namespace\\class::method'
                     );
                 }
 
@@ -134,7 +134,7 @@ class OpenApiRouteList extends RouteList
 
                 $routes[] = (new Route(strtoupper($method), $basePath . $path))
                     ->withOutputProcessor($outputProcessor)
-                    ->withClass($parts[0], $parts[1]);
+                    ->withClass($parts[count($parts)-2], $parts[count($parts)-1]);
             }
         }
 

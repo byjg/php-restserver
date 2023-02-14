@@ -122,12 +122,11 @@ The "operationId" must have the `Namespace\\Class::method` like the example belo
 
 We recommend you use the [zircote/swagger-php](https://github.com/zircote/swagger-php) tool
 to generate automatically your JSON file from PHPDocs comments.
-Is the best way for maintain your code documented and with the Swagger definition updated. 
-Since the Zircode Swagger PHP version 2.0.14 you can
-generate the proper "operationId" for you. Just run on command line:
+
+In that case the `operationId` will be generated automatically. The format will be: `HTTP_METHOD::PATH::Namespace\\Class::method` (e.g. `GET::/pet::PetStore\\Pet::getPet`)
 
 ```bash
-swagger --operationid
+vendor/bin/openapi -c operationid.hash=false src
 ```
 
 After you have the proper swagger.json just call the `HttpRequestHandler`
