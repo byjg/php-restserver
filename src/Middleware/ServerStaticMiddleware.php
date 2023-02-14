@@ -1079,7 +1079,11 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
             throw new Error500Exception("ServerStaticMiddleware requires finfo extension");
         }
 
-        $mimetype = $this->getContentType($filename);
+        if (version_compare(PHP_VERSION, '7.3.0', '<=') || !function_exists('mime_content_type')) {
+            $mimetype = $this->getContentType($filename);
+        } else {
+            $mimetype = mime_content_type($filename);
+        }
         return $mimetype;
     }
 
