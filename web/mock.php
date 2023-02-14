@@ -41,10 +41,10 @@ $request = Request::getInstance(Uri::getInstanceFromString("http://localhost/tes
 // Handle Request
 $mockHandler = MockRequestHandler::mock($routeDefinition, $request);
 
-print_r($mockHandler->getPs7Response()->getStatusCode());
+print_r($mockHandler->getPsr7Response()->getStatusCode());
 echo "\n";
-print_r($mockHandler->getPs7Response()->getHeaders());
-print_r($mockHandler->getPs7Response()->getBody()->getContents());
+print_r($mockHandler->getPsr7Response()->getHeaders());
+print_r($mockHandler->getPsr7Response()->getBody()->getContents());
 
 
 // $request = Request::getInstance(Uri::getInstanceFromString("http://localhost/testclosure"));

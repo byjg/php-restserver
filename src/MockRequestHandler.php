@@ -67,7 +67,7 @@ class MockRequestHandler extends HttpRequestHandler
 
     protected $psr7Response = null;
 
-    public function getPs7Response()
+    public function getPsr7Response()
     {
         if (is_null($this->psr7Response)) {
             $this->psr7Response = new Response($this->writer->getStatusCode());
