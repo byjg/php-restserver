@@ -72,6 +72,7 @@ class CorsMiddleware implements BeforeMiddlewareInterface
 
             foreach ((array)$this->corsOrigins as $origin) {
                 if (preg_match("~^.*//$origin$~", $request->server('HTTP_ORIGIN'))) {
+                    $response->setResponseCode(204, 'No Content');
                     $response->addHeader("Access-Control-Allow-Origin", $request->server('HTTP_ORIGIN'));
                     $response->addHeader('Access-Control-Allow-Credentials', 'true');
                     $response->addHeader('Access-Control-Max-Age', '86400');    // cache for 1 day
