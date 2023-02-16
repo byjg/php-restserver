@@ -244,9 +244,6 @@ class ServerRequestHandlerTest extends TestCase
         $expectedHeader = [
             "HTTP/1.1 200 OK",
             "Content-Type: application/json",
-            "Access-Control-Allow-Origin: http://localhost",
-            "Access-Control-Allow-Credentials: true",
-            "Access-Control-Max-Age: 86400",
         ];
         $expectedData = "[\"Success!\"]";
 
@@ -265,7 +262,7 @@ class ServerRequestHandlerTest extends TestCase
     public function testHandleCorsOptions()
     {
         $expectedHeader = [
-            "HTTP/1.1 200 OK",
+            "HTTP/1.1 204 No Content",
             "Content-Type: application/json",
             "Access-Control-Allow-Origin: http://localhost",
             "Access-Control-Allow-Credentials: true",
@@ -301,9 +298,6 @@ class ServerRequestHandlerTest extends TestCase
         $expectedHeader = [
             "HTTP/1.1 200 OK",
             "Content-Type: application/json",
-            "Access-Control-Allow-Origin: http://anyhostisallowed",
-            "Access-Control-Allow-Credentials: true",
-            "Access-Control-Max-Age: 86400",
         ];
         $expectedData = "[\"Success!\"]";
 
