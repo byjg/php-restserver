@@ -16,7 +16,7 @@
     "filp/whoops": "^2.14",
     "byjg/cache-engine": "dev-bump",
     "byjg/webrequest": "^5.0.0.x-dev",
-    "byjg/jwt-wrapper": "^2.0",
+    "byjg/jwt-wrapper": "dev-bump",
     "ext-json": "*"
   },
   "suggest": {
