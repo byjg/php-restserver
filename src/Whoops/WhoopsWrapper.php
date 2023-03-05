@@ -8,6 +8,7 @@ use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ReflectionMethod;
 use Whoops\Exception\Inspector;
 use Whoops\Handler\Handler;
+use Whoops\Inspector\InspectorInterface;
 use Whoops\RunInterface;
 
 class WhoopsWrapper extends Handler
@@ -93,7 +94,7 @@ class WhoopsWrapper extends Handler
      * @param  Inspector $inspector
      * @return void
      */
-    public function setInspector(Inspector $inspector)
+    public function setInspector(InspectorInterface $inspector)
     {
         return $this->effectiveHandler->setInspector($inspector);
     }
