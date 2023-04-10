@@ -40,10 +40,10 @@ class HttpRequest
      * @param string $value
      * @return string|boolean
      */
-    public function get($value)
+    public function get($value, $default = false)
     {
         if (!isset($this->get[$value])) {
-            return false;
+            return $default;
         } else {
             return $this->get[$value];
         }
@@ -55,10 +55,10 @@ class HttpRequest
      * @param string $value
      * @return string|boolean
      */
-    public function post($value)
+    public function post($value, $default = false)
     {
         if (!isset($this->post[$value])) {
-            return false;
+            return $default;
         } else {
             return $this->post[$value];
         }
@@ -70,10 +70,10 @@ class HttpRequest
      * @param string $value
      * @return string|boolean
      */
-    public function server($value)
+    public function server($value, $default = false)
     {
         if (!isset($this->server[$value])) {
-            return false;
+            return $default;
         } else {
             return $this->server[$value];
         }
@@ -85,10 +85,10 @@ class HttpRequest
      * @param string $value
      * @return string|boolean
      */
-    public function session($value)
+    public function session($value, $default = false)
     {
         if (!isset($this->session[$value])) {
-            return false;
+            return $default;
         } else {
             return $this->session[$value];
         }
@@ -100,10 +100,10 @@ class HttpRequest
      * @param string $value
      * @return string|boolean
      */
-    public function cookie($value)
+    public function cookie($value, $default = false)
     {
         if (!isset($this->cookie[$value])) {
-            return false;
+            return $default;
         } else {
             return $this->cookie[$value];
         }
@@ -115,10 +115,10 @@ class HttpRequest
      * @param string $value
      * @return string|boolean
      */
-    public function request($value)
+    public function request($value, $default = false)
     {
         if (!isset($this->phpRequest[$value])) {
-            return false;
+            return $default;
         } else {
             return $this->phpRequest[$value];
         }
@@ -130,10 +130,10 @@ class HttpRequest
      * @param string $value
      * @return string|boolean
      */
-    public function param($value)
+    public function param($value, $default = false)
     {
         if (!isset($this->param[$value])) {
-            return false;
+            return $default;
         } else {
             return $this->param[$value];
         }
