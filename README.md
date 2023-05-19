@@ -77,9 +77,9 @@ namespace My;
 class ClassName
 {
     //...
-    
+
     /**
-     * @param \ByJG\RestServer\HttpResponse $response 
+     * @param \ByJG\RestServer\HttpResponse $response
      * @param \ByJG\RestServer\HttpRequest $request
      */
     public function someMethod($response, $request)
@@ -96,12 +96,12 @@ class ClassName
 OpenAPI Specification(OAS), enabling development across the entire API lifecycle, from design and documentation,
 to test and deployment.
 
-Restserver supports both specifications 2.0 (former Swagger) and 3.0. 
+Restserver supports both specifications 2.0 (former Swagger) and 3.0.
 
 There are several tools for create and maintain the definition. Once you're using this concept/methodology
 you can apply here and generate automatically the routes without duplicate your work.
 
-First you need to create a swagger.json file. 
+First you need to create a swagger.json file.
 The "operationId" must have the `Namespace\\Class::method` like the example below:
 
 ```json
@@ -149,7 +149,7 @@ It is possible to cache the route by adding any PSR-16 instance on the second pa
 
 ```php
 <?php
-$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteList(__DIR__ . '/swagger.json'); 
+$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteList(__DIR__ . '/swagger.json');
 $routeDefinition->withCache(new \ByJG\Cache\Psr16\FileSystemCacheEngine());
 ```
 
@@ -157,7 +157,7 @@ $routeDefinition->withCache(new \ByJG\Cache\Psr16\FileSystemCacheEngine());
 
 As the Swagger process is fully automated, you can define the handler by Mime Type or Route:
 
-*Mime Type*
+#### Mime Type
 
 ```php
 <?php
@@ -168,7 +168,7 @@ $routeDefinition->withOutputProcessorForMimeType(
 );
 ```
 
-*Route*
+#### Route
 
 ```php
 <?php
@@ -182,7 +182,7 @@ $routeDefinition->withOutputProcessorForRoute(
 
 ## 2. Processing the Request and Response
 
-You need to implement a method, function or clousure with two parameters - Response and Request - in that order. 
+You need to implement a method, function or clousure with two parameters - Response and Request - in that order.
 
 ## The HttpRequest and HttpResponse object
 
@@ -191,7 +191,7 @@ The HttpRequest and the HttpResponse always will be passed to the function will 
 The HttpRequest have all information about the request, and the HttpResponse will be used to send back
 informations to the requester.
 
-**HttpRequest**
+### HttpRequest
 
 - get($var): get a value passed in the query string
 - post($var): get a value passed by the POST Form
@@ -204,7 +204,7 @@ informations to the requester.
 - getRequestServer(): get the request server name;
 - uploadedFiles(): Return a instance of the UploadedFiles();
 
-**HttpResponse**
+### HttpResponse
 
 - setSession($var, $value): set a value in the session;
 - removeSession($var): remove a value from the session;
@@ -219,9 +219,9 @@ informations to the requester.
 
 ### Output your data
 
-To output your data you *have to* use the `$response->write($object)`. 
+To output your data you *have to* use the `$response->write($object)`.
 The write method supports you output a object, stdclass, array or string. The Handler object will
-parse the output and setup in the proper format. 
+parse the output and setup in the proper format.
 
 For example:
 
@@ -234,7 +234,7 @@ For example:
  */
 function ($response, $request) {
     $response->getResponseBag()->setSerializationRule(ResponseBag::SINGLE_OBJECT);
-    
+
     // Output an array
     $array = ["field" => "value"];
     $response->write($array);
@@ -245,9 +245,9 @@ function ($response, $request) {
     $obj->OtherField = "OK";
     $response->write($obj);
 
-    // Model  
+    // Model
     // Can be an object :
-    //    - with public properties 
+    //    - with public properties
     //    - with getters and setters
     //    - with mixed public properties and getters and setters
     // See more about object transformations in the project https://github.com/byjg/anydataset
@@ -276,7 +276,7 @@ The result will be something like:
 
 ## The OutputProcessors
 
-An OutputProcessor will parse the `$response->write($obj)` and output in the proper format. 
+An OutputProcessor will parse the `$response->write($obj)` and output in the proper format.
 The available handlers are:
 
 - JsonOutputProcessor
@@ -335,7 +335,7 @@ This project uses the project `flip/whoops` to handle the errors. The default be
 ```php
 [
     "type" => Exception Type,
-    "message" => Error Message. 
+    "message" => Error Message.
 ]
 ```
 
@@ -461,4 +461,3 @@ RewriteRule ^(.*)$ ./app.php [QSA,NC,L]
 
 ----
 [Open source ByJG](http://opensource.byjg.com)
-

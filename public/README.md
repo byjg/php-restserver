@@ -2,8 +2,8 @@
 
 ## Basic API
 
-```
-php -S localhost:8080 app-dist.php 
+```bash
+php -S localhost:8080 app-dist.php
 ```
 
 Endpoints
@@ -14,8 +14,8 @@ Endpoints
 
 ## Basic OpeApi
 
-```
-php -S localhost:8080 app-openapi.php 
+```bash
+php -S localhost:8080 app-openapi.php
 ```
 
 Endpoints

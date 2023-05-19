@@ -9,14 +9,14 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "php": ">=5.6.0",
-    "byjg/serializer": "dev-major_refactory",
+    "php": ">=7.4",
+    "byjg/serializer": "5.0.0.x-dev",
     "byjg/singleton-pattern": "1.0.*",
     "nikic/fast-route": "v1.3.*",
     "filp/whoops": "^2.14",
-    "byjg/cache-engine": "dev-bump",
-    "byjg/webrequest": "^5.0.0.x-dev",
-    "byjg/jwt-wrapper": "dev-bump",
+    "byjg/cache-engine": "5.0.0.x-dev",
+    "byjg/webrequest": "dev-5.0.0rc",
+    "byjg/jwt-wrapper": "5.0.0.x-dev",
     "ext-json": "*"
   },
   "suggest": {
