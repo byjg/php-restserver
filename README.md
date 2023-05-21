@@ -1,20 +1,23 @@
 # PHP Rest Server
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/byjg/restserver/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/byjg/restserver/?branch=master)
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/40968662-27b2-4a31-9872-a29bdd68da2b/mini.png)](https://insight.sensiolabs.com/projects/40968662-27b2-4a31-9872-a29bdd68da2b)
-[![Build Status](https://travis-ci.com/byjg/restserver.svg?branch=master)](https://travis-ci.com/byjg/restserver)
 
+[![Build Status](https://github.com/byjg/restserver/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/restserver/actions/workflows/phpunit.yml)
+[![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
+[![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/restserver/)
+[![GitHub license](https://img.shields.io/github/license/byjg/restserver.svg)](https://opensource.byjg.com/opensource/licensing.html)
+[![GitHub release](https://img.shields.io/github/release/byjg/restserver.svg)](https://github.com/byjg/restserver/releases/)
 
 Create RESTFull services with different and customizable output handlers (JSON, XML, Html, etc.).
 Auto-Generate routes from swagger.json definition.
 
-# Installation
+## Installation
 
 ```bash
 composer require "byjg/restserver=4.0.*"
 ```
-# Understanding the RestServer library
 
-Basically the RestServer library enables you to create a full feature RESTFul 
+## Understanding the RestServer library
+
+Basically the RestServer library enables you to create a full feature RESTFul
 application on top of the well-known [FastRoute](https://github.com/nikic/FastRoute) library.
 
 You can get this working in a few minutes. Just follow this steps:
@@ -23,49 +26,42 @@ You can get this working in a few minutes. Just follow this steps:
     - Using Clousures (Easiest)
     - Using Classes
     - Using the OpenApi 2 (former Swagger) and OpenApi 3 documentation (the most reliable and for long-term and maintable applications)
-    
+
 2. Process the Request and output the Response
 
-Each "Path" or "Route" can have your own handle for output the response. 
+Each "Path" or "Route" can have your own handle for output the response.
 The are several handlers implemented and you can implement your own.
 
-# 1. Creating the Routes
+## 1. Creating the Routes
 
-## Using Closures
+### Using Closures
 
 ```php
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$routeDefinition = new \ByJG\RestServer\Route\RouteDefinition();
-$routeDefinition->addRoute(
-    \ByJG\RestServer\Route\RoutePattern::get(
-        '/testclosure',                   // The route
-        \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class,
-        function ($response, $request) {  // The Closure for Process the request 
-            $response->write('OK');
-        }
-    )
+$routeDefinition = new \ByJG\RestServer\Route\RouteList();
+$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testclosure")
+    ->withOutputProcessor(\ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class)
+    ->withClosure(function ($response, $request) {
+        $response->write('OK');
+    })
 );
 
 $restServer = new \ByJG\RestServer\HttpRequestHandler();
 $restServer->handle($routeDefinition);
 ```
 
-## Using Classes
+### Using Classes
 
 ```php
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$routeDefintion = new \ByJG\RestServer\Route\RouteDefinition();
-$routeDefintion->addRoute(
-    \ByJG\RestServer\Route\RoutePattern::get(
-        '/test',                          // The Route
-        \ByJG\RestServer\OutputProcessor\XmlOutputProcessor::class,
-        '\\My\\ClassName',                 // The class that have the method
-        'SomeMethod'                     // The method will process the request
-    )
+$routeDefintion = new \ByJG\RestServer\Route\RouteList();
+$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testxml")
+    ->withOutputProcessor(XmlOutputProcessor::class)
+    ->withClass(\My\ClassName::class, "someMethod")
 );
 
 $restServer = new \ByJG\RestServer\HttpRequestHandler();
@@ -94,10 +90,10 @@ class ClassName
 }
 ```
 
-## Auto-Generate from an OpenApi definition
+### Auto-Generate from an OpenApi definition
 
-[OpenApi](https://www.openapis.org/) is the world's largest framework of API developer tools for the 
-OpenAPI Specification(OAS), enabling development across the entire API lifecycle, from design and documentation, 
+[OpenApi](https://www.openapis.org/) is the world's largest framework of API developer tools for the
+OpenAPI Specification(OAS), enabling development across the entire API lifecycle, from design and documentation,
 to test and deployment.
 
 Restserver supports both specifications 2.0 (former Swagger) and 3.0. 
@@ -126,12 +122,11 @@ The "operationId" must have the `Namespace\\Class::method` like the example belo
 
 We recommend you use the [zircote/swagger-php](https://github.com/zircote/swagger-php) tool
 to generate automatically your JSON file from PHPDocs comments.
-Is the best way for maintain your code documented and with the Swagger definition updated. 
-Since the Zircode Swagger PHP version 2.0.14 you can
-generate the proper "operationId" for you. Just run on command line:
+
+In that case the `operationId` will be generated automatically. The format will be: `HTTP_METHOD::PATH::Namespace\\Class::method` (e.g. `GET::/pet::PetStore\\Pet::getPet`)
 
 ```bash
-swagger --operationid
+vendor/bin/openapi -c operationid.hash=false src
 ```
 
 After you have the proper swagger.json just call the `HttpRequestHandler`
@@ -142,23 +137,23 @@ and set automatic routes:
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '/swagger.json');
+$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteList(__DIR__ . '/swagger.json');
 
 $restServer = new \ByJG\RestServer\HttpRequestHandler();
 $restServer->handle($routeDefinition);
 ```
 
-## Caching the Routes
+### Caching the Routes
 
 It is possible to cache the route by adding any PSR-16 instance on the second parameter of the constructor:
 
 ```php
 <?php
-$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '/swagger.json'); 
+$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteList(__DIR__ . '/swagger.json'); 
 $routeDefinition->withCache(new \ByJG\Cache\Psr16\FileSystemCacheEngine());
 ```
 
-## Customizing the Handlers
+### Customizing the Handlers
 
 As the Swagger process is fully automated, you can define the handler by Mime Type or Route:
 
@@ -166,7 +161,7 @@ As the Swagger process is fully automated, you can define the handler by Mime Ty
 
 ```php
 <?php
-$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '/swagger.json');
+$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteList(__DIR__ . '/swagger.json');
 $routeDefinition->withOutputProcessorForMimeType(
     "application/json",
     \ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor::class
@@ -177,7 +172,7 @@ $routeDefinition->withOutputProcessorForMimeType(
 
 ```php
 <?php
-$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteDefinition(__DIR__ . '/swagger.json');
+$routeDefinition = new \ByJG\RestServer\Route\OpenApiRouteList(__DIR__ . '/swagger.json');
 $routeDefinition->withOutputProcessorForRoute(
     "GET",
     "/pet/{petId}",
@@ -185,7 +180,7 @@ $routeDefinition->withOutputProcessorForRoute(
 );
 ```
 
-# 2. Processing the Request and Response
+## 2. Processing the Request and Response
 
 You need to implement a method, function or clousure with two parameters - Response and Request - in that order. 
 
@@ -222,7 +217,7 @@ informations to the requester.
 - addHeader($header, $value): Add an header entry;
 - setResponseCode($value): Set the HTTP response code (eg. 200, 401, etc)
 
-## Output your data 
+### Output your data
 
 To output your data you *have to* use the `$response->write($object)`. 
 The write method supports you output a object, stdclass, array or string. The Handler object will
@@ -238,7 +233,7 @@ For example:
  * @param \ByJG\RestServer\HttpRequest $request
  */
 function ($response, $request) {
-    $response->getResponseBag()->serializationRule(ResponseBag::SINGLE_OBJECT);
+    $response->getResponseBag()->setSerializationRule(ResponseBag::SINGLE_OBJECT);
     
     // Output an array
     $array = ["field" => "value"];
@@ -279,7 +274,7 @@ The result will be something like:
 }
 ```
 
-# The OutputProcessors
+## The OutputProcessors
 
 An OutputProcessor will parse the `$response->write($obj)` and output in the proper format. 
 The available handlers are:
@@ -289,7 +284,7 @@ The available handlers are:
 - HtmlHandler
 - JsonCleanOutputProcessor
 
-## Using Custom Response Handler
+### Using Custom Response Handler
 
 The Default Response Handler will process all "$response->write" into a JSON.
 You can choose another Handlers. See below for a list of Available Response Handlers.
@@ -298,26 +293,19 @@ You can choose another Handlers. See below for a list of Available Response Hand
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-$routeDefinition = new \ByJG\RestServer\Route\RouteDefinition();
-$routeDefinition->addRoute(
-    \ByJG\RestServer\Route\RoutePattern::get(
-        '/test',                          // The Route
-        \ByJG\RestServer\OutputProcessor\XmlOutputProcessor::class,          // The Handler
-        '\\My\\ClassName',                // The class that have the method
-        'SomeMethod'                     // The method will process the request
-    )
+$routeDefinition = new \ByJG\RestServer\Route\RouteList();
+$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/test")
+    ->withOutputProcessor(XmlOutputProcessor::class)
+    ->withClass(\My\ClassName::class, "someMethod")
 );
 
 $restServer = new \ByJG\RestServer\HttpRequestHandler();
 $restServer->handle($routeDefinition);
 ```
 
-
-# Defining a Route
-
+## Defining a Route
 
 You can define route with constant and/or variable. For example:
-
 
 | Pattern                | Description |
 |------------------------|---------------------------------|
@@ -340,28 +328,131 @@ all matches values can be obtained by
 $this->getRequest()->param('variable');
 ```
 
-# Running the rest server
+## Error Handler
 
-You need to set up your restserver to handle ALL requests to a single PHP file. Normally is "app.php" 
+This project uses the project `flip/whoops` to handle the errors. The default behavior is return the error with the minimum information necessary.
 
-## PHP Built-in server
-
+```php
+[
+    "type" => Exception Type,
+    "message" => Error Message. 
+]
 ```
+
+To disable completely any error handler you can:
+
+```php
+<?php
+
+$http = (new HttpErrorHandler())
+    ->withDoNotUseErrorHandler();
+
+try {
+    $http->handle(.....);
+} catch (Exception $ex) {
+    // You have to handle by yourself the errors
+}
+```
+
+or you can get the detailed error handler with all information necessary to debug your application:
+
+```php
+<?php
+
+$http = (new HttpErrorHandler())
+    ->withDetailedErrorHandler();
+
+$http->handle(.....);
+```
+
+The error handler return the data based on the format defined by first accept content type header.
+
+The currently implementation are:
+
+- HTML
+- JSON
+- XML
+
+## Middleware
+
+HttpServerHandler has the ability to inject processing Before and After process the request. Using this you can inject code, change headers
+or even block the processing.
+
+You need to implement the class `BeforeMiddlewareInterface` and `AfterMiddlewareInterface` and then add to the handler:
+
+```php
+<?php
+$httpHandler = new \ByJG\RestServer\HttpRequestHandler();
+$httpHandler
+    ->withMiddleware(/*... instance of BeforeMiddlewareInterface or AfterMiddlewareInterface ...*/);
+```
+
+You can add how many middleware you want, however they will be processing in the order you added them.
+
+### Existing Middleware
+
+#### CORS support
+
+Enable the Server Handler process the CORS headers and block the access if the origin doesn't match.
+
+```php
+<?php
+$corsMiddleware = new \ByJG\RestServer\Middleware\CorsMiddleware();
+$corsMiddleware
+    ->withCorsOrigins([/* list of accepted origin */])  // Required to enable CORS
+    ->withAcceptCorsMethods([/* list of methods */])     // Optional. Default all methods. Don't need to pass 'OPTIONS'
+    ->withAcceptCorsHeaders([/* list of headers */])     // Optional. Default all headers
+```
+
+Note that the method `withCorsOrigins` accept a list of hosts regular expressions. e.g.
+
+- `example\.com` - Accept only example.com
+- `example\.(com|org)` - Accept both example.com and example.org
+- `example\.com(\.br)?` -Accept both example.com and example.com.br
+
+#### Server Static Files
+
+By default, Http Server Handler will only process the defined routes. Using this middleware, if a route is not found,
+the middleware will try to find a file that matches with the request path and output it.
+
+```php
+<?php
+$serverStatic = new ServerStaticMiddleware();
+```
+
+### Creating your own middleware
+
+All middleware needs to implement the `BeforeMiddlewareInterface` or `AfterMiddlewareInterface`. When added to Http Server, the handler
+will determine if it will be processed before or after the request. If the same class implements both interface, then it will run before and after.
+
+The middleware is required to return a `MiddlewareResult` class. The possible values are:
+
+- Middleware::continue() - It will continue to process the next middleware and process the request.
+- Middleware::stopProcessingOthers() - It will stop processing the next middleware and it will abort gracefully processing the request.
+- Middleware::stopProcessing() - It will allow to process the next middleware, however it will abort gracefully processing the request.
+
+## Running the rest server
+
+You need to set up your restserver to handle ALL requests to a single PHP file. Normally is "app.php"
+
+### PHP Built-in server
+
+```bash
 cd web
 php -S localhost:8080 app.php
 ```
 
-## Nginx 
+### Nginx
 
-```
+```nginx
 location / {
   try_files $uri $uri/ /app.php$is_args$args;
 }
 ```
 
-## Apache .htaccess
+### Apache .htaccess
 
-```
+```apache
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

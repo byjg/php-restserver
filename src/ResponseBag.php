@@ -3,6 +3,7 @@
 namespace ByJG\RestServer;
 
 use ByJG\Serializer\SerializerObject;
+use InvalidArgumentException;
 
 class ResponseBag
 {
@@ -10,6 +11,7 @@ class ResponseBag
     const AUTOMATIC = 0;
     const SINGLE_OBJECT = 1;
     const OBJECT_LIST = 2;
+    const RAW = 3;
 
     protected $collection = [];
     protected $serializationRule = ResponseBag::AUTOMATIC;
@@ -19,11 +21,15 @@ class ResponseBag
      */
     public function add($object)
     {
+        if (!is_string($object) && !is_numeric($object) && $this->serializationRule === ResponseBag::RAW) {
+            throw new InvalidArgumentException("Raw data can be only string or numbers");
+        }
+
         if (!is_object($object) && !is_array($object)) {
             $object = [ $object ];
         }
 
-        if ($this->serializationRule !== ResponseBag::SINGLE_OBJECT) {
+        if ($this->serializationRule !== ResponseBag::SINGLE_OBJECT && $this->serializationRule !== ResponseBag::RAW) {
             $this->collection[] = $object;
             return;
         }
@@ -42,17 +48,23 @@ class ResponseBag
     public function process($buildNull = true, $onlyString = false)
     {
         $collection = (array)$this->collection;
+        if ($this->serializationRule === ResponseBag::RAW) {
+            return implode("", $collection);
+        }
+
         if (count($collection) === 1
             && $this->serializationRule !== ResponseBag::OBJECT_LIST && isset($collection[0])
         ) {
             $collection = $collection[0];
         }
         
-        $object = new SerializerObject($collection);
-        return $object
-            ->setOnlyString($onlyString)
-            ->setBuildNull($buildNull)
-            ->build();
+        $object = SerializerObject::instance($collection)
+            ->withOnlyString($onlyString);
+
+        if (!$buildNull) {
+            $object->withDoNotSerializeNull();
+        }
+        return $object->serialize();
     }
 
     public function getCollection()
@@ -60,8 +72,13 @@ class ResponseBag
         return $this->collection;
     }
 
-    public function serializationRule($value)
+    public function setSerializationRule($value)
     {
         $this->serializationRule = $value;
+    }
+
+    public function getSerializationRule()
+    {
+        return $this->serializationRule;
     }
 }

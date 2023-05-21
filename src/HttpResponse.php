@@ -24,6 +24,7 @@ class HttpResponse
      * @var int
      */
     protected $responseCode = 200;
+    protected $responseCodeDescription = 'OK';
 
     public function __construct()
     {
@@ -109,12 +110,13 @@ class HttpResponse
      */
     public function writeDebug($key, $string)
     {
+        // @todo Review this.
         if (is_null($this->responseDebug)) {
             $this->responseDebug = new ResponseBag();
             $this->response->add($this->responseDebug);
         }
         $this->responseDebug->add(['debug' => [$key => $string]]);
-        ErrorHandler::getInstance()->addExtraInfo($key, serialize($string));
+        // ErrorHandler::getInstance()->addExtraInfo($key, serialize($string));
     }
 
     public function emptyResponse()
@@ -122,32 +124,36 @@ class HttpResponse
         $this->response = new ResponseBag();
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param string $header
+     * @param string|array $value
+     * @return void
+     */
     public function addHeader($header, $value)
     {
-        $this->headers[$header][] = $value;
+        $this->headers[$header] = $value;
     }
 
     public function getHeaders()
     {
-        $result = [];
-        foreach ($this->headers as $header => $values) {
-            $replace = true;
-            foreach ($values as $value) {
-                $result[] = [ "$header: $value", $replace ];
-                $replace = false;
-            }
-        }
-
-        return $result;
+        return $this->headers;
     }
 
-    public function setResponseCode($code)
+    public function setResponseCode($code, $description = "")
     {
         $this->responseCode = $code;
+        $this->responseCodeDescription = $description;
     }
 
     public function getResponseCode()
     {
         return $this->responseCode;
+    }
+
+    public function getResponseCodeDescription()
+    {
+        return $this->responseCodeDescription;
     }
 }

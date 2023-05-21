@@ -3,7 +3,8 @@
 namespace ByJG\RestServer;
 
 use ByJG\DesignPattern\Singleton;
-use ByJG\RestServer\Whoops\PlainResponseErrorHandler;
+use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
+use ByJG\RestServer\Whoops\WhoopsWrapper;
 use Whoops\Handler\Handler;
 use Whoops\Run;
 
@@ -20,14 +21,17 @@ class ErrorHandler
 
     /**
      *
-     * @var Handler
+     * @var WhoopsWrapper
      */
-    protected $handler = null;
+    protected $wrapper = null;
 
     protected function __construct()
     {
         $this->whoops = new Run();
-        $this->setHandler(new PlainResponseErrorHandler());
+        $this->wrapper = new WhoopsWrapper();
+
+        $this->whoops->popHandler();
+        $this->whoops->pushHandler($this->wrapper);
     }
 
     /**
@@ -37,9 +41,7 @@ class ErrorHandler
      */
     public function setHandler(Handler $handler)
     {
-        $this->whoops->popHandler();
-        $this->handler = $handler;
-        $this->whoops->pushHandler($this->handler);
+        $this->wrapper->setHandler($handler);
     }
 
     /**
@@ -58,17 +60,23 @@ class ErrorHandler
         $this->whoops->unregister();
     }
 
-    /**
-     * Added extra information for debug purposes on the error handler screen
-     *
-     * @param string $name
-     * @param string $value
-     */
-    public function addExtraInfo($name, $value)
+    public function setOutputProcessor(BaseOutputProcessor $processor, HttpResponse $response)
     {
-        if (method_exists($this->handler, 'addDataTable')) {
-            $data = $this->handler->getDataTable();
-            $this->handler->addDataTable('Info #' . (count($data) + 1), array($name => $value));
-        }
+        $this->wrapper->setOutputProcessor($processor, $response);
     }
+
+    // @todo Review
+    // /**
+    //  * Added extra information for debug purposes on the error handler screen
+    //  *
+    //  * @param string $name
+    //  * @param string $value
+    //  */
+    // public function addExtraInfo($name, $value)
+    // {
+    //     if (method_exists($this->handler, 'addDataTable')) {
+    //         $data = $this->handler->getDataTable();
+    //         $this->handler->addDataTable('Info #' . (count($data) + 1), array($name => $value));
+    //     }
+    // }
 }

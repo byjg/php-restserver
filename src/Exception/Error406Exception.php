@@ -6,6 +6,6 @@ class Error406Exception extends ClientShowException
 {
     public function handleHeader()
     {
-        $this->sendHeader(405, 'Not Acceptable');
+        $this->sendHeader(406, 'Not Acceptable');
     }
 }

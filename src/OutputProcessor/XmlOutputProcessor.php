@@ -12,9 +12,14 @@ class XmlOutputProcessor extends BaseOutputProcessor
         $this->contentType = "text/xml";
     }
 
-    public function getErrorHandler()
+    public function getDetailedErrorHandler()
     {
         return new XmlResponseHandler();
+    }
+
+    public function getErrorHandler()
+    {
+        return $this->getDetailedErrorHandler();
     }
 
     public function getFormatter()

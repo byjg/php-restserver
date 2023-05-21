@@ -18,7 +18,7 @@ class PlainResponseErrorHandler extends Handler
 {
 
     use WhoopsDebugTrait;
-    use WhoopsHeaderTrait;
+    use ClassNameBeautifier;
 
     /**
      * @var bool
@@ -44,17 +44,15 @@ class PlainResponseErrorHandler extends Handler
      */
     public function handle()
     {
-        $response = Formatter::formatExceptionPlain(
-            $this->getInspector()
+        $response = Formatter::formatExceptionAsDataArray(
+            $this->getInspector(),
+            false
         );
 
-        $debug = $this->getDataTable();
-        if (count($debug) > 0) {
-            $response .= "\n\n" . json_encode(["debug" => $debug]);
-        }
+        $title = $this->getClassAsTitle($response["type"]);
 
-        $this->setProperHeader($this->getException());
-        echo $response;
+        echo "<html><h1>${title}</h1><p>${response['message']}</p></html>";
+
         return Handler::QUIT;
     }
 }

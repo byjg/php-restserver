@@ -3,10 +3,17 @@
 
 namespace ByJG\RestServer;
 
-
-use ByJG\RestServer\Route\RouteDefinitionInterface;
+use ByJG\RestServer\Route\RouteListInterface;
 
 interface RequestHandler
 {
-    public function handle(RouteDefinitionInterface $routeDefinition, $outputBuffer = true, $session = true);
+    public function handle(RouteListInterface $routeDefinition, $outputBuffer = true, $session = true);
+
+    public function withErrorHandlerDisabled();
+
+    public function withDetailedErrorHandler();
+
+    public function withMiddleware($middleware);
+
+    public function withDefaultOutputProcessor($processor, $args = []);
 }

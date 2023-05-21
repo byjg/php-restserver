@@ -3,10 +3,12 @@
 namespace Tests;
 
 use ByJG\RestServer\HttpResponse;
+use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\HtmlOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
+use ByJG\RestServer\Writer\MemoryWriter;
 use PHPUnit\Framework\TestCase;
 
 class OutputProcessorTest extends TestCase
@@ -20,7 +22,7 @@ class OutputProcessorTest extends TestCase
 
     protected $result;
 
-    public function setUp()
+    public function setup(): void
     {
         $this->object = [
             "name" => "teste",
@@ -33,7 +35,7 @@ class OutputProcessorTest extends TestCase
         $this->httpResponse->write($this->object);
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->object = null;
         $this->result = null;
@@ -75,13 +77,11 @@ class OutputProcessorTest extends TestCase
      */
     public function testOutputProcessor($class, $contentType, $expectedProcess, $expectedResponse)
     {
-        // Mock object
-        $processor =  $this->getMockBuilder($class)
-            ->setMethods(["writeData"])
-            ->getMock();
-        $processor->expects($this->once())
-            ->method('writeData')
-            ->willReturnCallback(function ($data) { $this->result = $data;});
+        $writer = new MemoryWriter();
+
+        /** @var BaseOutputProcessor */
+        $processor = new $class();
+        $processor->setWriter($writer);
 
         // Run Basic Tests
         $this->assertEquals($contentType, $processor->getContentType());
@@ -93,7 +93,7 @@ class OutputProcessorTest extends TestCase
         // Run Process Response
         $processor->processResponse($this->httpResponse);
 
-        $this->assertEquals($expectedResponse, $this->result);
+        $this->assertEquals($expectedResponse, $writer->getData());
     }
 
 }

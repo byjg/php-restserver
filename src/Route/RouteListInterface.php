@@ -6,22 +6,22 @@ namespace ByJG\RestServer\Route;
 
 use FastRoute\Dispatcher;
 
-interface RouteDefinitionInterface
+interface RouteListInterface
 {
     /**
-     * @return RoutePattern[]
+     * @return Route[]
      */
     public function getRoutes();
 
     /**
-     * @param RoutePattern[] $routes
+     * @param Route[] $routes
      */
     public function setRoutes($routes);
 
     /**
-     * @param RoutePattern $route
+     * @param Route $route
      */
-    public function addRoute(RoutePattern $route);
+    public function addRoute(Route $route);
 
     /**
      * @return Dispatcher

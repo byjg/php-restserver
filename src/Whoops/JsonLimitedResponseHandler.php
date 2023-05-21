@@ -8,37 +8,37 @@ namespace ByJG\RestServer\Whoops;
 
 use Whoops\Exception\Formatter;
 use Whoops\Handler\Handler;
-use Whoops\Handler\JsonResponseHandler as OriginalJsonErrorHandler;
+use Whoops\Handler\JsonResponseHandler as ParentJsonErrorHandler;
 
 /**
  * Catches an exception and converts it to a JSON
  * response. Additionally can also return exception
  * frames for consumption by an API.
  */
-class JsonResponseErrorHandler extends OriginalJsonErrorHandler
+class JsonLimitedResponseHandler extends ParentJsonErrorHandler
 {
 
     use WhoopsDebugTrait;
-    use WhoopsHeaderTrait;
+    use ClassNameBeautifier;
 
     /**
      * @return int
      */
     public function handle()
     {
-        $response = array(
-            'error' => Formatter::formatExceptionAsDataArray(
-                $this->getInspector(),
-                $this->addTraceToOutput()
-            ),
+        $errorData = Formatter::formatExceptionAsDataArray(
+            $this->getInspector(),
+            false
         );
 
-        $debug = $this->getDataTable();
-        if (count($debug) > 0) {
-            $response["debug"] = $debug;
-        }
+        $title = $this->getClassAsTitle($errorData["type"]);
 
-        $this->setProperHeader($this->getException());
+        $response = array(
+            'error' => [
+                "type" => $title,
+                "message" => $errorData["message"]
+            ]
+        );
 
         echo json_encode($response, defined('JSON_PARTIAL_OUTPUT_ON_ERROR') ? JSON_PARTIAL_OUTPUT_ON_ERROR : 0);
 

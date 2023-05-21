@@ -7,7 +7,7 @@ use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
 
-class RouteDefinition implements RouteDefinitionInterface
+class RouteList implements RouteListInterface
 {
     protected $routes = null;
 
@@ -17,8 +17,8 @@ class RouteDefinition implements RouteDefinitionInterface
     }
 
     /**
-     * @param RoutePattern[] $routes
-     * @return RouteDefinition
+     * @param Route[] $routes
+     * @return RouteList
      */
     public function setRoutes($routes)
     {
@@ -29,10 +29,10 @@ class RouteDefinition implements RouteDefinitionInterface
     }
 
     /**
-     * @param RoutePattern $route
-     * @return RouteDefinition
+     * @param Route $route
+     * @return RouteList
      */
-    public function addRoute(RoutePattern $route)
+    public function addRoute(Route $route)
     {
         if (is_null($this->routes)) {
             $this->routes = [];
@@ -52,7 +52,7 @@ class RouteDefinition implements RouteDefinitionInterface
             foreach ($this->getRoutes() as $route) {
                 $r->addRoute(
                     $route->getMethod(),
-                    $route->getPattern(),
+                    $route->getPath(),
                     [
                         "output_processor" => $route->getOutputProcessor(),
                         "class" => $route->getClass(),

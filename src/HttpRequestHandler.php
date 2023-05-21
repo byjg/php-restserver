@@ -7,12 +7,18 @@ use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
+use ByJG\RestServer\Middleware\AfterMiddlewareInterface;
+use ByJG\RestServer\Middleware\BeforeMiddlewareInterface;
+use ByJG\RestServer\Middleware\MiddlewareManagement;
+use ByJG\RestServer\Middleware\MiddlewareResult;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
-use ByJG\RestServer\Route\RouteDefinition;
-use ByJG\RestServer\Route\RouteDefinitionInterface;
+use ByJG\RestServer\Route\RouteListInterface;
+use ByJG\RestServer\Writer\HttpWriter;
+use ByJG\RestServer\Writer\WriterInterface;
 use Closure;
 use FastRoute\Dispatcher;
+use InvalidArgumentException;
 
 class HttpRequestHandler implements RequestHandler
 {
@@ -21,9 +27,27 @@ class HttpRequestHandler implements RequestHandler
     const NOT_FOUND = "NOT FOUND";
 
     protected $useErrorHandler = true;
+    protected $detailedErrorHandler = false;
+
+    protected $defaultOutputProcessor = null;
+    protected $defaultOutputProcessorArgs = [];
+
+    protected $afterMiddlewareList = [];
+    protected $beforeMiddlewareList = [];
+
+    protected $httpRequest = null;
+    protected $httpResponse = null;
+
+    /** @var WriterInterface */
+    protected $writer;
+
+    public function __construct()
+    {
+        $this->writer = new HttpWriter();
+    }
 
     /**
-     * @param RouteDefinitionInterface $routeDefinition
+     * @param RouteListInterface $routeDefinition
      * @return bool
      * @throws ClassNotFoundException
      * @throws Error404Exception
@@ -31,37 +55,55 @@ class HttpRequestHandler implements RequestHandler
      * @throws Error520Exception
      * @throws InvalidClassException
      */
-    protected function process(RouteDefinitionInterface $routeDefinition)
+    protected function process(RouteListInterface $routeDefinition)
     {
         // Initialize ErrorHandler with default error handler
         if ($this->useErrorHandler) {
             ErrorHandler::getInstance()->register();
         }
 
-        // Get HttpRequest
-        $request = $this->getHttpRequest();
-
         // Get the URL parameters
-        $httpMethod = $request->server('REQUEST_METHOD');
-        $uri = parse_url($request->server('REQUEST_URI'), PHP_URL_PATH);
-        parse_str(parse_url($request->server('REQUEST_URI'), PHP_URL_QUERY), $queryStr);
+        $httpMethod = $this->getHttpRequest()->server('REQUEST_METHOD');
+        $uri = parse_url($this->getHttpRequest()->server('REQUEST_URI'), PHP_URL_PATH);
+        $query = parse_url($this->getHttpRequest()->server('REQUEST_URI'), PHP_URL_QUERY);
+        $queryStr = [];
+        if (!empty($query)) {
+            parse_str($query, $queryStr);
+        }
 
         // Generic Dispatcher for RestServer
         $dispatcher = $routeDefinition->getDispatcher();
-
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
+
+        // Get OutputProcessor
+        $outputProcessor = $this->initializeProcessor();
+        
+        // Process Before Middleware
+        try {
+            $middlewareResult = MiddlewareManagement::processBefore(
+                $this->beforeMiddlewareList,
+                $routeInfo[0],
+                $this->getHttpResponse(),
+                $this->getHttpRequest()
+            );
+        } catch (\Exception $ex) {
+            $outputProcessor->processResponse($this->getHttpResponse());
+            throw $ex;
+        }
+        
+        if ($middlewareResult->getStatus() != MiddlewareResult::CONTINUE) {
+            $outputProcessor->processResponse($this->getHttpResponse());
+            return true;
+        }
 
         // Processing
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
-                if ($this->tryDeliveryPhysicalFile() === false) {
-                    $this->prepareToOutput();
-                    throw new Error404Exception("Route '$uri' not found");
-                }
-                return true;
+                $outputProcessor->processResponse($this->getHttpResponse());
+                throw new Error404Exception("Route '$uri' not found");
 
             case Dispatcher::METHOD_NOT_ALLOWED:
-                $this->prepareToOutput();
+                $outputProcessor->processResponse($this->getHttpResponse());
                 throw new Error405Exception('Method not allowed');
 
             case Dispatcher::FOUND:
@@ -71,15 +113,17 @@ class HttpRequestHandler implements RequestHandler
                 // Get the Selected Route
                 $selectedRoute = $routeInfo[1];
 
-                // Default Handler for errors and
-                $outputProcessor = $this->prepareToOutput($selectedRoute["output_processor"]);
-
                 // Class
                 $class = $selectedRoute["class"];
-                $request->appendVars($vars);
+                $this->getHttpRequest()->appendVars($vars);
 
+                // Get OutputProcessor
+                $outputProcessor = $this->initializeProcessor(
+                    $selectedRoute["output_processor"]
+                );
+                
                 // Execute the request
-                $this->executeRequest($outputProcessor, $class, $request);
+                $this->executeRequest($outputProcessor, $class);
 
                 break;
 
@@ -88,40 +132,71 @@ class HttpRequestHandler implements RequestHandler
         }
     }
 
-    protected function prepareToOutput($class = null)
+    protected function initializeProcessor($class = null)
     {
-        if (empty($class)) {
-            $outputProcessor = BaseOutputProcessor::getFromHttpAccept();
-        } else {
+        if (!empty($class)) {
             $outputProcessor = BaseOutputProcessor::getFromClassName($class);
+        } elseif (!empty($this->defaultOutputProcessor)) {
+            $outputProcessor = BaseOutputProcessor::getFromClassName($this->defaultOutputProcessor);
+        } else {
+            $outputProcessor = BaseOutputProcessor::getFromHttpAccept();
         }
+        $outputProcessor->setWriter($this->writer);
         $outputProcessor->writeContentType();
-        ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
+        if ($this->detailedErrorHandler) {
+            ErrorHandler::getInstance()->setHandler($outputProcessor->getDetailedErrorHandler());
+        } else {
+            ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
+        }
 
+        ErrorHandler::getInstance()->setOutputProcessor($outputProcessor, $this->getHttpResponse());
+        
         return $outputProcessor;
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return HttpRequest
+     */
     protected function getHttpRequest()
     {
-        return new HttpRequest($_GET, $_POST, $_SERVER, isset($_SESSION) ? $_SESSION : [], $_COOKIE);
+        if (is_null($this->httpRequest)) {
+            $this->httpRequest = new HttpRequest($_GET, $_POST, $_SERVER, isset($_SESSION) ? $_SESSION : [], $_COOKIE);
+        }
+
+        return $this->httpRequest;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return HttpResponse
+     */
+    protected function getHttpResponse()
+    {
+        if (is_null($this->httpResponse)) {
+            $this->httpResponse = new HttpResponse();
+        }
+
+        return $this->httpResponse;
     }
 
     /**
      * @param OutputProcessorInterface $outputProcessor
      * @param $class
-     * @param HttpRequest $request
      * @throws ClassNotFoundException
      * @throws InvalidClassException
      */
-    protected function executeRequest(OutputProcessorInterface $outputProcessor, $class, HttpRequest $request)
+    protected function executeRequest(
+        OutputProcessorInterface $outputProcessor,
+        $class
+    )
     {
-        // Create the Request and Response methods
-        $response = new HttpResponse();
-
         // Process Closure
         if ($class instanceof Closure) {
-            $class($response, $request);
-            $outputProcessor->processResponse($response);
+            $class($this->getHttpResponse(), $this->getHttpRequest());
+            $outputProcessor->processResponse($this->getHttpResponse());
             return;
         }
 
@@ -135,14 +210,21 @@ class HttpRequestHandler implements RequestHandler
         if (!method_exists($instance, $function)) {
             throw new InvalidClassException("There is no method '$class::$function''");
         }
-        $instance->$function($response, $request);
-        $outputProcessor->processResponse($response);
+        $instance->$function($this->getHttpResponse(), $this->getHttpRequest());
+
+        MiddlewareManagement::processAfter(
+            $this->afterMiddlewareList,
+            $this->getHttpResponse(),
+            $this->getHttpRequest()
+        );
+        
+        $outputProcessor->processResponse($this->getHttpResponse());
     }
 
     /**
      * Handle the ROUTE (see web/app-dist.php)
      *
-     * @param RouteDefinitionInterface $routeDefinition
+     * @param RouteListInterface $routeDefinition
      * @param bool $outputBuffer
      * @param bool $session
      * @return bool|void
@@ -152,7 +234,7 @@ class HttpRequestHandler implements RequestHandler
      * @throws Error520Exception
      * @throws InvalidClassException
      */
-    public function handle(RouteDefinitionInterface $routeDefinition, $outputBuffer = true, $session = false)
+    public function handle(RouteListInterface $routeDefinition, $outputBuffer = true, $session = false)
     {
         if ($outputBuffer) {
             ob_start();
@@ -167,113 +249,49 @@ class HttpRequestHandler implements RequestHandler
         return $this->process($routeDefinition);
     }
 
-    /**
-     * @return bool
-     * @throws Error404Exception
-     */
-    protected function tryDeliveryPhysicalFile()
+    public function withErrorHandlerDisabled()
     {
-        $file = $_SERVER['SCRIPT_FILENAME'];
-        if (!empty($file) && file_exists($file)) {
-            $mime = $this->mimeContentType($file);
-
-            if ($mime === false) {
-                return false;
-            }
-
-            if (!defined("RESTSERVER_TEST")) {
-                header("Content-Type: $mime");
-            }
-            echo file_get_contents($file);
-            return true;
-        }
-
-        return false;
+        $this->useErrorHandler = false;
+        return $this;
     }
 
-    /**
-     * Get the Mime Type based on the filename
-     *
-     * @param string $filename
-     * @return string
-     * @throws Error404Exception
-     */
-    protected function mimeContentType($filename)
+    public function withDetailedErrorHandler()
     {
-        $prohibitedTypes = [
-            "php",
-            "vb",
-            "cs",
-            "rb",
-            "py",
-            "py3",
-            "lua"
-        ];
+        $this->detailedErrorHandler = true;
+        return $this;
+    }
 
-        $mimeTypes = [
-            'txt' => 'text/plain',
-            'htm' => 'text/html',
-            'html' => 'text/html',
-            'css' => 'text/css',
-            'js' => 'application/javascript',
-            'json' => 'application/json',
-            'xml' => 'application/xml',
-            'swf' => 'application/x-shockwave-flash',
-            'flv' => 'video/x-flv',
-            // images
-            'png' => 'image/png',
-            'jpe' => 'image/jpeg',
-            'jpeg' => 'image/jpeg',
-            'jpg' => 'image/jpeg',
-            'gif' => 'image/gif',
-            'bmp' => 'image/bmp',
-            'ico' => 'image/vnd.microsoft.icon',
-            'tiff' => 'image/tiff',
-            'tif' => 'image/tiff',
-            'svg' => 'image/svg+xml',
-            'svgz' => 'image/svg+xml',
-            // archives
-            'zip' => 'application/zip',
-            'rar' => 'application/x-rar-compressed',
-            'exe' => 'application/x-msdownload',
-            'msi' => 'application/x-msdownload',
-            'cab' => 'application/vnd.ms-cab-compressed',
-            // audio/video
-            'mp3' => 'audio/mpeg',
-            'qt' => 'video/quicktime',
-            'mov' => 'video/quicktime',
-            // adobe
-            'pdf' => 'application/pdf',
-            'psd' => 'image/vnd.adobe.photoshop',
-            'ai' => 'application/postscript',
-            'eps' => 'application/postscript',
-            'ps' => 'application/postscript',
-            // ms office
-            'doc' => 'application/msword',
-            'rtf' => 'application/rtf',
-            'xls' => 'application/vnd.ms-excel',
-            'ppt' => 'application/vnd.ms-powerpoint',
-            // open office
-            'odt' => 'application/vnd.oasis.opendocument.text',
-            'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
-        ];
-
-        if (!file_exists($filename)) {
-            throw new Error404Exception();
+    public function withMiddleware($middleware)
+    {
+        if ($middleware instanceof BeforeMiddlewareInterface) {
+            $this->beforeMiddlewareList[] = $middleware;
+        }
+        if ($middleware instanceof AfterMiddlewareInterface) {
+            $this->afterMiddlewareList[] = $middleware;
         }
 
-        $ext = substr(strrchr($filename, "."), 1);
-        if (!in_array($ext, $prohibitedTypes)) {
-            if (array_key_exists($ext, $mimeTypes)) {
-                return $mimeTypes[$ext];
-            } elseif (function_exists('finfo_open')) {
-                $finfo = finfo_open(FILEINFO_MIME);
-                $mimetype = finfo_file($finfo, $filename);
-                finfo_close($finfo);
-                return $mimetype;
+        return $this;
+    }
+
+    public function withDefaultOutputProcessor($processor, $args = [])
+    {
+        if (!($processor instanceof \Closure)) {
+            if (!is_string($processor)) {
+                throw new InvalidArgumentException("Default processor needs to class name of an OutputProcessor");
+            }
+            if (!is_subclass_of($processor, BaseOutputProcessor::class)) {
+                throw new InvalidArgumentException("Needs to be a class of " . BaseOutputProcessor::class);
             }
         }
 
-        return false;
+        $this->defaultOutputProcessor = $processor;
+
+        return $this;
+    }
+
+    public function withWriter(WriterInterface $writer)
+    {
+        $this->writer = $writer;
+        return $this;
     }
 }

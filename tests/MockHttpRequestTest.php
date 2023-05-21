@@ -6,6 +6,7 @@ use ByJG\RestServer\MockHttpRequest;
 use ByJG\Util\Helper\RequestFormUrlEncoded;
 use ByJG\Util\Helper\RequestMultiPart;
 use ByJG\Util\MultiPartItem;
+use ByJG\Util\Psr7\Request;
 use ByJG\Util\Uri;
 use PHPUnit\Framework\TestCase;
 
@@ -28,7 +29,7 @@ class MockHttpRequestTest extends TestCase
                         'name' => 'penguim.png',
                         'type' => 'image/png',
                         'size' => 19187,
-                        'tmp_name' => '/tmp/penguim.png',
+                        'tmp_name' => sys_get_temp_dir() . '/penguim.png',
                         'error' => null,
                     ]
             ],

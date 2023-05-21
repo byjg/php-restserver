@@ -2,6 +2,7 @@
 
 namespace ByJG\RestServer\OutputProcessor;
 
+use ByJG\RestServer\Whoops\PlainResponseErrorHandler;
 use ByJG\Serializer\Formatter\PlainTextFormatter;
 use Whoops\Handler\PrettyPageHandler;
 
@@ -12,9 +13,14 @@ class HtmlOutputProcessor extends BaseOutputProcessor
         $this->contentType = "text/html";
     }
 
-    public function getErrorHandler()
+    public function getDetailedErrorHandler()
     {
         return new PrettyPageHandler();
+    }
+
+    public function getErrorHandler()
+    {
+        return new PlainResponseErrorHandler();
     }
 
     public function getFormatter()
