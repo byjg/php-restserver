@@ -70,7 +70,7 @@ class MockHttpRequest extends HttpRequest
         // Headers and Cookies
         $this->cookie = [];
         foreach ($this->psrRequest->getHeaders() as $key => $value) {
-            $this->server["HTTP_" . strtoupper($key)] = $this->psrRequest->getHeaderLine($key);
+            $this->server["HTTP_" . str_replace('-', '_', strtoupper($key))] = $this->psrRequest->getHeaderLine($key);
 
             if ($key == "Cookie") {
                 parse_str(preg_replace("/;\s*/", "&", $this->psrRequest->getHeaderLine($key)), $this->cookie);
