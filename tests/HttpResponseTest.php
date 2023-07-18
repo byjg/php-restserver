@@ -25,7 +25,6 @@ class HttpResponseTest extends TestCase
 
     public function testGetHeaders()
     {
-        $this->object->getHeaders();
         $this->assertEquals(
             [],
             $this->object->getHeaders()

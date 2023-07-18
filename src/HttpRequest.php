@@ -217,6 +217,13 @@ class HttpRequest
         return $servername;
     }
 
+    public function getHeader($header)
+    {
+        $header = strtoupper(str_replace('-', '_', $header));
+        $header = 'HTTP_' . $header;
+        return $this->server($header);
+    }
+
     public function getRequestPath()
     {
         return parse_url($this->server('REQUEST_URI'), PHP_URL_PATH);

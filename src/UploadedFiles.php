@@ -18,6 +18,11 @@ class UploadedFiles
 
     public function isOk($key)
     {
+        return empty($this->getFileByKey($key, 'error'));
+    }
+
+    public function getErrorCode($key)
+    {
         return $this->getFileByKey($key, 'error');
     }
 
@@ -48,6 +53,11 @@ class UploadedFiles
     public function clearTemp($key)
     {
         unlink($this->getFileByKey($key, 'tmp_name'));
+    }
+
+    public function getFileSize($key)
+    {
+        return $this->getFileByKey($key, 'size');
     }
 
     private function getFileByKey($key, $property)
