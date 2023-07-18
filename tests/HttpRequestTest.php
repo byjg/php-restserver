@@ -58,18 +58,21 @@ class HttpRequestTest extends TestCase
     {
         $this->assertEquals(5, $this->request->cookie('cookiep'));
         $this->assertEquals(5, $this->request->request('cookiep'));
+        $this->assertEquals(['cookiep' => 5], $this->request->cookie());
     }
 
     public function testSession()
     {
         $this->assertEquals(4, $this->request->session('sessionp'));
         $this->assertEquals(4, $this->request->request('sessionp'));
+        $this->assertEquals(['sessionp' => 4], $this->request->session());
     }
 
     public function testParam()
     {
         $this->assertEquals(6, $this->request->param('paramp'));
         $this->assertEmpty($this->request->request('paramp'));
+        $this->assertEquals(['paramp' => 6], $this->request->param());
     }
 
     public function testGetHeader()
@@ -86,12 +89,14 @@ class HttpRequestTest extends TestCase
     {
         $this->assertEquals(1, $this->request->get('getp'));
         $this->assertEquals(1, $this->request->request('getp'));
+        $this->assertEquals(['getp' => 1], $this->request->get());
     }
 
     public function testPost()
     {
         $this->assertEquals(2, $this->request->post('postp'));
         $this->assertEquals(2, $this->request->request('postp'));
+        $this->assertEquals(['postp' => 2], $this->request->post());
     }
 
     public function testAppendVars()
