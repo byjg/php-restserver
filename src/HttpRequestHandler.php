@@ -193,31 +193,48 @@ class HttpRequestHandler implements RequestHandler
         $class
     )
     {
-        // Process Closure
-        if ($class instanceof Closure) {
-            $class($this->getHttpResponse(), $this->getHttpRequest());
-            $outputProcessor->processResponse($this->getHttpResponse());
-            return;
+        $className = null;
+        $methodName = null;
+        $exception = null;
+        try {
+            if ($class instanceof Closure) {
+                // Process Closure
+                $className = 'Closure';
+                $methodName = $this->getHttpRequest()->getRequestPath();
+                $class($this->getHttpResponse(), $this->getHttpRequest());
+            } else {
+                // Process Class::Method()
+                $class = $class[0];
+                $method = $class[1];
+                if (!class_exists($class)) {
+                    throw new ClassNotFoundException("Class '$class' defined in the route is not found");
+                }
+                $instance = new $class();
+                if (!method_exists($instance, $method)) {
+                    throw new InvalidClassException("There is no method '$class::$method''");
+                }
+                $instance->$method($this->getHttpResponse(), $this->getHttpRequest());
+                $className = $class;
+                $methodName = $method;
+            }
+        } catch (\Exception $ex) {
+            $exception = $ex;
+        } finally {
+            MiddlewareManagement::processAfter(
+                $this->afterMiddlewareList,
+                $this->getHttpResponse(),
+                $this->getHttpRequest(),
+                $className,
+                $methodName,
+                $exception
+            );
+
+            if ($exception !== null) {
+                throw $exception;
+            }
         }
 
-        // Process Class::Method()
-        $function = $class[1];
-        $class =  $class[0];
-        if (!class_exists($class)) {
-            throw new ClassNotFoundException("Class '$class' defined in the route is not found");
-        }
-        $instance = new $class();
-        if (!method_exists($instance, $function)) {
-            throw new InvalidClassException("There is no method '$class::$function''");
-        }
-        $instance->$function($this->getHttpResponse(), $this->getHttpRequest());
 
-        MiddlewareManagement::processAfter(
-            $this->afterMiddlewareList,
-            $this->getHttpResponse(),
-            $this->getHttpRequest()
-        );
-        
         $outputProcessor->processResponse($this->getHttpResponse());
     }
 
