@@ -193,22 +193,22 @@ class HttpRequestHandler implements RequestHandler
      */
     protected function executeRequest(
         OutputProcessorInterface $outputProcessor,
-        $class
+        $classDefinition
     )
     {
         $className = null;
         $methodName = null;
         $exception = null;
         try {
-            if ($class instanceof Closure) {
+            if ($classDefinition instanceof Closure) {
                 // Process Closure
                 $className = 'Closure';
                 $methodName = $this->getHttpRequest()->getRequestPath();
-                $class($this->getHttpResponse(), $this->getHttpRequest());
+                $classDefinition($this->getHttpResponse(), $this->getHttpRequest());
             } else {
                 // Process Class::Method()
-                $class = $class[0];
-                $method = $class[1];
+                $class = $classDefinition[0];
+                $method = $classDefinition[1];
                 if (!class_exists($class)) {
                     throw new ClassNotFoundException("Class '$class' defined in the route is not found");
                 }
