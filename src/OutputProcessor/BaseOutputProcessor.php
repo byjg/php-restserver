@@ -6,6 +6,7 @@ use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\ResponseBag;
 use ByJG\RestServer\Writer\WriterInterface;
+use Closure;
 
 abstract class BaseOutputProcessor implements OutputProcessorInterface
 {
@@ -41,7 +42,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
     
     public static function getFromHttpAccept()
     {
-        $accept = isset($_SERVER["HTTP_ACCEPT"]) ? $_SERVER["HTTP_ACCEPT"] : "application/json";
+        $accept = $_SERVER["HTTP_ACCEPT"] ?? "application/json";
         
         $acceptList = explode(",", $accept);
         
@@ -54,7 +55,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
      */
     public static function getFromClassName($className)
     {
-        if ($className instanceof \Closure) {
+        if ($className instanceof Closure) {
             return $className();
         }
         return new $className();

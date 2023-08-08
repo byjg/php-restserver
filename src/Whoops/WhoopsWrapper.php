@@ -6,6 +6,7 @@ use ByJG\RestServer\Exception\ClientShowException;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ReflectionMethod;
+use Throwable;
 use Whoops\Exception\Inspector;
 use Whoops\Handler\Handler;
 use Whoops\Inspector\InspectorInterface;
@@ -50,8 +51,9 @@ class WhoopsWrapper extends Handler
      *
      ********************************************************* */
 
-     /**
+    /**
      * @return int|null A handler may return nothing, or a Handler::HANDLE_* constant
+     * @throws \ReflectionException
      */
     public function handle()
     {
@@ -74,7 +76,7 @@ class WhoopsWrapper extends Handler
 
     /**
      * @param  RunInterface  $run
-     * @return void
+     * @return void|null
      */
     public function setRun(RunInterface $run)
     {
@@ -82,8 +84,8 @@ class WhoopsWrapper extends Handler
     }
 
     /**
-     * @param  \Throwable $exception
-     * @return void
+     * @param  Throwable $exception
+     * @return void|null
      */
     public function setException($exception)
     {
@@ -92,7 +94,7 @@ class WhoopsWrapper extends Handler
 
     /**
      * @param  Inspector $inspector
-     * @return void
+     * @return void|null
      */
     public function setInspector(InspectorInterface $inspector)
     {

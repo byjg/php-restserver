@@ -231,7 +231,7 @@ class HttpRequest
     {
         $servername = $this->getServerName();
 
-        if ($port && $this->server('SERVER_PORT' !== false)) {
+        if ($port && $this->server('SERVER_PORT') !== false) {
             $servername .= ':' . $this->server('SERVER_PORT');
         }
 

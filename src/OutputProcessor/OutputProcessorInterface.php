@@ -37,10 +37,10 @@ interface OutputProcessorInterface
     public function getContentType();
 
     /**
-     * @param HttpResponse $class
+     * @param HttpResponse $response
      * @return string
      */
-    public function processResponse(HttpResponse $class);
+    public function processResponse(HttpResponse $response);
 
     /**
      * @return Handler

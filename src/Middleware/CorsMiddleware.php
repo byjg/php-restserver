@@ -29,12 +29,13 @@ class CorsMiddleware implements BeforeMiddlewareInterface
     ];
 
     /**
-     * Undocumented function
+     * Pre-flight CORS verification
      *
      * @param mixed $dispatcherStatus
      * @param HttpResponse $response
      * @param HttpRequest $request
      * @return MiddlewareResult
+     * @throws Error401Exception
      */
     public function beforeProcess(
         $dispatcherStatus,
@@ -57,7 +58,7 @@ class CorsMiddleware implements BeforeMiddlewareInterface
     }
 
     /**
-     * Undocumented function
+     * Pre-flight CORS verification
      *
      * @param HttpResponse $response
      * @param HttpRequest $request

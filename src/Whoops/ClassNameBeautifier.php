@@ -7,6 +7,8 @@
 
 namespace ByJG\RestServer\Whoops;
 
+use ReflectionClass;
+
 /**
  * Description of WhoopsDebugInterface
  *
@@ -16,7 +18,7 @@ trait ClassNameBeautifier
 {
     public function getClassAsTitle($ex)
     {
-        $refClass = new \ReflectionClass($ex);
+        $refClass = new ReflectionClass($ex);
 
         $title = str_replace("Exception", "",  $refClass->getShortName());
         $title = preg_replace("/([a-z0-9])([A-Z])/", "$1 $2", $title);

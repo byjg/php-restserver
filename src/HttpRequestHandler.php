@@ -17,6 +17,7 @@ use ByJG\RestServer\Route\RouteListInterface;
 use ByJG\RestServer\Writer\HttpWriter;
 use ByJG\RestServer\Writer\WriterInterface;
 use Closure;
+use Exception;
 use FastRoute\Dispatcher;
 use InvalidArgumentException;
 
@@ -86,7 +87,7 @@ class HttpRequestHandler implements RequestHandler
                 $this->getHttpResponse(),
                 $this->getHttpRequest()
             );
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $outputProcessor->processResponse($this->getHttpResponse());
             throw $ex;
         }
@@ -130,6 +131,8 @@ class HttpRequestHandler implements RequestHandler
             default:
                 throw new Error520Exception('Unknown');
         }
+
+        return true;
     }
 
     protected function initializeProcessor($class = null)
@@ -162,7 +165,7 @@ class HttpRequestHandler implements RequestHandler
     protected function getHttpRequest()
     {
         if (is_null($this->httpRequest)) {
-            $this->httpRequest = new HttpRequest($_GET, $_POST, $_SERVER, isset($_SESSION) ? $_SESSION : [], $_COOKIE);
+            $this->httpRequest = new HttpRequest($_GET, $_POST, $_SERVER, $_SESSION ?? [], $_COOKIE);
         }
 
         return $this->httpRequest;
@@ -217,7 +220,7 @@ class HttpRequestHandler implements RequestHandler
                 $className = $class;
                 $methodName = $method;
             }
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $exception = $ex;
         } finally {
             MiddlewareManagement::processAfter(
@@ -244,7 +247,7 @@ class HttpRequestHandler implements RequestHandler
      * @param RouteListInterface $routeDefinition
      * @param bool $outputBuffer
      * @param bool $session
-     * @return bool|void
+     * @return bool
      * @throws ClassNotFoundException
      * @throws Error404Exception
      * @throws Error405Exception
@@ -292,7 +295,7 @@ class HttpRequestHandler implements RequestHandler
 
     public function withDefaultOutputProcessor($processor, $args = [])
     {
-        if (!($processor instanceof \Closure)) {
+        if (!($processor instanceof Closure)) {
             if (!is_string($processor)) {
                 throw new InvalidArgumentException("Default processor needs to class name of an OutputProcessor");
             }
