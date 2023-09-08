@@ -35,7 +35,12 @@ class MockHttpRequest extends HttpRequest
     public function payload()
     {
         if (is_null($this->payload)) {
-            $this->payload = $this->psrRequest->getBody()->getContents();
+            $body = $this->psrRequest->getBody();
+            if (empty($body)) {
+                $this->payload = "";
+            } else {
+                $this->payload = $body->getContents();
+            }
         }
 
         return $this->payload;
