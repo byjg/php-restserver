@@ -6,7 +6,6 @@ use ByJG\RestServer\MockHttpRequest;
 use ByJG\Util\Helper\RequestFormUrlEncoded;
 use ByJG\Util\Helper\RequestMultiPart;
 use ByJG\Util\MultiPartItem;
-use ByJG\Util\Psr7\Request;
 use ByJG\Util\Uri;
 use PHPUnit\Framework\TestCase;
 
@@ -19,8 +18,10 @@ class MockHttpRequestTest extends TestCase
             new MultiPartItem("upfile", file_get_contents(__DIR__ . "/mimefiles/test.png"), "penguim.png", "image/png")
         ];
 
-        $psr7Request = RequestMultiPart::build(new Uri("/?foo=bar"), "POST", $multiPartItems);
-        $mockHttpRequest = new MockHttpRequest($psr7Request);
+        $psr7Request = RequestMultiPart::build(new Uri("/2?foo=bar"), "POST", $multiPartItems);
+        $mockHttpRequest = new MockHttpRequest($psr7Request, ["id" => 2]);
+
+        $this->assertEquals(2, $mockHttpRequest->param("id"));
 
         $this->assertEquals(
             [

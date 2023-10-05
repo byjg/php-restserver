@@ -16,13 +16,13 @@ class MockHttpRequest extends HttpRequest
      *
      * @param Request $psrRequest
      */
-    public function __construct(Request $psrRequest)
+    public function __construct(Request $psrRequest, $param = [])
     {
         $this->psrRequest = $psrRequest;
 
         $this->initializePhpVariables();
 
-        parent::__construct($this->get, $this->post, $this->server, $this->session, $this->cookie);
+        parent::__construct($this->get, $this->post, $this->server, $this->session, $this->cookie, $param);
     }
 
     private $payload;
