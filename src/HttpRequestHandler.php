@@ -207,18 +207,16 @@ class HttpRequestHandler implements RequestHandler
                 $classDefinition($this->getHttpResponse(), $this->getHttpRequest());
             } else {
                 // Process Class::Method()
-                $class = $classDefinition[0];
-                $method = $classDefinition[1];
-                if (!class_exists($class)) {
-                    throw new ClassNotFoundException("Class '$class' defined in the route is not found");
+                $className = $classDefinition[0];
+                $methodName = $classDefinition[1];
+                if (!class_exists($className)) {
+                    throw new ClassNotFoundException("Class '$className' defined in the route is not found");
                 }
-                $instance = new $class();
-                if (!method_exists($instance, $method)) {
-                    throw new InvalidClassException("There is no method '$class::$method''");
+                $instance = new $className();
+                if (!method_exists($instance, $methodName)) {
+                    throw new InvalidClassException("There is no method '$className::$methodName''");
                 }
-                $instance->$method($this->getHttpResponse(), $this->getHttpRequest());
-                $className = $class;
-                $methodName = $method;
+                $instance->$methodName($this->getHttpResponse(), $this->getHttpRequest());
             }
         } catch (Exception $ex) {
             $exception = $ex;
