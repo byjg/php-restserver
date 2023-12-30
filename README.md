@@ -438,7 +438,7 @@ You need to set up your restserver to handle ALL requests to a single PHP file. 
 ### PHP Built-in server
 
 ```bash
-cd web
+cd public
 php -S localhost:8080 app.php
 ```
 
@@ -457,6 +457,20 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ ./app.php [QSA,NC,L]
+```
+
+## Dependencies
+
+```mermaid
+flowchart TD
+   byjg/restserver --> byjg/serializer
+   byjg/restserver --> byjg/singleton-pattern
+   byjg/restserver --> nikikc/fast-route
+   byjg/restserver --> filp/whoops
+   byjg/restserver --> byjg/cache-engine
+   byjg/restserver --> byjg/webrequest
+   byjg/restserver --> byjg/jwt-wrapper
+   byjg/restserver --> ext-json
 ```
 
 ----
