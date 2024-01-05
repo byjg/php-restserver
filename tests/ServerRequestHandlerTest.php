@@ -41,6 +41,8 @@ class ServerRequestHandlerTest extends TestCase
 
     public function setup(): void
     {
+        ini_set('output_buffering', 4096);
+
         $this->object = new HttpRequestHandler();
         
         $this->reach = false;
