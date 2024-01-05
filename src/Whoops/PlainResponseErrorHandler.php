@@ -51,7 +51,7 @@ class PlainResponseErrorHandler extends Handler
 
         $title = $this->getClassAsTitle($response["type"]);
 
-        echo "<html><h1>${title}</h1><p>${response['message']}</p></html>";
+        echo "<html><h1>{$title}</h1><p>{$response['message']}</p></html>";
 
         return Handler::QUIT;
     }
