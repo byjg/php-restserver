@@ -8,13 +8,14 @@ use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error415Exception;
 use ByJG\RestServer\HttpRequest;
-use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\Route\RouteList;
 use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Middleware\CorsMiddleware;
+use ByJG\RestServer\Middleware\DummyAfterMiddleware;
 use ByJG\RestServer\Middleware\ServerStaticMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\Route\Route;
+use ByJG\RestServer\Route\RouteList;
 use ByJG\RestServer\Writer\MemoryWriter;
 use PHPUnit\Framework\TestCase;
 
@@ -40,6 +41,8 @@ class ServerRequestHandlerTest extends TestCase
 
     public function setup(): void
     {
+        ini_set('output_buffering', 4096);
+
         $this->object = new HttpRequestHandler();
         
         $this->reach = false;
@@ -109,6 +112,23 @@ class ServerRequestHandlerTest extends TestCase
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
         $this->processAndGetContent($this->object, $expectedHeader, $expectedData);
+
+        $this->assertTrue($this->reach);
+    }
+
+    public function testHandle1WithAfterMiddleware()
+    {
+        $expectedHeader = [
+            "HTTP/1.1 200 OK",
+            "Content-Type: application/json",
+        ];
+        $expectedData = '{"key":"value"}';
+
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = "http://localhost/test";
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
+
+        $this->processAndGetContent($this->object, $expectedHeader, $expectedData, new DummyAfterMiddleware());
 
         $this->assertTrue($this->reach);
     }

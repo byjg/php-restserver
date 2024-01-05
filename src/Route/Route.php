@@ -16,9 +16,6 @@ class Route
      *
      * @param array|string $method
      * @param string $path
-     * @param string $outputProcessor
-     * @param Closure|string $class
-     * @param string|null $methodName
      */
     public function __construct($method, $path)
     {
@@ -32,7 +29,7 @@ class Route
         return $this;
     }
 
-    public function withClosure(\Closure $closure)
+    public function withClosure(Closure $closure)
     {
         $this->setClass($closure);
         return $this;
@@ -59,6 +56,7 @@ class Route
     protected function setMethod($method)
     {
         $this->method = $method;
+        return $this;
     }
 
     /**
@@ -76,6 +74,7 @@ class Route
     protected function setPath($path)
     {
         $this->path = $path;
+        return $this;
     }
 
     /**
@@ -93,6 +92,7 @@ class Route
     protected function setOutputProcessor($outputProcessor)
     {
         $this->outputProcessor = $outputProcessor;
+        return $this;
     }
 
     /**
@@ -110,6 +110,7 @@ class Route
     protected function setClass($class)
     {
         $this->class = $class;
+        return $this;
     }
 
 
@@ -117,9 +118,6 @@ class Route
      * Route Factory for "GET" method
      *
      * @param string $path
-     * @param string $outputProcessor
-     * @param string $class
-     * @param null $methodName
      * @return Route
      */
     public static function get($path)
@@ -131,9 +129,6 @@ class Route
      * Route Factory for "POST" method
      *
      * @param string $path
-     * @param string $outputProcessor
-     * @param string $class
-     * @param null $methodName
      * @return Route
      */
     public static function post($path)
@@ -145,9 +140,6 @@ class Route
      * Route Factory for "PUT" method
      *
      * @param string $path
-     * @param string $outputProcessor
-     * @param string $class
-     * @param null $methodName
      * @return Route
      */
     public static function put($path)
@@ -159,9 +151,6 @@ class Route
      * Route Factory for "DELETE" method
      *
      * @param string $path
-     * @param string $outputProcessor
-     * @param string $class
-     * @param null $methodName
      * @return Route
      */
     public static function delete($path)

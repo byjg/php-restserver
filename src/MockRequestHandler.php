@@ -10,7 +10,6 @@ use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\Route\RouteListInterface;
 use ByJG\RestServer\Writer\MemoryWriter;
 use ByJG\Util\Psr7\MemoryStream;
-use ByJG\Util\Psr7\MessageException;
 use ByJG\Util\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
 
@@ -27,6 +26,7 @@ class MockRequestHandler extends HttpRequestHandler
     /**
      * MockRequestHandler constructor.
      * @param RequestInterface $request
+     * @noinspection PhpMissingParentConstructorInspection
      */
     public function __construct(RequestInterface $request)
     {
@@ -44,7 +44,6 @@ class MockRequestHandler extends HttpRequestHandler
      * @throws Error405Exception
      * @throws Error520Exception
      * @throws InvalidClassException
-     * @throws MessageException
      */
     public static function mock(RouteListInterface $routes, RequestInterface $request)
     {

@@ -5,10 +5,8 @@ namespace ByJG\RestServer\Middleware;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\ResponseBag;
 use ByJG\Util\JwtWrapper;
 use ByJG\Util\JwtWrapperException;
-use Exception;
 
 class JwtMiddleware implements BeforeMiddlewareInterface
 {
@@ -29,6 +27,7 @@ class JwtMiddleware implements BeforeMiddlewareInterface
      * @param HttpResponse $response
      * @param HttpRequest $request
      * @return MiddlewareResult
+     * @throws Error401Exception
      */
     public function beforeProcess(
         $dispatcherStatus,

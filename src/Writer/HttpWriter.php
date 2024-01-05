@@ -12,6 +12,7 @@ class HttpWriter implements WriterInterface
     public function responseCode($responseCode, $description)
     {
         $this->header("HTTP/1.1 $responseCode $description");
+        http_response_code($responseCode);
     }
 
     public function echo($data)

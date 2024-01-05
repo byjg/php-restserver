@@ -12,7 +12,6 @@ use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\Serializer\SerializerObject;
 use ByJG\Util\Uri;
 use Psr\SimpleCache\CacheInterface;
-use Psr\SimpleCache\InvalidArgumentException;
 
 class OpenApiRouteList extends RouteList
 {
@@ -23,10 +22,6 @@ class OpenApiRouteList extends RouteList
 
     /**
      * @param $openApiDefinition
-     * @param string $defaultProcessor
-     * @param CacheInterface|null $cache
-     * @throws InvalidArgumentException
-     * @throws OperationIdInvalidException
      * @throws SchemaInvalidException
      * @throws SchemaNotFoundException
      */
@@ -108,7 +103,7 @@ class OpenApiRouteList extends RouteList
      */
     protected function generateRoutes()
     {
-        $basePath = isset($this->schema["basePath"]) ? $this->schema["basePath"] : "";
+        $basePath = $this->schema["basePath"] ?? "";
         if (empty($basePath) && isset($this->schema["servers"])) {
             $uri = new Uri($this->schema["servers"][0]["url"]);
             $basePath = $uri->getPath();

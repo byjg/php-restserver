@@ -37,11 +37,15 @@ class HttpRequest
     /**
      * Get a parameter passed by GET (the same as $_GET). If not found return false.
      *
-     * @param string $value
-     * @return string|boolean
+     * @param ?string $value
+     * @return string|array|boolean
      */
-    public function get($value, $default = false)
+    public function get($value = null, $default = false)
     {
+        if (is_null($value)) {
+            return $this->get;
+        }
+
         if (!isset($this->get[$value])) {
             return $default;
         } else {
@@ -52,11 +56,15 @@ class HttpRequest
     /**
      * Get a parameter passed by POST (the same as $_POST). If not found return false.
      *
-     * @param string $value
-     * @return string|boolean
+     * @param ?string $value
+     * @return string|boolean|array
      */
-    public function post($value, $default = false)
+    public function post($value = null, $default = false)
     {
+        if (is_null($value)) {
+            return $this->post;
+        }
+
         if (!isset($this->post[$value])) {
             return $default;
         } else {
@@ -67,11 +75,15 @@ class HttpRequest
     /**
      * Get the parameters sent by server (the same as $_SERVER). If not found return false.
      *
-     * @param string $value
-     * @return string|boolean
+     * @param ?string $value
+     * @return string|boolean|array
      */
-    public function server($value, $default = false)
+    public function server($value = null, $default = false)
     {
+        if (is_null($value)) {
+            return $this->server;
+        }
+
         if (!isset($this->server[$value])) {
             return $default;
         } else {
@@ -82,11 +94,15 @@ class HttpRequest
     /**
      * Get a server session value(the same as $_SESSION). If not found return false.
      *
-     * @param string $value
-     * @return string|boolean
+     * @param ?string $value
+     * @return string|boolean|array
      */
-    public function session($value, $default = false)
+    public function session($value = null, $default = false)
     {
+        if (is_null($value)) {
+            return $this->session;
+        }
+
         if (!isset($this->session[$value])) {
             return $default;
         } else {
@@ -97,11 +113,15 @@ class HttpRequest
     /**
      * Get the cookie sent by the client (the same as $_COOKIE). If not found return false.
      *
-     * @param string $value
-     * @return string|boolean
+     * @param ?string $value
+     * @return string|boolean|array
      */
-    public function cookie($value, $default = false)
+    public function cookie($value = null, $default = false)
     {
+        if (is_null($value)) {
+            return $this->cookie;
+        }
+
         if (!isset($this->cookie[$value])) {
             return $default;
         } else {
@@ -112,11 +132,15 @@ class HttpRequest
     /**
      * Get a value from any of get, post, server, cookie or session. If not found return false.
      *
-     * @param string $value
-     * @return string|boolean
+     * @param ?string $value
+     * @return string|boolean|array
      */
-    public function request($value, $default = false)
+    public function request($value = null, $default = false)
     {
+        if (is_null($value)) {
+            return $this->phpRequest;
+        }
+
         if (!isset($this->phpRequest[$value])) {
             return $default;
         } else {
@@ -127,11 +151,15 @@ class HttpRequest
     /**
      * Get a value from the params found in the URL
      *
-     * @param string $value
-     * @return string|boolean
+     * @param ?string $value
+     * @return string|boolean|array
      */
-    public function param($value, $default = false)
+    public function param($value = null, $default = false)
     {
+        if (is_null($value)) {
+            return $this->param;
+        }
+
         if (!isset($this->param[$value])) {
             return $default;
         } else {
@@ -203,7 +231,7 @@ class HttpRequest
     {
         $servername = $this->getServerName();
 
-        if ($port && $this->server('SERVER_PORT' !== false)) {
+        if ($port && $this->server('SERVER_PORT') !== false) {
             $servername .= ':' . $this->server('SERVER_PORT');
         }
 
@@ -215,6 +243,13 @@ class HttpRequest
         }
 
         return $servername;
+    }
+
+    public function getHeader($header)
+    {
+        $header = strtoupper(str_replace('-', '_', $header));
+        $header = 'HTTP_' . $header;
+        return $this->server($header);
     }
 
     public function getRequestPath()

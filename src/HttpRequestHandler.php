@@ -17,6 +17,7 @@ use ByJG\RestServer\Route\RouteListInterface;
 use ByJG\RestServer\Writer\HttpWriter;
 use ByJG\RestServer\Writer\WriterInterface;
 use Closure;
+use Exception;
 use FastRoute\Dispatcher;
 use InvalidArgumentException;
 
@@ -86,7 +87,7 @@ class HttpRequestHandler implements RequestHandler
                 $this->getHttpResponse(),
                 $this->getHttpRequest()
             );
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $outputProcessor->processResponse($this->getHttpResponse());
             throw $ex;
         }
@@ -130,6 +131,8 @@ class HttpRequestHandler implements RequestHandler
             default:
                 throw new Error520Exception('Unknown');
         }
+
+        return true;
     }
 
     protected function initializeProcessor($class = null)
@@ -162,7 +165,7 @@ class HttpRequestHandler implements RequestHandler
     protected function getHttpRequest()
     {
         if (is_null($this->httpRequest)) {
-            $this->httpRequest = new HttpRequest($_GET, $_POST, $_SERVER, isset($_SESSION) ? $_SESSION : [], $_COOKIE);
+            $this->httpRequest = new HttpRequest($_GET, $_POST, $_SERVER, $_SESSION ?? [], $_COOKIE);
         }
 
         return $this->httpRequest;
@@ -190,34 +193,49 @@ class HttpRequestHandler implements RequestHandler
      */
     protected function executeRequest(
         OutputProcessorInterface $outputProcessor,
-        $class
+        $classDefinition
     )
     {
-        // Process Closure
-        if ($class instanceof Closure) {
-            $class($this->getHttpResponse(), $this->getHttpRequest());
-            $outputProcessor->processResponse($this->getHttpResponse());
-            return;
+        $className = null;
+        $methodName = null;
+        $exception = null;
+        try {
+            if ($classDefinition instanceof Closure) {
+                // Process Closure
+                $className = 'Closure';
+                $methodName = $this->getHttpRequest()->getRequestPath();
+                $classDefinition($this->getHttpResponse(), $this->getHttpRequest());
+            } else {
+                // Process Class::Method()
+                $className = $classDefinition[0];
+                $methodName = $classDefinition[1];
+                if (!class_exists($className)) {
+                    throw new ClassNotFoundException("Class '$className' defined in the route is not found");
+                }
+                $instance = new $className();
+                if (!method_exists($instance, $methodName)) {
+                    throw new InvalidClassException("There is no method '$className::$methodName''");
+                }
+                $instance->$methodName($this->getHttpResponse(), $this->getHttpRequest());
+            }
+        } catch (Exception $ex) {
+            $exception = $ex;
+        } finally {
+            MiddlewareManagement::processAfter(
+                $this->afterMiddlewareList,
+                $this->getHttpResponse(),
+                $this->getHttpRequest(),
+                $className,
+                $methodName,
+                $exception
+            );
+
+            if ($exception !== null) {
+                throw $exception;
+            }
         }
 
-        // Process Class::Method()
-        $function = $class[1];
-        $class =  $class[0];
-        if (!class_exists($class)) {
-            throw new ClassNotFoundException("Class '$class' defined in the route is not found");
-        }
-        $instance = new $class();
-        if (!method_exists($instance, $function)) {
-            throw new InvalidClassException("There is no method '$class::$function''");
-        }
-        $instance->$function($this->getHttpResponse(), $this->getHttpRequest());
 
-        MiddlewareManagement::processAfter(
-            $this->afterMiddlewareList,
-            $this->getHttpResponse(),
-            $this->getHttpRequest()
-        );
-        
         $outputProcessor->processResponse($this->getHttpResponse());
     }
 
@@ -227,7 +245,7 @@ class HttpRequestHandler implements RequestHandler
      * @param RouteListInterface $routeDefinition
      * @param bool $outputBuffer
      * @param bool $session
-     * @return bool|void
+     * @return bool
      * @throws ClassNotFoundException
      * @throws Error404Exception
      * @throws Error405Exception
@@ -275,7 +293,7 @@ class HttpRequestHandler implements RequestHandler
 
     public function withDefaultOutputProcessor($processor, $args = [])
     {
-        if (!($processor instanceof \Closure)) {
+        if (!($processor instanceof Closure)) {
             if (!is_string($processor)) {
                 throw new InvalidArgumentException("Default processor needs to class name of an OutputProcessor");
             }

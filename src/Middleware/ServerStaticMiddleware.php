@@ -6,7 +6,6 @@ use ByJG\RestServer\Exception\Error415Exception;
 use ByJG\RestServer\Exception\Error500Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\OutputProcessor\HtmlOutputProcessor;
 use ByJG\RestServer\ResponseBag;
 use ByJG\Util\Uri;
 use FastRoute\Dispatcher;
@@ -770,7 +769,6 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
         'stl' => 'application/vnd.ms-pki.stl',
         'str' => 'application/vnd.pg.format',
         'stw' => 'application/vnd.sun.xml.writer.template',
-        'sub' => 'image/vnd.dvb.subtitle',
         'sub' => 'text/vnd.dvb.subtitle',
         'sus' => 'application/vnd.sus-calendar',
         'susp' => 'application/vnd.sus-calendar',
@@ -913,7 +911,6 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
         'wmlsc' => 'application/vnd.wap.wmlscriptc',
         'wmv' => 'video/x-ms-wmv',
         'wmx' => 'video/x-ms-wmx',
-        'wmz' => 'application/x-ms-wmz',
         'wmz' => 'application/x-msmetafile',
         'woff' => 'font/woff',
         'woff2' => 'font/woff2',
@@ -1011,6 +1008,8 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
      * @param HttpResponse $response
      * @param HttpRequest $request
      * @return MiddlewareResult
+     * @throws Error415Exception
+     * @throws Error500Exception
      */
     public function beforeProcess(
         $dispatcherStatus,
@@ -1042,7 +1041,7 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
             $response->emptyResponse();
             $response->getResponseBag()->setSerializationRule(ResponseBag::RAW);
             $response->write(file_get_contents($file));
-            return MiddlewareResult::stopProcessingOthers(HtmlOutputProcessor::class);
+            return MiddlewareResult::stopProcessingOthers();
         }
 
         return MiddlewareResult::continue();
@@ -1053,6 +1052,8 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
      *
      * @param string $filename
      * @return string
+     * @throws Error415Exception
+     * @throws Error500Exception
      */
     public function mimeContentType($filename)
     {

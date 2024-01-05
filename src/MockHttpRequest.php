@@ -16,13 +16,13 @@ class MockHttpRequest extends HttpRequest
      *
      * @param Request $psrRequest
      */
-    public function __construct(Request $psrRequest)
+    public function __construct(Request $psrRequest, $param = [])
     {
         $this->psrRequest = $psrRequest;
 
         $this->initializePhpVariables();
 
-        parent::__construct($this->get, $this->post, $this->server, $this->session, $this->cookie);
+        parent::__construct($this->get, $this->post, $this->server, $this->session, $this->cookie, $param);
     }
 
     private $payload;
@@ -35,7 +35,12 @@ class MockHttpRequest extends HttpRequest
     public function payload()
     {
         if (is_null($this->payload)) {
-            $this->payload = $this->psrRequest->getBody()->getContents();
+            $body = $this->psrRequest->getBody();
+            if (empty($body)) {
+                $this->payload = "";
+            } else {
+                $this->payload = $body->getContents();
+            }
         }
 
         return $this->payload;
@@ -70,7 +75,7 @@ class MockHttpRequest extends HttpRequest
         // Headers and Cookies
         $this->cookie = [];
         foreach ($this->psrRequest->getHeaders() as $key => $value) {
-            $this->server["HTTP_" . strtoupper($key)] = $this->psrRequest->getHeaderLine($key);
+            $this->server["HTTP_" . str_replace('-', '_', strtoupper($key))] = $this->psrRequest->getHeaderLine($key);
 
             if ($key == "Cookie") {
                 parse_str(preg_replace("/;\s*/", "&", $this->psrRequest->getHeaderLine($key)), $this->cookie);
