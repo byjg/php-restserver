@@ -10,13 +10,13 @@
   "prefer-stable": true,
   "require": {
     "php": ">=7.4",
-    "byjg/serializer": "4.9.*",
-    "byjg/singleton-pattern": "4.9.*",
+    "byjg/serializer": "^4.9",
+    "byjg/singleton-pattern": "^4.9",
     "nikic/fast-route": "v1.3.*",
     "filp/whoops": "^2.14",
-    "byjg/cache-engine": "4.9.*",
-    "byjg/webrequest": "4.9.*",
-    "byjg/jwt-wrapper": "4.9.*",
+    "byjg/cache-engine": "^4.9",
+    "byjg/webrequest": "dev-5.0.0rc",
+    "byjg/jwt-wrapper": "^4.9",
     "ext-json": "*"
   },
   "suggest": {
