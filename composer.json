@@ -10,7 +10,7 @@
   "prefer-stable": true,
   "require": {
     "php": ">=8.1",
-    "byjg/serializer": "^4.9",
+    "byjg/serializer": "^5.0",
     "byjg/singleton-pattern": "^4.9",
     "nikic/fast-route": "v1.3.*",
     "filp/whoops": "^2.14",
