@@ -63,7 +63,7 @@ class WhoopsWrapper extends Handler
         if ($exception instanceof ClientShowException) {
             $exception->setResponse($this->response);
             $exception->handleHeader();
-        } else {
+        } elseif (!empty($this->response)) {
             $this->response->setResponseCode(500, 'Internal Error');
         }
 
