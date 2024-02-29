@@ -9,7 +9,7 @@ use ByJG\RestServer\Exception\SchemaInvalidException;
 use ByJG\RestServer\Exception\SchemaNotFoundException;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
-use ByJG\Serializer\SerializerObject;
+use ByJG\Serializer\Serialize;
 use ByJG\Util\Uri;
 use Psr\SimpleCache\CacheInterface;
 
@@ -35,9 +35,9 @@ class OpenApiRouteList extends RouteList
         $contents = file_get_contents($openApiDefinition);
 
         if ($ext == "json") {
-            $this->schema = SerializerObject::instance($contents)->fromJson()->serialize();
+            $this->schema = Serialize::fromJson($contents)->toArray();
         } elseif ($ext == "yaml" || $ext == "yml") {
-            $this->schema = SerializerObject::instance($contents)->fromYaml()->serialize();
+            $this->schema = Serialize::fromYaml($contents)->toArray();
         } else {
             throw new SchemaInvalidException(
                 "Cannot determine file type. Valids extensions are 'json', 'yaml' or 'yml'"
