@@ -197,8 +197,8 @@ class HttpRequest
             'HTTP_FORWARDED',
             'HTTP_CF_CONNECTING_IP',
             'HTTP_X_ORIGINAL_FORWARDED_FOR',
-            'HTTP_REMOTE_ADDR',
-            'HTTP_SERVER_ADDR',
+            'REMOTE_ADDR',
+            'SERVER_ADDR',
             'HTTP_CLIENT_IP',
         ];
         foreach ($headers as $header) {
