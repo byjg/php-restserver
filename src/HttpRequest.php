@@ -191,16 +191,20 @@ class HttpRequest
     public function getRequestIp()
     {
         $headers = [
-            'HTTP_CLIENT_IP',
             'HTTP_X_FORWARDED_FOR',
             'HTTP_X_FORWARDED',
             'HTTP_FORWARDED_FOR',
             'HTTP_FORWARDED',
-            'REMOTE_ADDR',
+            'HTTP_CF_CONNECTING_IP',
+            'HTTP_X_ORIGINAL_FORWARDED_FOR',
+            'HTTP_REMOTE_ADDR',
+            'HTTP_SERVER_ADDR',
+            'HTTP_CLIENT_IP',
         ];
         foreach ($headers as $header) {
             if ($this->server($header) !== false) {
-                return $this->server($header);
+                $list = explode(",", $this->server($header));
+                return reset($list);
             }
         }
 
