@@ -213,7 +213,7 @@ class HttpRequest
 
     public static function ip()
     {
-        $request = new HttpRequest($_GET, $_POST, $_SERVER, $_SESSION, $_COOKIE);
+        $request = new HttpRequest([], [], isset($_SERVER) ? $_SERVER : [], [], []);
         return $request->getRequestIp();
     }
 
