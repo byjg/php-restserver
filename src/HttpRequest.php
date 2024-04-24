@@ -217,6 +217,18 @@ class HttpRequest
         return $request->getRequestIp();
     }
 
+    public function getUserAgent()
+    {
+        $userAgent = $this->server('HTTP_USER_AGENT');
+        return $userAgent ? $userAgent : null;
+    }
+
+    public static function userAgent()
+    {
+        $request = new HttpRequest([], [], isset($_SERVER) ? $_SERVER : [], [], []);
+        return $request->getUserAgent();
+    }
+
     public function getServerName()
     {
         $headers = [
