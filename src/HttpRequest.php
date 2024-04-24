@@ -208,7 +208,13 @@ class HttpRequest
             }
         }
 
-        return 'UNKNOWN';
+        return null;
+    }
+
+    public static function ip()
+    {
+        $request = new HttpRequest($_GET, $_POST, $_SERVER, $_SESSION, $_COOKIE);
+        return $request->getRequestIp();
     }
 
     public function getServerName()
