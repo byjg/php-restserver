@@ -431,7 +431,7 @@ class ServerRequestHandlerTest extends TestCase
 
     public function testJwtMiddlewareWithToken()
     {
-        $jwtKey = new JwtKeySecret("password", decode: false);
+        $jwtKey = new JwtKeySecret("password", false);
         $jwtWrapper = new JwtWrapper("localhost", $jwtKey);
         $token = $jwtWrapper->generateToken(["userid" => "123"]);
 
@@ -452,7 +452,7 @@ class ServerRequestHandlerTest extends TestCase
 
     public function testJwtMiddlewareEmptyToken()
     {
-        $jwtKey = new JwtKeySecret("password", decode: false);
+        $jwtKey = new JwtKeySecret("password", false);
         $jwtWrapper = new JwtWrapper("localhost", $jwtKey);
 
         $expectedHeader = [
@@ -474,7 +474,7 @@ class ServerRequestHandlerTest extends TestCase
     {
         $this->expectException(Error401Exception::class);
 
-        $jwtKey = new JwtKeySecret("wrong", decode: false);
+        $jwtKey = new JwtKeySecret("wrong", false);
         $jwtWrapper = new JwtWrapper("other", $jwtKey);
         $token = $jwtWrapper->generateToken(["userid" => "150"]);
 
@@ -483,7 +483,7 @@ class ServerRequestHandlerTest extends TestCase
         $_SERVER['HTTP_AUTHORIZATION'] = "Bearer $token";
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
-        $jwtKey2 = new JwtKeySecret("password", decode: false);
+        $jwtKey2 = new JwtKeySecret("password", false);
         $jwtWrapper2 = new JwtWrapper("localhost", $jwtKey2);
 
         $this->processAndGetContent($this->object, null, '[]', new JwtMiddleware($jwtWrapper2));
