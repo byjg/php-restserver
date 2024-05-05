@@ -12,11 +12,14 @@ use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Middleware\CorsMiddleware;
 use ByJG\RestServer\Middleware\DummyAfterMiddleware;
+use ByJG\RestServer\Middleware\JwtMiddleware;
 use ByJG\RestServer\Middleware\ServerStaticMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\Route\Route;
 use ByJG\RestServer\Route\RouteList;
 use ByJG\RestServer\Writer\MemoryWriter;
+use ByJG\Util\JwtKeySecret;
+use ByJG\Util\JwtWrapper;
 use PHPUnit\Framework\TestCase;
 
 require __DIR__ . '/OpenApiWrapperExposed.php';
@@ -80,6 +83,18 @@ class ServerRequestHandlerTest extends TestCase
         );
 
         $this->definition->addRoute(
+            Route::get("/testjwt")
+                ->withClosure(function ($response, $request) {
+                    $response->write(
+                        [
+                            JwtMiddleware::JWT_PARAM_PARSE_STATUS => $request->param(JwtMiddleware::JWT_PARAM_PARSE_STATUS),
+                            JwtMiddleware::JWT_PARAM_PARSE_MESSAGE => $request->param(JwtMiddleware::JWT_PARAM_PARSE_MESSAGE),
+                            JwtMiddleware::JWT_PARAM_PREFIX . ".userid" => $request->param(JwtMiddleware::JWT_PARAM_PREFIX . ".userid")
+                        ]
+                    );
+                })
+        );
+        $this->definition->addRoute(
             (new Route('GET', '/error'))
                 ->withClass('\\My\\Class', 'method')
         );
@@ -90,6 +105,12 @@ class ServerRequestHandlerTest extends TestCase
         $this->object = null;
         $this->reach = false;
         $this->headers = null;
+        $_SERVER = [];
+        $_GET = [];
+        $_POST = [];
+        $_REQUEST = [];
+        $_COOKIE = [];
+        $_FILES = [];
     }
 
     /**
@@ -407,4 +428,65 @@ class ServerRequestHandlerTest extends TestCase
             $this->assertEquals($expectedData, $writer->getData());
         }
     }
+
+    public function testJwtMiddlewareWithToken()
+    {
+        $jwtKey = new JwtKeySecret("password", decode: false);
+        $jwtWrapper = new JwtWrapper("localhost", $jwtKey);
+        $token = $jwtWrapper->generateToken(["userid" => "123"]);
+
+        $expectedHeader = [
+            "HTTP/1.1 200 OK",
+            "Content-Type: application/json",
+        ];
+        $expectedData = '{"jwt.parse.status":"success","jwt.parse.message":false,"jwt.userid":"123"}';
+
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = "http://localhost/testjwt";
+        $_SERVER['HTTP_AUTHORIZATION'] = "Bearer $token";
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
+
+
+        $this->processAndGetContent($this->object, $expectedHeader, $expectedData, new JwtMiddleware($jwtWrapper));
+    }
+
+    public function testJwtMiddlewareEmptyToken()
+    {
+        $jwtKey = new JwtKeySecret("password", decode: false);
+        $jwtWrapper = new JwtWrapper("localhost", $jwtKey);
+
+        $expectedHeader = [
+            "HTTP/1.1 200 OK",
+            "Content-Type: application/json",
+        ];
+        $expectedData = '{"jwt.parse.status":"failed","jwt.parse.message":"Absent authorization token","jwt.userid":false}';
+
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = "http://localhost/testjwt";
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
+
+
+        $this->processAndGetContent($this->object, $expectedHeader, $expectedData, new JwtMiddleware($jwtWrapper));
+    }
+
+
+    public function testJwtMiddlewareWrongToken()
+    {
+        $this->expectException(Error401Exception::class);
+
+        $jwtKey = new JwtKeySecret("wrong", decode: false);
+        $jwtWrapper = new JwtWrapper("other", $jwtKey);
+        $token = $jwtWrapper->generateToken(["userid" => "150"]);
+
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = "http://localhost/testjwt";
+        $_SERVER['HTTP_AUTHORIZATION'] = "Bearer $token";
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
+
+        $jwtKey2 = new JwtKeySecret("password", decode: false);
+        $jwtWrapper2 = new JwtWrapper("localhost", $jwtKey2);
+
+        $this->processAndGetContent($this->object, null, '[]', new JwtMiddleware($jwtWrapper2));
+    }
+
 }
