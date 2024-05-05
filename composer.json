@@ -6,6 +6,11 @@
       "ByJG\\RestServer\\": "src/"
     }
   },
+    "autoload-dev": {
+        "psr-4": {
+        "Tests\\": "tests/"
+        }
+    },
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
@@ -16,7 +21,7 @@
     "filp/whoops": "^2.14",
     "byjg/cache-engine": "^5.0",
     "byjg/webrequest": "dev-5.0.0rc",
-    "byjg/jwt-wrapper": "^4.9",
+    "byjg/jwt-wrapper": "^5.0",
     "ext-json": "*"
   },
   "suggest": {
