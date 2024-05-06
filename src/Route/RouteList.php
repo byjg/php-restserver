@@ -9,9 +9,12 @@ use function FastRoute\simpleDispatcher;
 
 class RouteList implements RouteListInterface
 {
-    protected $routes = null;
+    protected array $routes = [];
 
-    public function getRoutes()
+    /**
+     * @return Route[]
+     */
+    public function getRoutes(): array
     {
         return $this->routes;
     }
@@ -20,7 +23,7 @@ class RouteList implements RouteListInterface
      * @param Route[] $routes
      * @return RouteList
      */
-    public function setRoutes($routes)
+    public function setRoutes(array $routes): static
     {
         foreach ((array)$routes as $route) {
             $this->addRoute($route);
@@ -32,11 +35,8 @@ class RouteList implements RouteListInterface
      * @param Route $route
      * @return RouteList
      */
-    public function addRoute(Route $route)
+    public function addRoute(Route $route): static
     {
-        if (is_null($this->routes)) {
-            $this->routes = [];
-        }
         $this->routes[] = $route;
         return $this;
     }
@@ -44,7 +44,7 @@ class RouteList implements RouteListInterface
     /**
      * @return Dispatcher
      */
-    public function getDispatcher()
+    public function getDispatcher(): Dispatcher
     {
         // Generic Dispatcher for RestServer
         return simpleDispatcher(function (RouteCollector $r) {

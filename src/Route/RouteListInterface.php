@@ -11,20 +11,20 @@ interface RouteListInterface
     /**
      * @return Route[]
      */
-    public function getRoutes();
+    public function getRoutes(): array;
 
     /**
      * @param Route[] $routes
      */
-    public function setRoutes($routes);
+    public function setRoutes(array $routes): static;
 
     /**
      * @param Route $route
      */
-    public function addRoute(Route $route);
+    public function addRoute(Route $route): static;
 
     /**
      * @return Dispatcher
      */
-    public function getDispatcher();
+    public function getDispatcher(): Dispatcher;
 }

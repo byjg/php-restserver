@@ -12,11 +12,6 @@ class ServerRequestHandlerTest extends TestCase
     use MockServerTrait;
 
     /**
-     * @throws \ByJG\RestServer\Exception\ClassNotFoundException
-     * @throws \ByJG\RestServer\Exception\Error404Exception
-     * @throws \ByJG\RestServer\Exception\Error405Exception
-     * @throws \ByJG\RestServer\Exception\Error520Exception
-     * @throws \ByJG\RestServer\Exception\InvalidClassException
      */
     public function testHandle1()
     {
@@ -36,11 +31,6 @@ class ServerRequestHandlerTest extends TestCase
     }
 
     /**
-     * @throws \ByJG\RestServer\Exception\ClassNotFoundException
-     * @throws \ByJG\RestServer\Exception\Error404Exception
-     * @throws \ByJG\RestServer\Exception\Error405Exception
-     * @throws \ByJG\RestServer\Exception\Error520Exception
-     * @throws \ByJG\RestServer\Exception\InvalidClassException
      */
     public function testHandle2()
     {
@@ -60,11 +50,6 @@ class ServerRequestHandlerTest extends TestCase
     }
 
     /**
-     * @throws \ByJG\RestServer\Exception\ClassNotFoundException
-     * @throws \ByJG\RestServer\Exception\Error404Exception
-     * @throws \ByJG\RestServer\Exception\Error405Exception
-     * @throws \ByJG\RestServer\Exception\Error520Exception
-     * @throws \ByJG\RestServer\Exception\InvalidClassException
      */
     public function testHandle3()
     {
@@ -79,11 +64,6 @@ class ServerRequestHandlerTest extends TestCase
     }
 
     /**
-     * @throws \ByJG\RestServer\Exception\ClassNotFoundException
-     * @throws \ByJG\RestServer\Exception\Error404Exception
-     * @throws \ByJG\RestServer\Exception\Error405Exception
-     * @throws \ByJG\RestServer\Exception\Error520Exception
-     * @throws \ByJG\RestServer\Exception\InvalidClassException
      */
     public function testHandle4()
     {
@@ -98,11 +78,6 @@ class ServerRequestHandlerTest extends TestCase
     }
 
     /**
-     * @throws \ByJG\RestServer\Exception\ClassNotFoundException
-     * @throws \ByJG\RestServer\Exception\Error404Exception
-     * @throws \ByJG\RestServer\Exception\Error405Exception
-     * @throws \ByJG\RestServer\Exception\Error520Exception
-     * @throws \ByJG\RestServer\Exception\InvalidClassException
      */
     public function testHandle5()
     {

@@ -6,10 +6,10 @@ use Closure;
 
 class Route
 {
-    protected $method;
-    protected $path;
-    protected $outputProcessor = null;
-    protected $class = null;
+    protected array|string $method;
+    protected string $path;
+    protected ?string $outputProcessor = null;
+    protected array|string|Closure|null $class = null;
 
     /**
      * Route constructor.
@@ -17,34 +17,34 @@ class Route
      * @param array|string $method
      * @param string $path
      */
-    public function __construct($method, $path)
+    public function __construct(array|string $method, string $path)
     {
         $this->setMethod($method);
         $this->setPath($path);
     }
 
-    public function withOutputProcessor($outputProcessor)
+    public function withOutputProcessor(string $outputProcessor): static
     {
         $this->setOutputProcessor($outputProcessor);
         return $this;
     }
 
-    public function withClosure(Closure $closure)
+    public function withClosure(Closure $closure): static
     {
         $this->setClass($closure);
         return $this;
     }
 
-    public function withClass($class, $methodName)
+    public function withClass($class, $methodName): static
     {
         $this->setClass([$class, $methodName]);
         return $this;
     }
 
     /**
-     * @return mixed
+     * @return array|string
      */
-    public function getMethod()
+    public function getMethod(): array|string
     {
         return $this->method;
     }
@@ -53,7 +53,7 @@ class Route
      * @param mixed $method
      * @return Route
      */
-    protected function setMethod($method)
+    protected function setMethod(array|string $method): static
     {
         $this->method = $method;
         return $this;
@@ -62,7 +62,7 @@ class Route
     /**
      * @return mixed
      */
-    public function getPath()
+    public function getPath(): string
     {
         return $this->path;
     }
@@ -71,7 +71,7 @@ class Route
      * @param mixed $path
      * @return Route
      */
-    protected function setPath($path)
+    protected function setPath(string $path): static
     {
         $this->path = $path;
         return $this;
@@ -80,7 +80,7 @@ class Route
     /**
      * @return string
      */
-    public function getOutputProcessor()
+    public function getOutputProcessor(): ?string
     {
         return $this->outputProcessor;
     }
@@ -89,16 +89,16 @@ class Route
      * @param mixed $outputProcessor
      * @return Route
      */
-    protected function setOutputProcessor($outputProcessor)
+    protected function setOutputProcessor(string $outputProcessor): static
     {
         $this->outputProcessor = $outputProcessor;
         return $this;
     }
 
     /**
-     * @return mixed
+     * @return array|string|Closure|null
      */
-    public function getClass()
+    public function getClass(): array|string|Closure|null
     {
         return $this->class;
     }
@@ -107,7 +107,7 @@ class Route
      * @param mixed $class
      * @return Route
      */
-    protected function setClass($class)
+    protected function setClass(array|string|Closure $class): static
     {
         $this->class = $class;
         return $this;
@@ -120,7 +120,7 @@ class Route
      * @param string $path
      * @return Route
      */
-    public static function get($path)
+    public static function get(string $path): Route
     {
         return new Route('GET', $path);
     }
@@ -131,7 +131,7 @@ class Route
      * @param string $path
      * @return Route
      */
-    public static function post($path)
+    public static function post(string $path): Route
     {
         return new Route('POST', $path);
     }
@@ -142,7 +142,7 @@ class Route
      * @param string $path
      * @return Route
      */
-    public static function put($path)
+    public static function put(string $path): Route
     {
         return new Route('PUT', $path);
     }
@@ -153,7 +153,7 @@ class Route
      * @param string $path
      * @return Route
      */
-    public static function delete($path)
+    public static function delete(string $path): Route
     {
         return new Route('DELETE', $path);
     }

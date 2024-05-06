@@ -15,17 +15,17 @@ use Psr\SimpleCache\CacheInterface;
 
 class OpenApiRouteList extends RouteList
 {
-    protected $cache;
-    protected $schema;
-    protected $defaultProcessor;
-    protected $overrideOutputProcessor = [];
+    protected CacheInterface $cache;
+    protected array $schema;
+    protected string $defaultProcessor;
+    protected array $overrideOutputProcessor = [];
 
     /**
-     * @param $openApiDefinition
+     * @param string $openApiDefinition
      * @throws SchemaInvalidException
      * @throws SchemaNotFoundException
      */
-    public function __construct($openApiDefinition)
+    public function __construct(string $openApiDefinition)
     {
         if (!file_exists($openApiDefinition)) {
             throw new SchemaNotFoundException("Schema '$openApiDefinition' not found");
@@ -54,36 +54,36 @@ class OpenApiRouteList extends RouteList
     }
 
     /**
-     * @param $method
-     * @param $path
+     * @param string $method
+     * @param string $path
      * @param string $processor
      * @return $this
      */
-    public function withOutputProcessorForRoute($method, $path, $processor)
+    public function withOutputProcessorForRoute(string $method, string $path, string $processor): static
     {
         $this->overrideOutputProcessor[strtoupper($method) . " " . $path] = $processor;
         return $this;
     }
 
-    public function withOutputProcessorForMimeType($mimeType, $processor)
+    public function withOutputProcessorForMimeType(string $mimeType, string $processor): static
     {
         $this->overrideOutputProcessor[$mimeType] = $processor;
         return $this;
     }
 
-    public function withDefaultProcessor($processor)
+    public function withDefaultProcessor(string $processor): static
     {
         $this->defaultProcessor = $processor;
         return $this;
     }
 
-    public function withCache(CacheInterface $cache)
+    public function withCache(CacheInterface $cache): static
     {
         $this->cache = $cache;
         return $this;
     }
 
-    public function getRoutes()
+    public function getRoutes(): array
     {
         if (empty($this->routes)) {
             $routePattern = $this->cache->get('SERVERHANDLERROUTES', false);
@@ -98,10 +98,10 @@ class OpenApiRouteList extends RouteList
     }
 
     /**
-     * @return array
+     * @return Route[]
      * @throws OperationIdInvalidException
      */
-    protected function generateRoutes()
+    protected function generateRoutes(): array
     {
         $basePath = $this->schema["basePath"] ?? "";
         if (empty($basePath) && isset($this->schema["servers"])) {
@@ -136,19 +136,19 @@ class OpenApiRouteList extends RouteList
         return $routes;
     }
 
-    protected function sortPaths($pathList)
+    protected function sortPaths(array $pathList): array
     {
         usort($pathList, function ($left, $right) {
-            if (strpos($left, '{') === false && strpos($right, '{') !== false) {
+            if (!str_contains($left, '{') && str_contains($right, '{')) {
                 return -16384;
             }
-            if (strpos($left, '{') !== false && strpos($right, '{') === false) {
+            if (str_contains($left, '{') && !str_contains($right, '{')) {
                 return 16384;
             }
-            if (strpos($left, $right) !== false) {
+            if (str_contains($left, $right)) {
                 return -16384;
             }
-            if (strpos($right, $left) !== false) {
+            if (str_contains($right, $left)) {
                 return 16384;
             }
             return strcmp($left, $right);
@@ -158,13 +158,13 @@ class OpenApiRouteList extends RouteList
     }
 
     /**
-     * @param $method
-     * @param $path
-     * @param $properties
+     * @param string $method
+     * @param string $path
+     * @param array $properties
      * @return string
      * @throws OperationIdInvalidException
      */
-    protected function getMethodOutputProcessor($method, $path, $properties)
+    protected function getMethodOutputProcessor(string $method, string $path, array $properties): string
     {
         $key = strtoupper($method) . " " . $path;
         if (isset($this->overrideOutputProcessor[$key])) {
@@ -192,7 +192,7 @@ class OpenApiRouteList extends RouteList
         return BaseOutputProcessor::getFromContentType($produces);
     }
 
-    public function getSchema()
+    public function getSchema(): array
     {
         return $this->schema;
     }
