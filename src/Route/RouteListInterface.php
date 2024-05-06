@@ -23,6 +23,8 @@ interface RouteListInterface
      */
     public function addRoute(Route $route): static;
 
+    public function addClass(string $className): static;
+
     /**
      * @return Dispatcher
      */

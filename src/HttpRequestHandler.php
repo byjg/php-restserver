@@ -2,9 +2,9 @@
 
 namespace ByJG\RestServer;
 
-use ByJG\RestServer\Attributes\AfterProcessAttributeInterface;
+use ByJG\RestServer\Attributes\AfterRouteInterface;
 use ByJG\RestServer\Attributes\AttributeParse;
-use ByJG\RestServer\Attributes\BeforeProcessAttributeInterface;
+use ByJG\RestServer\Attributes\BeforeRouteInterface;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
@@ -219,9 +219,9 @@ class HttpRequestHandler implements RequestHandler
                 if (!method_exists($instance, $methodName)) {
                     throw new InvalidClassException("There is no method '$className::$methodName''");
                 }
-                AttributeParse::processAttribute(BeforeProcessAttributeInterface::class, $instance, $methodName, $this->getHttpResponse(), $this->getHttpRequest());
+                AttributeParse::processAttribute(BeforeRouteInterface::class, $instance, $methodName, $this->getHttpResponse(), $this->getHttpRequest());
                 $instance->$methodName($this->getHttpResponse(), $this->getHttpRequest());
-                AttributeParse::processAttribute(AfterProcessAttributeInterface::class, $instance, $methodName, $this->getHttpResponse(), $this->getHttpRequest());
+                AttributeParse::processAttribute(AfterRouteInterface::class, $instance, $methodName, $this->getHttpResponse(), $this->getHttpRequest());
             }
         } catch (Exception $ex) {
             $exception = $ex;

@@ -17,7 +17,8 @@ Setup:
 Creating and customizing routes:
 - [Defining Route Names](docs/defining-route-names.md)
 - [Create Routes using Closures](docs/routes-using-closures.md)
-- [Create Routes using Classes](docs/routes-using-classes.md)
+- [Create Routes Manually](docs/routes-manually.md)
+- [Create Routes using PHP Attributes](docs/routes-using-php-attributes.md)
 - [Auto-Generate from an OpenApi definition](docs/autogenerator-routes-openapi.md) (**hot**)
 
 Processing the request and output the response:
@@ -26,6 +27,7 @@ Processing the request and output the response:
 Advanced:
 - [Middleware](docs/middleware.md)
 - [Error Handler](docs/error-handler.md)
+- [Intercepting the Request](docs/intercepting-request.md)
 - [Caching Routes](docs/caching-routes.md)
 
 ## Installation

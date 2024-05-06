@@ -15,7 +15,13 @@ class AttributeParse
         $attributes = $reflection->getAttributes($attributeInstance, ReflectionAttribute::IS_INSTANCEOF);
 
         foreach ($attributes as $attribute) {
-            $attribute->newInstance()->process($response, $request);
+            if ($attributeInstance === BeforeRouteInterface::class) {
+                $attribute->newInstance()->processBefore($response, $request);
+            } else if ($attributeInstance === AfterRouteInterface::class) {
+                $attribute->newInstance()->processAfter($response, $request);
+            } else {
+                throw new \InvalidArgumentException("Attribute not found");
+            }
         }
     }
 

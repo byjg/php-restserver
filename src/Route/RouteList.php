@@ -3,8 +3,12 @@
 
 namespace ByJG\RestServer\Route;
 
+use ByJG\RestServer\Attributes\RouteDefinition;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
+use ReflectionAttribute;
+use ReflectionClass;
+use ReflectionException;
 use function FastRoute\simpleDispatcher;
 
 class RouteList implements RouteListInterface
@@ -38,6 +42,25 @@ class RouteList implements RouteListInterface
     public function addRoute(Route $route): static
     {
         $this->routes[] = $route;
+        return $this;
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    public function addClass(string $className): static
+    {
+        $reflection = new ReflectionClass($className);
+        $methods = $reflection->getMethods();
+
+        foreach ($methods as $method) {
+            $attributes = $method->getAttributes(RouteDefinition::class, ReflectionAttribute::IS_INSTANCEOF);
+
+            foreach ($attributes as $attribute) {
+                $this->addRoute($attribute->newInstance()->createRoute($className, $method->getName()));
+            }
+        }
+
         return $this;
     }
 
