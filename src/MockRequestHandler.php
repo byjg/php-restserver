@@ -18,20 +18,21 @@ class MockRequestHandler extends HttpRequestHandler
     /**
      * @var RequestInterface
      */
-    protected $request;
-
-    /** @var MemoryWriter */
-    protected $writer;
+    protected RequestInterface $requestInterface;
 
     /**
      * MockRequestHandler constructor.
-     * @param RequestInterface $request
      * @noinspection PhpMissingParentConstructorInspection
      */
-    public function __construct(RequestInterface $request)
+    public function __construct()
     {
-        $this->request = $request;
         $this->writer = new MemoryWriter();
+    }
+
+    public function withRequestObject(RequestInterface $request): static
+    {
+        $this->requestInterface = $request;
+        return $this;
     }
 
 
@@ -47,18 +48,19 @@ class MockRequestHandler extends HttpRequestHandler
      */
     public static function mock(RouteListInterface $routes, RequestInterface $request)
     {
-        $handler = new MockRequestHandler($request);
-        $handler->handle($routes, false, false);
+        $handler = new MockRequestHandler();
+        $handler->withRequestObject($request);
+        $handler->handle($routes);
         return $handler;
     }
 
     /**
-     * @return HttpRequest|MockHttpRequest
+     * @return RequestInterface
      */
     protected function getHttpRequest()
     {
         if (is_null($this->httpRequest)) {
-            $this->httpRequest = new MockHttpRequest($this->request);
+            $this->httpRequest = new MockHttpRequest($this->requestInterface);
         }
 
         return $this->httpRequest;
@@ -80,5 +82,10 @@ class MockRequestHandler extends HttpRequestHandler
 
 
         return $this->psr7Response;
+    }
+
+    public function handle(RouteListInterface $routeDefinition, $outputBuffer = true, $session = false)
+    {
+        parent::handle($routeDefinition, false, false);
     }
 }
