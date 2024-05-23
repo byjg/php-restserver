@@ -22,12 +22,14 @@
     "byjg/cache-engine": "^5.0",
     "byjg/webrequest": "dev-5.0.0rc",
     "byjg/jwt-wrapper": "^5.0",
+    "psr/log": "^1.0|^2.0|^3.0",
     "ext-json": "*"
   },
   "suggest": {
     "ext-fileinfo": "*"
   },
   "require-dev": {
+    "monolog/monolog": "^3.4",
     "phpunit/phpunit": "5.7.*|7.4.*|^9.6"
   },
   "license": "MIT"

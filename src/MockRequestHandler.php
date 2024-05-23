@@ -12,6 +12,8 @@ use ByJG\RestServer\Writer\MemoryWriter;
 use ByJG\Util\Psr7\MemoryStream;
 use ByJG\Util\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class MockRequestHandler extends HttpRequestHandler
 {
@@ -24,9 +26,10 @@ class MockRequestHandler extends HttpRequestHandler
      * MockRequestHandler constructor.
      * @noinspection PhpMissingParentConstructorInspection
      */
-    public function __construct()
+    public function __construct(LoggerInterface $logger = null)
     {
         $this->writer = new MemoryWriter();
+        ErrorHandler::getInstance()->setLogger($logger ?? new NullLogger());
     }
 
     public function withRequestObject(RequestInterface $request): static

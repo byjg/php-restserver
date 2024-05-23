@@ -3,8 +3,11 @@
 namespace ByJG\RestServer;
 
 use ByJG\DesignPattern\Singleton;
-use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
+use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
+use ByJG\RestServer\Whoops\LoggerErrorHandler;
 use ByJG\RestServer\Whoops\WhoopsWrapper;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Whoops\Handler\Handler;
 use Whoops\Run;
 
@@ -21,6 +24,12 @@ class ErrorHandler
 
     /**
      *
+     * @var LoggerInterface
+     */
+    protected $logger = null;
+
+    /**
+     *
      * @var WhoopsWrapper
      */
     protected $wrapper = null;
@@ -30,7 +39,10 @@ class ErrorHandler
         $this->whoops = new Run();
         $this->wrapper = new WhoopsWrapper();
 
+        $this->logger = new NullLogger();
+
         $this->whoops->popHandler();
+        $this->whoops->pushHandler(new LoggerErrorHandler());
         $this->whoops->pushHandler($this->wrapper);
     }
 
@@ -60,9 +72,19 @@ class ErrorHandler
         $this->whoops->unregister();
     }
 
-    public function setOutputProcessor(BaseOutputProcessor $processor, HttpResponse $response)
+    public function setOutputProcessor(OutputProcessorInterface $processor, HttpResponse $response)
     {
         $this->wrapper->setOutputProcessor($processor, $response);
+    }
+
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    public function getLogger(): LoggerInterface
+    {
+        return $this->logger;
     }
 
     // @todo Review
