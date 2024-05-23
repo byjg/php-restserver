@@ -20,6 +20,8 @@ use ByJG\RestServer\Route\RouteList;
 use ByJG\RestServer\Writer\MemoryWriter;
 use ByJG\Util\JwtKeySecret;
 use ByJG\Util\JwtWrapper;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 
 require __DIR__ . '/OpenApiWrapperExposed.php';
@@ -46,7 +48,11 @@ class ServerRequestHandlerTest extends TestCase
     {
         ini_set('output_buffering', 4096);
 
-        $this->object = new HttpRequestHandler();
+        $logger = new Logger("unittest");
+        $stream_handler = new StreamHandler("php://stderr");
+        $logger->pushHandler($stream_handler);
+
+        $this->object = new HttpRequestHandler($logger);
         
         $this->reach = false;
         

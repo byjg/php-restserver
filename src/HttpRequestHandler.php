@@ -20,6 +20,8 @@ use Closure;
 use Exception;
 use FastRoute\Dispatcher;
 use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class HttpRequestHandler implements RequestHandler
 {
@@ -42,9 +44,10 @@ class HttpRequestHandler implements RequestHandler
     /** @var WriterInterface */
     protected $writer;
 
-    public function __construct()
+    public function __construct(LoggerInterface $logger = null)
     {
         $this->writer = new HttpWriter();
+        ErrorHandler::getInstance()->setLogger($logger ?? new NullLogger());
     }
 
     /**
@@ -58,6 +61,7 @@ class HttpRequestHandler implements RequestHandler
      */
     protected function process(RouteListInterface $routeDefinition)
     {
+
         // Initialize ErrorHandler with default error handler
         if ($this->useErrorHandler) {
             ErrorHandler::getInstance()->register();
