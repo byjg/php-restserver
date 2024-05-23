@@ -2,6 +2,9 @@
 
 namespace ByJG\RestServer;
 
+use ByJG\RestServer\Attributes\AfterRouteInterface;
+use ByJG\RestServer\Attributes\AttributeParse;
+use ByJG\RestServer\Attributes\BeforeRouteInterface;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
@@ -20,6 +23,8 @@ use Closure;
 use Exception;
 use FastRoute\Dispatcher;
 use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class HttpRequestHandler implements RequestHandler
 {
@@ -42,9 +47,10 @@ class HttpRequestHandler implements RequestHandler
     /** @var WriterInterface */
     protected $writer;
 
-    public function __construct()
+    public function __construct(LoggerInterface $logger = null)
     {
         $this->writer = new HttpWriter();
+        ErrorHandler::getInstance()->setLogger($logger ?? new NullLogger());
     }
 
     /**
@@ -58,6 +64,7 @@ class HttpRequestHandler implements RequestHandler
      */
     protected function process(RouteListInterface $routeDefinition)
     {
+
         // Initialize ErrorHandler with default error handler
         if ($this->useErrorHandler) {
             ErrorHandler::getInstance()->register();
@@ -216,7 +223,9 @@ class HttpRequestHandler implements RequestHandler
                 if (!method_exists($instance, $methodName)) {
                     throw new InvalidClassException("There is no method '$className::$methodName''");
                 }
+                AttributeParse::processAttribute(BeforeRouteInterface::class, $instance, $methodName, $this->getHttpResponse(), $this->getHttpRequest());
                 $instance->$methodName($this->getHttpResponse(), $this->getHttpRequest());
+                AttributeParse::processAttribute(AfterRouteInterface::class, $instance, $methodName, $this->getHttpResponse(), $this->getHttpRequest());
             }
         } catch (Exception $ex) {
             $exception = $ex;

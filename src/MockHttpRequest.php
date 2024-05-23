@@ -3,20 +3,20 @@
 namespace ByJG\RestServer;
 
 use ByJG\RestServer\Exception\OperationIdInvalidException;
-use ByJG\Util\Psr7\Request;
+use Psr\Http\Message\RequestInterface;
 
 class MockHttpRequest extends HttpRequest
 {
     /**
-     * @var Request
+     * @var RequestInterface
      */
-    protected $psrRequest ;
+    protected RequestInterface $psrRequest ;
 
     /**
      *
-     * @param Request $psrRequest
+     * @param RequestInterface $psrRequest
      */
-    public function __construct(Request $psrRequest, $param = [])
+    public function __construct(RequestInterface $psrRequest, $param = [])
     {
         $this->psrRequest = $psrRequest;
 

@@ -5,6 +5,7 @@ namespace ByJG\RestServer\Whoops;
 use ByJG\RestServer\Exception\ClientShowException;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
+use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
 use ReflectionMethod;
 use Throwable;
 use Whoops\Exception\Inspector;
@@ -39,7 +40,7 @@ class WhoopsWrapper extends Handler
         $this->effectiveHandler = $handler;
     }
 
-    public function setOutputProcessor(BaseOutputProcessor $processor, HttpResponse $response)
+    public function setOutputProcessor(OutputProcessorInterface $processor, HttpResponse $response)
     {
         $this->outputProcessor = $processor;
         $this->response = $response;

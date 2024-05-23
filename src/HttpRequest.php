@@ -152,7 +152,7 @@ class HttpRequest
      * Get a value from the params found in the URL
      *
      * @param ?string $value
-     * @return string|boolean|array
+     * @return mixed
      */
     public function param($value = null, $default = false)
     {

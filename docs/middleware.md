@@ -16,34 +16,11 @@ You can add how many middleware you want, however they will be processing in the
 
 ## Existing Middleware
 
-### CORS support
+* [CORS Support](middleware-cors.md)
+* [Static Server Files](middleware-staticserver.md)
+* [JWT Authentication](middleware-jwt.md)
 
-Enable the Server Handler process the CORS headers and block the access if the origin doesn't match.
 
-```php
-<?php
-$corsMiddleware = new \ByJG\RestServer\Middleware\CorsMiddleware();
-$corsMiddleware
-    ->withCorsOrigins([/* list of accepted origin */])  // Required to enable CORS
-    ->withAcceptCorsMethods([/* list of methods */])     // Optional. Default all methods. Don't need to pass 'OPTIONS'
-    ->withAcceptCorsHeaders([/* list of headers */])     // Optional. Default all headers
-```
-
-Note that the method `withCorsOrigins` accept a list of hosts regular expressions. e.g.
-
-- `example\.com` - Accept only example.com
-- `example\.(com|org)` - Accept both example.com and example.org
-- `example\.com(\.br)?` -Accept both example.com and example.com.br
-
-### Server Static Files
-
-By default, Http Server Handler will only process the defined routes. Using this middleware, if a route is not found,
-the middleware will try to find a file that matches with the request path and output it.
-
-```php
-<?php
-$serverStatic = new ServerStaticMiddleware();
-```
 
 ## Creating your own middleware
 

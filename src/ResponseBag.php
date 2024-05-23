@@ -2,7 +2,7 @@
 
 namespace ByJG\RestServer;
 
-use ByJG\Serializer\SerializerObject;
+use ByJG\Serializer\Serialize;
 use InvalidArgumentException;
 
 class ResponseBag
@@ -43,7 +43,7 @@ class ResponseBag
     /**
      * @param bool $buildNull
      * @param bool $onlyString
-     * @return array
+     * @return array|string
      */
     public function process($buildNull = true, $onlyString = false)
     {
@@ -57,14 +57,17 @@ class ResponseBag
         ) {
             $collection = $collection[0];
         }
+
+        if (!is_object($collection) && !is_array($collection)) {
+            return "$collection";
+        }
         
-        $object = SerializerObject::instance($collection)
-            ->withOnlyString($onlyString);
+        $object = Serialize::from($collection)->withOnlyString($onlyString);
 
         if (!$buildNull) {
-            $object->withDoNotSerializeNull();
+            $object->withDoNotParseNullValues();
         }
-        return $object->serialize();
+        return $object->toArray();
     }
 
     public function getCollection()

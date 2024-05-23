@@ -5,8 +5,7 @@ namespace Tests;
 use ByJG\RestServer\ResponseBag;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-
-require __DIR__ . '/ModelSample.php';
+use Tests\Model\ModelSample;
 
 class ResponseBagTest extends TestCase
 {
