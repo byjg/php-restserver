@@ -2,6 +2,7 @@
 
 namespace ByJG\RestServer\Whoops;
 
+use ByJG\RestServer\ErrorHandler;
 use ByJG\RestServer\Exception\ClientShowException;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
@@ -72,6 +73,8 @@ class WhoopsWrapper extends Handler
             $this->response->emptyResponse();
             $this->outputProcessor->writeHeader($this->response);
         }
+
+        ErrorHandler::getInstance()->getLogger()->error($exception->getMessage(), explode("\n", $exception->getTraceAsString() ?? ''));
         return $this->effectiveHandler->handle();
     }
 

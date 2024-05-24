@@ -4,7 +4,6 @@ namespace ByJG\RestServer;
 
 use ByJG\DesignPattern\Singleton;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
-use ByJG\RestServer\Whoops\LoggerErrorHandler;
 use ByJG\RestServer\Whoops\WhoopsWrapper;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -41,8 +40,8 @@ class ErrorHandler
 
         $this->logger = new NullLogger();
 
-        $this->whoops->popHandler();
-        $this->whoops->pushHandler(new LoggerErrorHandler());
+        $this->whoops->clearHandlers();
+        $this->whoops->writeToOutput(true);
         $this->whoops->pushHandler($this->wrapper);
     }
 
