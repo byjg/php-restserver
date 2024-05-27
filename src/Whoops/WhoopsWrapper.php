@@ -4,6 +4,7 @@ namespace ByJG\RestServer\Whoops;
 
 use ByJG\RestServer\ErrorHandler;
 use ByJG\RestServer\Exception\ClientShowException;
+use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
@@ -24,6 +25,7 @@ class WhoopsWrapper extends Handler
 
     /** @var HttpResponse */
     protected $response;
+    private HttpRequest $request;
 
     public function __construct()
     {
@@ -41,10 +43,11 @@ class WhoopsWrapper extends Handler
         $this->effectiveHandler = $handler;
     }
 
-    public function setOutputProcessor(OutputProcessorInterface $processor, HttpResponse $response)
+    public function setOutputProcessor(OutputProcessorInterface $processor, HttpResponse $response, HttpRequest $request)
     {
         $this->outputProcessor = $processor;
         $this->response = $response;
+        $this->request = $request;
     }
 
     /* *******************************************************
@@ -74,7 +77,16 @@ class WhoopsWrapper extends Handler
             $this->outputProcessor->writeHeader($this->response);
         }
 
-        ErrorHandler::getInstance()->getLogger()->error($exception->getMessage(), explode("\n", $exception->getTraceAsString() ?? ''));
+        $logData = [
+            'path' => $this->request->getRequestPath(),
+            'method' => $this->request->server('REQUEST_METHOD'),
+            'trace' => explode("\n", $exception->getTraceAsString() ?? '')
+        ];
+
+        ErrorHandler::getInstance()->getLogger()->error(
+            $exception->getMessage(),
+            $logData
+        );
         return $this->effectiveHandler->handle();
     }
 

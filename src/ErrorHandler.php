@@ -71,9 +71,9 @@ class ErrorHandler
         $this->whoops->unregister();
     }
 
-    public function setOutputProcessor(OutputProcessorInterface $processor, HttpResponse $response)
+    public function setOutputProcessor(OutputProcessorInterface $processor, HttpResponse $response, HttpRequest $request)
     {
-        $this->wrapper->setOutputProcessor($processor, $response);
+        $this->wrapper->setOutputProcessor($processor, $response, $request);
     }
 
     public function setLogger(LoggerInterface $logger)
