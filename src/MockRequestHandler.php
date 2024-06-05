@@ -12,26 +12,30 @@ use ByJG\RestServer\Writer\MemoryWriter;
 use ByJG\Util\Psr7\MemoryStream;
 use ByJG\Util\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class MockRequestHandler extends HttpRequestHandler
 {
     /**
      * @var RequestInterface
      */
-    protected $request;
-
-    /** @var MemoryWriter */
-    protected $writer;
+    protected $requestInterface;
 
     /**
      * MockRequestHandler constructor.
-     * @param RequestInterface $request
      * @noinspection PhpMissingParentConstructorInspection
      */
-    public function __construct(RequestInterface $request)
+    public function __construct(LoggerInterface $logger = null)
     {
-        $this->request = $request;
         $this->writer = new MemoryWriter();
+        ErrorHandler::getInstance()->setLogger($logger ?? new NullLogger());
+    }
+
+    public function withRequestObject(RequestInterface $request)
+    {
+        $this->requestInterface = $request;
+        return $this;
     }
 
 
@@ -47,18 +51,23 @@ class MockRequestHandler extends HttpRequestHandler
      */
     public static function mock(RouteListInterface $routes, RequestInterface $request)
     {
-        $handler = new MockRequestHandler($request);
-        $handler->handle($routes, false, false);
+        $handler = new MockRequestHandler();
+        $handler->withRequestObject($request);
+        $handler->handle($routes);
         return $handler;
     }
 
     /**
-     * @return HttpRequest|MockHttpRequest
+     * @return RequestInterface
      */
     protected function getHttpRequest()
     {
+        if (is_null($this->httpRequest) && !is_null($this->requestInterface)) {
+            $this->httpRequest = new MockHttpRequest($this->requestInterface);
+        }
+
         if (is_null($this->httpRequest)) {
-            $this->httpRequest = new MockHttpRequest($this->request);
+            throw new \RuntimeException("MockRequestHandler::withRequestObject() must be called before handle method");
         }
 
         return $this->httpRequest;
@@ -80,5 +89,10 @@ class MockRequestHandler extends HttpRequestHandler
 
 
         return $this->psr7Response;
+    }
+
+    public function handle(RouteListInterface $routeDefinition, $outputBuffer = true, $session = false)
+    {
+        parent::handle($routeDefinition, false, false);
     }
 }

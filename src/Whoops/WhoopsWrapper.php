@@ -2,9 +2,12 @@
 
 namespace ByJG\RestServer\Whoops;
 
+use ByJG\RestServer\ErrorHandler;
 use ByJG\RestServer\Exception\ClientShowException;
+use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
+use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
 use ReflectionMethod;
 use Throwable;
 use Whoops\Exception\Inspector;
@@ -22,6 +25,7 @@ class WhoopsWrapper extends Handler
 
     /** @var HttpResponse */
     protected $response;
+    private HttpRequest $request;
 
     public function __construct()
     {
@@ -39,10 +43,11 @@ class WhoopsWrapper extends Handler
         $this->effectiveHandler = $handler;
     }
 
-    public function setOutputProcessor(BaseOutputProcessor $processor, HttpResponse $response)
+    public function setOutputProcessor(OutputProcessorInterface $processor, HttpResponse $response, HttpRequest $request)
     {
         $this->outputProcessor = $processor;
         $this->response = $response;
+        $this->request = $request;
     }
 
     /* *******************************************************
@@ -63,7 +68,7 @@ class WhoopsWrapper extends Handler
         if ($exception instanceof ClientShowException) {
             $exception->setResponse($this->response);
             $exception->handleHeader();
-        } else {
+        } elseif (!empty($this->response)) {
             $this->response->setResponseCode(500, 'Internal Error');
         }
 
@@ -71,6 +76,17 @@ class WhoopsWrapper extends Handler
             $this->response->emptyResponse();
             $this->outputProcessor->writeHeader($this->response);
         }
+
+        $logData = [
+            'path' => $this->request->getRequestPath(),
+            'method' => $this->request->server('REQUEST_METHOD'),
+            'trace' => explode("\n", $exception->getTraceAsString() ?? '')
+        ];
+
+        ErrorHandler::getInstance()->getLogger()->error(
+            $exception->getMessage(),
+            $logData
+        );
         return $this->effectiveHandler->handle();
     }
 

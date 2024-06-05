@@ -10,6 +10,11 @@ use ByJG\Util\JwtWrapperException;
 
 class JwtMiddleware implements BeforeMiddlewareInterface
 {
+    const JWT_PARAM_PREFIX = 'jwt';
+    const JWT_PARAM_PARSE_STATUS = 'jwt.parse.status';
+    const JWT_PARAM_PARSE_MESSAGE = 'jwt.parse.message';
+    const JWT_SUCCESS = 'success';
+    const JWT_FAILED = 'failed';
 
     protected $ignorePath = [];
     protected $jwtWrapper;
@@ -41,11 +46,19 @@ class JwtMiddleware implements BeforeMiddlewareInterface
             }
         }
 
+        $vars = [];
         try {
-            $request->appendVars((array)$this->jwtWrapper->extractData());
+            foreach ((array)$this->jwtWrapper->extractData() as $key => $value) {
+                $vars[self::JWT_PARAM_PREFIX . '.' . $key] = $value;
+            }
+            $vars[self::JWT_PARAM_PARSE_STATUS] = self::JWT_SUCCESS;
         } catch (JwtWrapperException $ex) {
+            $vars[self::JWT_PARAM_PARSE_STATUS] = self::JWT_FAILED;
+            $vars[self::JWT_PARAM_PARSE_MESSAGE] = $ex->getMessage();
+        } catch (\Exception $ex) {
             throw new Error401Exception($ex->getMessage());
         }
+        $request->appendVars($vars);
 
         return MiddlewareResult::continue();
     }
