@@ -30,6 +30,8 @@ class WhoopsWrapper extends Handler
     public function __construct()
     {
         $this->effectiveHandler = new PlainResponseErrorHandler();
+        $this->request = new HttpRequest([], [], [], [], []);
+        $this->response = new HttpResponse();
     }
 
     /**
