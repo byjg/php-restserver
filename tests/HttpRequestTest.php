@@ -105,4 +105,10 @@ class HttpRequestTest extends TestCase
         $this->assertEquals(7, $this->request->param('newp'));
     }
 
+    public function testEmptyRequest()
+    {
+        $request = new HttpRequest([], [], [], [], [], []);
+        $this->assertEmpty($request->getRequestPath());
+        $this->assertEmpty($request->server('REQUEST_METHOD'));
+    }
 }
