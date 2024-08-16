@@ -9,10 +9,20 @@ You need to implement the class `BeforeMiddlewareInterface` and `AfterMiddleware
 <?php
 $httpHandler = new \ByJG\RestServer\HttpRequestHandler();
 $httpHandler
-    ->withMiddleware(/*... instance of BeforeMiddlewareInterface or AfterMiddlewareInterface ...*/);
+    ->withMiddleware(/*... instance of BeforeMiddlewareInterface or AfterMiddlewareInterface ...*/, /* routing pattern */);
 ```
 
 You can add how many middleware you want, however they will be processing in the order you added them.
+
+The route pattern allow execute the middleware only for specific routes. 
+The pattern is a regular expression. If you want to match all routes, don't pass the second parameter.
+
+Some examples:
+
+  - `'^/api/'` - Will match all routes that starts with `/api/`
+  - `'sample'` - Will match all routes that contains the word 'sample'
+  - '`'^((?!/test).)*$'` - Will match any route don't contain the path /test 
+
 
 ## Existing Middleware
 

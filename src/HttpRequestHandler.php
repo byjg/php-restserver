@@ -283,13 +283,18 @@ class HttpRequestHandler implements RequestHandler
         return $this;
     }
 
-    public function withMiddleware($middleware)
+    public function withMiddleware($middleware, $routePattern = null)
     {
+        $item = [
+            'middleware' => $middleware,
+            'routePattern' => $routePattern
+        ];
+
         if ($middleware instanceof BeforeMiddlewareInterface) {
-            $this->beforeMiddlewareList[] = $middleware;
+            $this->beforeMiddlewareList[] = $item;
         }
         if ($middleware instanceof AfterMiddlewareInterface) {
-            $this->afterMiddlewareList[] = $middleware;
+            $this->afterMiddlewareList[] = $item;
         }
 
         return $this;
