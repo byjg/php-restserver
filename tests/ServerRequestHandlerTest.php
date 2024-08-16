@@ -11,7 +11,6 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Middleware\CorsMiddleware;
-use ByJG\RestServer\Middleware\DummyAfterMiddleware;
 use ByJG\RestServer\Middleware\JwtMiddleware;
 use ByJG\RestServer\Middleware\ServerStaticMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
@@ -143,7 +142,7 @@ class ServerRequestHandlerTest extends TestCase
         $this->assertTrue($this->reach);
     }
 
-    public function testHandle1WithAfterMiddleware()
+    public function testMiddlewareAndRoutePatternProcess()
     {
         $expectedHeader = [
             "HTTP/1.1 200 OK",
@@ -155,10 +154,35 @@ class ServerRequestHandlerTest extends TestCase
         $_SERVER['REQUEST_URI'] = "http://localhost/test";
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
-        $this->processAndGetContent($this->object, $expectedHeader, $expectedData, new DummyAfterMiddleware());
+        $dummyMiddleware = new DummyAfterMiddleware();
+        $this->processAndGetContent($this->object, $expectedHeader, $expectedData, $dummyMiddleware, '^/t.*$');
+
+        $this->assertEquals(1, $dummyMiddleware->getHere());
 
         $this->assertTrue($this->reach);
     }
+
+
+    public function testMiddlewareAndRoutePatternIgnore()
+    {
+        $expectedHeader = [
+            "HTTP/1.1 200 OK",
+            "Content-Type: application/json",
+        ];
+        $expectedData = '{"key":"value"}';
+
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = "http://localhost/test";
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
+
+        $dummyMiddleware = new DummyAfterMiddleware();
+        $this->processAndGetContent($this->object, $expectedHeader, $expectedData, $dummyMiddleware, '^/somepath$');
+
+        $this->assertEquals(0, $dummyMiddleware->getHere());
+
+        $this->assertTrue($this->reach);
+    }
+
 
     /**
      * @throws \ByJG\RestServer\Exception\ClassNotFoundException
@@ -409,7 +433,7 @@ class ServerRequestHandlerTest extends TestCase
         $this->assertNull($serverStatic->mimeContentType("test/aaaa"));
     }
 
-    public function processAndGetContent($handler, $expectedHeader, $expectedData, $middleWare = null)
+    public function processAndGetContent($handler, $expectedHeader, $expectedData, $middleWare = null, $routingPattern = null)
     {
         $writer = new MemoryWriter();
 
@@ -419,7 +443,7 @@ class ServerRequestHandlerTest extends TestCase
                 ->withWriter($writer);
 
             if (!is_null($middleWare)) {
-                $handler->withMiddleware($middleWare);
+                $handler->withMiddleware($middleWare, $routingPattern);
             }
 
             $handler->handle($this->definition, true, false);
