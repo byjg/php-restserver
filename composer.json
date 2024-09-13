@@ -20,7 +20,7 @@
     "nikic/fast-route": "v1.3.*",
     "filp/whoops": "^2.14",
     "byjg/cache-engine": "^5.0",
-    "byjg/webrequest": "dev-5.0.0rc",
+    "byjg/webrequest": "^5.0",
     "byjg/jwt-wrapper": "^5.0",
     "psr/log": "^1.0|^2.0|^3.0",
     "ext-json": "*"
@@ -29,7 +29,7 @@
     "ext-fileinfo": "*"
   },
   "require-dev": {
-    "monolog/monolog": "^3.4",
+    "monolog/monolog": "^2.9|^3.4",
     "phpunit/phpunit": "5.7.*|7.4.*|^9.6"
   },
   "license": "MIT"

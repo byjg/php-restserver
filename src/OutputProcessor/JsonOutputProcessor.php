@@ -17,7 +17,9 @@ class JsonOutputProcessor extends BaseOutputProcessor
 
     public function getDetailedErrorHandler(): Handler
     {
-        return new JsonResponseHandler();
+        $jsonHandler = new JsonResponseHandler();
+        $jsonHandler->addTraceToOutput(true);
+        return $jsonHandler;
     }
 
     public function getErrorHandler(): Handler

@@ -20,7 +20,7 @@ class MockRequestHandler extends HttpRequestHandler
     /**
      * @var RequestInterface
      */
-    protected RequestInterface $requestInterface;
+    protected RequestInterface $request;
 
     /**
      * MockRequestHandler constructor.
@@ -62,8 +62,12 @@ class MockRequestHandler extends HttpRequestHandler
      */
     protected function getHttpRequest()
     {
-        if (is_null($this->httpRequest)) {
+        if (is_null($this->httpRequest) && !is_null($this->requestInterface)) {
             $this->httpRequest = new MockHttpRequest($this->requestInterface);
+        }
+
+        if (is_null($this->httpRequest)) {
+            throw new \RuntimeException("MockRequestHandler::withRequestObject() must be called before handle method");
         }
 
         return $this->httpRequest;

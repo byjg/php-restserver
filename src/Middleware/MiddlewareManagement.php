@@ -75,7 +75,14 @@ class MiddlewareManagement
             return $continue;
         }
 
-        foreach ($middlewareList as $middleWare) {
+        foreach ($middlewareList as $item) {
+            $middleWare = $item['middleware'];
+            $routePattern = $item['routePattern'];
+
+            if (!is_null($routePattern) && !preg_match("~$routePattern~", $request->getRequestPath())) {
+                continue;
+            }
+
             if (!is_null($dispatcherStatus)) {
                 $result = $middleWare->beforeProcess($dispatcherStatus, $response, $request);
             } else {

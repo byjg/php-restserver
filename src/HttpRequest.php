@@ -191,20 +191,42 @@ class HttpRequest
     public function getRequestIp()
     {
         $headers = [
-            'HTTP_CLIENT_IP',
             'HTTP_X_FORWARDED_FOR',
             'HTTP_X_FORWARDED',
             'HTTP_FORWARDED_FOR',
             'HTTP_FORWARDED',
+            'HTTP_CF_CONNECTING_IP',
+            'HTTP_X_ORIGINAL_FORWARDED_FOR',
             'REMOTE_ADDR',
+            'SERVER_ADDR',
+            'HTTP_CLIENT_IP',
         ];
         foreach ($headers as $header) {
             if ($this->server($header) !== false) {
-                return $this->server($header);
+                $list = explode(",", $this->server($header));
+                return reset($list);
             }
         }
 
-        return 'UNKNOWN';
+        return null;
+    }
+
+    public static function ip()
+    {
+        $request = new HttpRequest([], [], isset($_SERVER) ? $_SERVER : [], [], []);
+        return $request->getRequestIp();
+    }
+
+    public function getUserAgent()
+    {
+        $userAgent = $this->server('HTTP_USER_AGENT');
+        return $userAgent ? $userAgent : null;
+    }
+
+    public static function userAgent()
+    {
+        $request = new HttpRequest([], [], isset($_SERVER) ? $_SERVER : [], [], []);
+        return $request->getUserAgent();
     }
 
     public function getServerName()

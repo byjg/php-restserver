@@ -159,7 +159,7 @@ class HttpRequestHandler implements RequestHandler
             ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
         }
 
-        ErrorHandler::getInstance()->setOutputProcessor($outputProcessor, $this->getHttpResponse());
+        ErrorHandler::getInstance()->setOutputProcessor($outputProcessor, $this->getHttpResponse(), $this->getHttpRequest());
         
         return $outputProcessor;
     }
@@ -288,13 +288,18 @@ class HttpRequestHandler implements RequestHandler
         return $this;
     }
 
-    public function withMiddleware($middleware)
+    public function withMiddleware($middleware, $routePattern = null)
     {
+        $item = [
+            'middleware' => $middleware,
+            'routePattern' => $routePattern
+        ];
+
         if ($middleware instanceof BeforeMiddlewareInterface) {
-            $this->beforeMiddlewareList[] = $middleware;
+            $this->beforeMiddlewareList[] = $item;
         }
         if ($middleware instanceof AfterMiddlewareInterface) {
-            $this->afterMiddlewareList[] = $middleware;
+            $this->afterMiddlewareList[] = $item;
         }
 
         return $this;
