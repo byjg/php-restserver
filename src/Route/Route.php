@@ -51,7 +51,7 @@ class Route
 
     /**
      * @param mixed $method
-     * @return Route
+     * @return static
      */
     protected function setMethod(array|string $method): static
     {
@@ -69,7 +69,7 @@ class Route
 
     /**
      * @param mixed $path
-     * @return Route
+     * @return static
      */
     protected function setPath(string $path): static
     {
@@ -87,7 +87,7 @@ class Route
 
     /**
      * @param mixed $outputProcessor
-     * @return Route
+     * @return static
      */
     protected function setOutputProcessor(string $outputProcessor): static
     {
@@ -105,7 +105,7 @@ class Route
 
     /**
      * @param mixed $class
-     * @return Route
+     * @return static
      */
     protected function setClass(array|string|Closure $class): static
     {
@@ -118,7 +118,7 @@ class Route
      * Route Factory for "GET" method
      *
      * @param string $path
-     * @return Route
+     * @return static
      */
     public static function get(string $path): Route
     {
@@ -129,7 +129,7 @@ class Route
      * Route Factory for "POST" method
      *
      * @param string $path
-     * @return Route
+     * @return static
      */
     public static function post(string $path): Route
     {
@@ -140,7 +140,7 @@ class Route
      * Route Factory for "PUT" method
      *
      * @param string $path
-     * @return Route
+     * @return static
      */
     public static function put(string $path): Route
     {
@@ -151,7 +151,7 @@ class Route
      * Route Factory for "DELETE" method
      *
      * @param string $path
-     * @return Route
+     * @return static
      */
     public static function delete(string $path): Route
     {

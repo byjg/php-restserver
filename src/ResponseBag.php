@@ -8,20 +8,20 @@ use InvalidArgumentException;
 class ResponseBag
 {
 
-    const AUTOMATIC = 0;
-    const SINGLE_OBJECT = 1;
-    const OBJECT_LIST = 2;
-    const RAW = 3;
+//    const AUTOMATIC = 0;
+//    const SINGLE_OBJECT = 1;
+//    const OBJECT_LIST = 2;
+//    const RAW = 3;
 
-    protected $collection = [];
-    protected $serializationRule = ResponseBag::AUTOMATIC;
+    protected array $collection = [];
+    protected SerializationRuleEnum $serializationRule = SerializationRuleEnum::Automatic;
 
     /**
      * @param string|mixed $object
      */
-    public function add($object)
+    public function add(mixed $object): void
     {
-        if (!is_string($object) && !is_numeric($object) && $this->serializationRule === ResponseBag::RAW) {
+        if (!is_string($object) && !is_numeric($object) && $this->serializationRule === SerializationRuleEnum::Raw) {
             throw new InvalidArgumentException("Raw data can be only string or numbers");
         }
 
@@ -29,7 +29,7 @@ class ResponseBag
             $object = [ $object ];
         }
 
-        if ($this->serializationRule !== ResponseBag::SINGLE_OBJECT && $this->serializationRule !== ResponseBag::RAW) {
+        if ($this->serializationRule !== SerializationRuleEnum::SingleObject && $this->serializationRule !== SerializationRuleEnum::Raw) {
             $this->collection[] = $object;
             return;
         }
@@ -45,15 +45,15 @@ class ResponseBag
      * @param bool $onlyString
      * @return array|string
      */
-    public function process($buildNull = true, $onlyString = false)
+    public function process(bool $buildNull = true, bool $onlyString = false): array|string
     {
-        $collection = (array)$this->collection;
-        if ($this->serializationRule === ResponseBag::RAW) {
+        $collection = $this->collection;
+        if ($this->serializationRule === SerializationRuleEnum::Raw) {
             return implode("", $collection);
         }
 
         if (count($collection) === 1
-            && $this->serializationRule !== ResponseBag::OBJECT_LIST && isset($collection[0])
+            && $this->serializationRule !== SerializationRuleEnum::ObjectList && isset($collection[0])
         ) {
             $collection = $collection[0];
         }
@@ -70,17 +70,17 @@ class ResponseBag
         return $object->toArray();
     }
 
-    public function getCollection()
+    public function getCollection(): array
     {
         return $this->collection;
     }
 
-    public function setSerializationRule($value)
+    public function setSerializationRule(SerializationRuleEnum $value): void
     {
         $this->serializationRule = $value;
     }
 
-    public function getSerializationRule()
+    public function getSerializationRule(): SerializationRuleEnum
     {
         return $this->serializationRule;
     }

@@ -16,10 +16,10 @@ class JwtMiddleware implements BeforeMiddlewareInterface
     const JWT_SUCCESS = 'success';
     const JWT_FAILED = 'failed';
 
-    protected $ignorePath = [];
-    protected $jwtWrapper;
+    protected array $ignorePath = [];
+    protected JwtWrapper $jwtWrapper;
 
-    public function __construct(JwtWrapper $jwtWrapper, $ignorePath = [])
+    public function __construct(JwtWrapper $jwtWrapper, array $ignorePath = [])
     {
         $this->jwtWrapper = $jwtWrapper;
         $this->ignorePath = $ignorePath;
@@ -35,14 +35,14 @@ class JwtMiddleware implements BeforeMiddlewareInterface
      * @throws Error401Exception
      */
     public function beforeProcess(
-        $dispatcherStatus,
+        mixed        $dispatcherStatus,
         HttpResponse $response,
-        HttpRequest $request
-    )
+        HttpRequest  $request
+    ): MiddlewareResult
     {
         foreach ($this->ignorePath as $path) {
             if (preg_match("~$path~", $request->getRequestPath())) {
-                return MiddlewareResult::continue();
+                return MiddlewareResult::continue;
             }
         }
 
@@ -60,6 +60,6 @@ class JwtMiddleware implements BeforeMiddlewareInterface
         }
         $request->appendVars($vars);
 
-        return MiddlewareResult::continue();
+        return MiddlewareResult::continue;
     }
 }

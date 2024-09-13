@@ -12,10 +12,10 @@ interface AfterMiddlewareInterface
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
-     * @param $class
-     * @param $method
-     * @param $exception
+     * @param string $class
+     * @param string $method
+     * @param string|null $exception
      * @return MiddlewareResult
      */
-    public function afterProcess(HttpResponse $response, HttpRequest $request, $class, $method, $exception);
+    public function afterProcess(HttpResponse $response, HttpRequest $request, string $class, string $method, ?string $exception): MiddlewareResult;
 }

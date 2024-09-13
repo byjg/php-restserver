@@ -4,7 +4,7 @@ namespace ByJG\RestServer\OutputProcessor;
 
 use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\ResponseBag;
+use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\RestServer\Writer\WriterInterface;
 use Closure;
 
@@ -52,7 +52,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
     }
 
     /**
-     * @param $className
+     * @param Closure|string $className
      * @return OutputProcessorInterface
      */
     public static function getFromClassName(Closure|string $className): object
@@ -109,7 +109,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
             ->getResponseBag()
             ->process($this->buildNull, $this->onlyString);
 
-        if ($response->getResponseBag()->getSerializationRule() === ResponseBag::RAW) {
+        if ($response->getResponseBag()->getSerializationRule() === SerializationRuleEnum::Raw) {
             $this->writeData($serialized);
         } else {
             $this->writeData(

@@ -30,7 +30,8 @@
   },
   "require-dev": {
     "monolog/monolog": "^2.9|^3.4",
-    "phpunit/phpunit": "5.7.*|7.4.*|^9.6"
+    "phpunit/phpunit": "5.7.*|7.4.*|^9.6",
+    "vimeo/psalm": "^5.9"
   },
   "license": "MIT"
 }

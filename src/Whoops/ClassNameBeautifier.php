@@ -8,6 +8,7 @@
 namespace ByJG\RestServer\Whoops;
 
 use ReflectionClass;
+use ReflectionException;
 
 /**
  * Description of WhoopsDebugInterface
@@ -16,7 +17,10 @@ use ReflectionClass;
  */
 trait ClassNameBeautifier
 {
-    public function getClassAsTitle($ex)
+    /**
+     * @throws ReflectionException
+     */
+    public function getClassAsTitle(string $ex): array|string|null
     {
         $refClass = new ReflectionClass($ex);
 

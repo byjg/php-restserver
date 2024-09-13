@@ -5,13 +5,13 @@ namespace ByJG\RestServer;
 class HttpRequest
 {
 
-    protected $get;
-    protected $post;
-    protected $server;
-    protected $session;
-    protected $cookie;
-    protected $param;
-    protected $phpRequest;
+    protected array $get;
+    protected array $post;
+    protected array $server;
+    protected array $session;
+    protected array $cookie;
+    protected array $param;
+    protected array $phpRequest;
 
     /**
      *
@@ -22,7 +22,7 @@ class HttpRequest
      * @param array $cookie
      * @param array $param
      */
-    public function __construct($get, $post, $server, $session, $cookie, $param = [])
+    public function __construct(array $get, array $post, array $server, array $session, array $cookie, array $param = [])
     {
         $this->get = $get;
         $this->post = $post;
@@ -37,10 +37,11 @@ class HttpRequest
     /**
      * Get a parameter passed by GET (the same as $_GET). If not found return false.
      *
-     * @param ?string $value
+     * @param string|null $value
+     * @param bool $default
      * @return string|array|boolean
      */
-    public function get($value = null, $default = false)
+    public function get(?string $value = null, bool $default = false): string|array|bool
     {
         if (is_null($value)) {
             return $this->get;
@@ -57,9 +58,10 @@ class HttpRequest
      * Get a parameter passed by POST (the same as $_POST). If not found return false.
      *
      * @param ?string $value
+     * @param bool $default
      * @return string|boolean|array
      */
-    public function post($value = null, $default = false)
+    public function post(?string $value = null, bool $default = false): string|array|bool
     {
         if (is_null($value)) {
             return $this->post;
@@ -76,9 +78,10 @@ class HttpRequest
      * Get the parameters sent by server (the same as $_SERVER). If not found return false.
      *
      * @param ?string $value
+     * @param bool $default
      * @return string|boolean|array
      */
-    public function server($value = null, $default = false)
+    public function server(?string $value = null, bool $default = false): string|array|bool
     {
         if (is_null($value)) {
             return $this->server;
@@ -95,9 +98,10 @@ class HttpRequest
      * Get a server session value(the same as $_SESSION). If not found return false.
      *
      * @param ?string $value
+     * @param bool $default
      * @return string|boolean|array
      */
-    public function session($value = null, $default = false)
+    public function session(?string $value = null, bool $default = false): bool|array|string
     {
         if (is_null($value)) {
             return $this->session;
@@ -114,9 +118,10 @@ class HttpRequest
      * Get the cookie sent by the client (the same as $_COOKIE). If not found return false.
      *
      * @param ?string $value
+     * @param bool $default
      * @return string|boolean|array
      */
-    public function cookie($value = null, $default = false)
+    public function cookie(?string $value = null, bool $default = false): bool|array|string
     {
         if (is_null($value)) {
             return $this->cookie;
@@ -133,9 +138,10 @@ class HttpRequest
      * Get a value from any of get, post, server, cookie or session. If not found return false.
      *
      * @param ?string $value
+     * @param bool $default
      * @return string|boolean|array
      */
-    public function request($value = null, $default = false)
+    public function request(?string $value = null, bool $default = false): bool|array|string
     {
         if (is_null($value)) {
             return $this->phpRequest;
@@ -152,9 +158,10 @@ class HttpRequest
      * Get a value from the params found in the URL
      *
      * @param ?string $value
+     * @param bool $default
      * @return mixed
      */
-    public function param($value = null, $default = false)
+    public function param(?string $value = null, bool $default = false): mixed
     {
         if (is_null($value)) {
             return $this->param;
@@ -167,14 +174,14 @@ class HttpRequest
         }
     }
 
-    private $payload;
+    protected ?string $payload = null;
 
     /**
      * Get the payload passed during the request(the same as php://input). If not found return empty.
      *
      * @return string
      */
-    public function payload()
+    public function payload(): string
     {
         if (is_null($this->payload)) {
             $this->payload = file_get_contents("php://input");
@@ -186,9 +193,9 @@ class HttpRequest
     /**
      * Use this method to get the CLIENT REQUEST IP.
      * Note that if you behing a Proxy, the variable REMOTE_ADDR will always have the same IP
-     * @return string
+     * @return string|null
      */
-    public function getRequestIp()
+    public function getRequestIp(): ?string
     {
         $headers = [
             'HTTP_X_FORWARDED_FOR',
@@ -211,25 +218,25 @@ class HttpRequest
         return null;
     }
 
-    public static function ip()
+    public static function ip(): ?string
     {
-        $request = new HttpRequest([], [], isset($_SERVER) ? $_SERVER : [], [], []);
+        $request = new HttpRequest([], [], $_SERVER, [], []);
         return $request->getRequestIp();
     }
 
-    public function getUserAgent()
+    public function getUserAgent(): bool|array|string|null
     {
         $userAgent = $this->server('HTTP_USER_AGENT');
-        return $userAgent ? $userAgent : null;
+        return $userAgent ?: null;
     }
 
-    public static function userAgent()
+    public static function userAgent(): bool|array|string|null
     {
-        $request = new HttpRequest([], [], isset($_SERVER) ? $_SERVER : [], [], []);
+        $request = new HttpRequest([], [], $_SERVER, [], []);
         return $request->getUserAgent();
     }
 
-    public function getServerName()
+    public function getServerName(): bool|array|string
     {
         $headers = [
             'SERVER_NAME',
@@ -247,9 +254,9 @@ class HttpRequest
      * Use this method to get the SERVER NAME.
      * @param bool $port
      * @param bool $protocol
-     * @return string
+     * @return bool|array<array-key, mixed>|string
      */
-    public function getRequestServer($port = false, $protocol = false)
+    public function getRequestServer(bool $port = false, bool $protocol = false): bool|array|string
     {
         $servername = $this->getServerName();
 
@@ -267,32 +274,32 @@ class HttpRequest
         return $servername;
     }
 
-    public function getHeader($header)
+    public function getHeader(string $header): bool|array|string
     {
         $header = strtoupper(str_replace('-', '_', $header));
         $header = 'HTTP_' . $header;
         return $this->server($header);
     }
 
-    public function getRequestPath()
+    public function getRequestPath(): bool|array|int|string|null
     {
         return parse_url($this->server('REQUEST_URI'), PHP_URL_PATH);
     }
 
-    private $uploadedFiles;
+    private ?UploadedFiles $uploadedFiles = null;
 
     /**
      * @return UploadedFiles
      */
-    public function uploadedFiles()
+    public function uploadedFiles(): UploadedFiles
     {
-        if (!isset($this->uploadedFiles)) {
+        if (is_null($this->uploadedFiles)) {
             $this->uploadedFiles = new UploadedFiles();
         }
         return $this->uploadedFiles;
     }
 
-    public function appendVars($array)
+    public function appendVars($array): void
     {
         $this->param = array_merge($this->param, $array);
     }

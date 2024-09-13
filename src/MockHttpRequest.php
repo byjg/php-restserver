@@ -25,22 +25,16 @@ class MockHttpRequest extends HttpRequest
         parent::__construct($this->get, $this->post, $this->server, $this->session, $this->cookie, $param);
     }
 
-    private $payload;
-
     /**
      * Get the payload passed during the request(the same as php://input). If not found return empty.
      *
      * @return string
      */
-    public function payload()
+    public function payload(): string
     {
         if (is_null($this->payload)) {
             $body = $this->psrRequest->getBody();
-            if (empty($body)) {
-                $this->payload = "";
-            } else {
-                $this->payload = $body->getContents();
-            }
+            $this->payload = $body->getContents();
         }
 
         return $this->payload;
@@ -50,7 +44,7 @@ class MockHttpRequest extends HttpRequest
     /**
      * Initilize PHP variables based on the request
      */
-    protected function initializePhpVariables()
+    protected function initializePhpVariables(): void
     {
         $this->session = [];
 
@@ -109,7 +103,7 @@ class MockHttpRequest extends HttpRequest
     /**
      * Inicialize the PHP variable $_FILE
      */
-    protected function initializePhpFileVar()
+    protected function initializePhpFileVar(): void
     {
         $_FILES = [];
 

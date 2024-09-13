@@ -18,9 +18,9 @@ use Psr\Log\NullLogger;
 class MockRequestHandler extends HttpRequestHandler
 {
     /**
-     * @var RequestInterface
+     * @var RequestInterface|null
      */
-    protected RequestInterface $request;
+    private ?RequestInterface $requestInterface = null;
 
     /**
      * MockRequestHandler constructor.
@@ -58,9 +58,9 @@ class MockRequestHandler extends HttpRequestHandler
     }
 
     /**
-     * @return RequestInterface
+     * @return HttpRequest
      */
-    protected function getHttpRequest()
+    protected function getHttpRequest(): HttpRequest
     {
         if (is_null($this->httpRequest) && !is_null($this->requestInterface)) {
             $this->httpRequest = new MockHttpRequest($this->requestInterface);
@@ -73,17 +73,20 @@ class MockRequestHandler extends HttpRequestHandler
         return $this->httpRequest;
     }
 
-    protected $psr7Response = null;
+    protected Response|null $psr7Response = null;
 
     public function getPsr7Response()
     {
         if (is_null($this->psr7Response)) {
+            /** @psalm-suppress UndefinedInterfaceMethod Always using MemoryWriter */
             $this->psr7Response = new Response($this->writer->getStatusCode());
 
+            /** @psalm-suppress UndefinedInterfaceMethod Always using MemoryWriter */
             foreach ($this->writer->getHeaders() as $header => $value) {
                 $this->psr7Response = $this->psr7Response->withHeader($header, $value);
             }
 
+            /** @psalm-suppress UndefinedInterfaceMethod Always using MemoryWriter */
             $this->psr7Response = $this->psr7Response->withBody(new MemoryStream($this->writer->getData()));
         }
 
@@ -91,8 +94,8 @@ class MockRequestHandler extends HttpRequestHandler
         return $this->psr7Response;
     }
 
-    public function handle(RouteListInterface $routeDefinition, $outputBuffer = true, $session = false)
+    public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = false): bool
     {
-        parent::handle($routeDefinition, false, false);
+        return parent::handle($routeDefinition, false, false);
     }
 }

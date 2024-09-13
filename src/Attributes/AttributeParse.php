@@ -5,10 +5,14 @@ namespace ByJG\RestServer\Attributes;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ReflectionAttribute;
+use ReflectionException;
 use ReflectionMethod;
 
 class AttributeParse
 {
+    /**
+     * @throws ReflectionException
+     */
     public static function processAttribute(string $attributeInstance, object $entity, string $method, HttpResponse $response, HttpRequest $request): void
     {
         $reflection = new ReflectionMethod($entity, $method);

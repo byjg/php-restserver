@@ -2,9 +2,16 @@
 
 namespace Tests;
 
+use ByJG\RestServer\Exception\ClassNotFoundException;
+use ByJG\RestServer\Exception\Error404Exception;
+use ByJG\RestServer\Exception\Error405Exception;
+use ByJG\RestServer\Exception\Error520Exception;
+use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\HttpResponse;
+use ByJG\RestServer\Middleware\AfterMiddlewareInterface;
+use ByJG\RestServer\Middleware\BeforeMiddlewareInterface;
 use ByJG\RestServer\Middleware\JwtMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\Route\Route;
@@ -16,18 +23,18 @@ use Monolog\Logger;
 trait MockServerTrait
 {
     /**
-     * @var HttpRequestHandler
+     * @var HttpRequestHandler|null
      */
-    protected $object;
+    protected ?HttpRequestHandler $object;
 
     /**
      * @var RouteList
      */
-    protected $definition;
+    protected RouteList $definition;
 
-    protected $reach = false;
+    protected bool $reach = false;
 
-    public $headers = null;
+    public array|null $headers = null;
 
     public function setup(): void
     {
@@ -104,7 +111,14 @@ trait MockServerTrait
         $_FILES = [];
     }
 
-    public function processAndGetContent($handler, $expectedHeader, $expectedData, $middleWare = null, $expectedParams = [])
+    /**
+     * @throws InvalidClassException
+     * @throws ClassNotFoundException
+     * @throws Error404Exception
+     * @throws Error520Exception
+     * @throws Error405Exception
+     */
+    public function processAndGetContent(HttpRequestHandler $handler, ?array $expectedHeader, mixed $expectedData, AfterMiddlewareInterface|BeforeMiddlewareInterface $middleWare = null, array $expectedParams = []): void
     {
         $writer = new MemoryWriter();
 

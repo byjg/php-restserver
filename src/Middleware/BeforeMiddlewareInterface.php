@@ -16,8 +16,8 @@ interface BeforeMiddlewareInterface
      * @return MiddlewareResult
      */
     public function beforeProcess(
-        $dispatcherStatus,
+        mixed        $dispatcherStatus,
         HttpResponse $response,
-        HttpRequest $request
-    );
+        HttpRequest  $request
+    ): MiddlewareResult;
 }

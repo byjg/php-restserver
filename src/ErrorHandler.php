@@ -18,21 +18,21 @@ class ErrorHandler
 
     /**
      *
-     * @var Run
+     * @var Run|null
      */
-    protected $whoops = null;
+    protected ?Run $whoops = null;
 
     /**
      *
      * @var LoggerInterface
      */
-    protected $logger = null;
+    protected LoggerInterface $logger;
 
     /**
      *
-     * @var WhoopsWrapper
+     * @var WhoopsWrapper|null
      */
-    protected $wrapper = null;
+    protected ?WhoopsWrapper $wrapper = null;
 
     protected function __construct()
     {
@@ -51,7 +51,7 @@ class ErrorHandler
      *
      * @param Handler $handler
      */
-    public function setHandler(Handler $handler)
+    public function setHandler(Handler $handler): void
     {
         $this->wrapper->setHandler($handler);
     }
@@ -59,7 +59,7 @@ class ErrorHandler
     /**
      * Set Whoops as the default error and exception handler used by PHP:
      */
-    public function register()
+    public function register(): void
     {
         $this->whoops->register();
     }
@@ -67,27 +67,17 @@ class ErrorHandler
     /**
      * Disable Whoops as the default error and exception handler used by PHP:
      */
-    public function unregister()
+    public function unregister(): void
     {
         $this->whoops->unregister();
     }
 
-    public function setOutputProcessor(OutputProcessorInterface $processor, HttpResponse $response, HttpRequest $request)
+    public function setOutputProcessor(OutputProcessorInterface $processor, HttpResponse $response, HttpRequest $request): void
     {
         $this->wrapper->setOutputProcessor($processor, $response, $request);
     }
 
-    public function setLogger(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
-
-    public function getLogger(): LoggerInterface
-    {
-        return $this->logger;
-    }
-
-    public function setLogger(LoggerInterface $logger)
+    public function setLogger(LoggerInterface $logger): void
     {
         $this->logger = $logger;
     }

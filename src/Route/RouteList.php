@@ -25,11 +25,11 @@ class RouteList implements RouteListInterface
 
     /**
      * @param Route[] $routes
-     * @return RouteList
+     * @return static
      */
     public function setRoutes(array $routes): static
     {
-        foreach ((array)$routes as $route) {
+        foreach ($routes as $route) {
             $this->addRoute($route);
         }
         return $this;
@@ -37,7 +37,7 @@ class RouteList implements RouteListInterface
 
     /**
      * @param Route $route
-     * @return RouteList
+     * @return static
      */
     public function addRoute(Route $route): static
     {

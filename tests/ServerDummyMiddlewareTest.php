@@ -2,7 +2,6 @@
 
 namespace Tests;
 
-use ByJG\RestServer\Middleware\DummyAfterMiddleware;
 use PHPUnit\Framework\TestCase;
 
 class ServerDummyMiddlewareTest extends TestCase
