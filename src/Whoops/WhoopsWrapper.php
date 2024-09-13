@@ -44,7 +44,7 @@ class WhoopsWrapper extends Handler
         $this->effectiveHandler = $handler;
     }
 
-    public function setOutputProcessor(OutputProcessorInterface $processor, HttpResponse $response, HttpRequest $request)
+    public function setOutputProcessor(OutputProcessorInterface $processor, HttpResponse $response, HttpRequest $request): void
     {
         $this->outputProcessor = $processor;
         $this->response = $response;

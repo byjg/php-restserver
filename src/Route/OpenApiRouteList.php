@@ -99,7 +99,10 @@ class OpenApiRouteList extends RouteList
 
     /**
      * @return Route[]
+     *
      * @throws OperationIdInvalidException
+     *
+     * @psalm-return list{0?: Route,...}
      */
     protected function generateRoutes(): array
     {
@@ -136,6 +139,11 @@ class OpenApiRouteList extends RouteList
         return $routes;
     }
 
+    /**
+     * @return array
+     *
+     * @psalm-return list<mixed>
+     */
     protected function sortPaths(array $pathList): array
     {
         usort($pathList, function ($left, $right) {

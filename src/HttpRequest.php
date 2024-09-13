@@ -224,6 +224,9 @@ class HttpRequest
         return $request->getRequestIp();
     }
 
+    /**
+     * @return array|null|string|true
+     */
     public function getUserAgent(): bool|array|string|null
     {
         $userAgent = $this->server('HTTP_USER_AGENT');
@@ -281,7 +284,10 @@ class HttpRequest
         return $this->server($header);
     }
 
-    public function getRequestPath(): bool|array|int|string|null
+    /**
+     * @return false|null|string
+     */
+    public function getRequestPath(): bool|array|string|null
     {
         return parse_url($this->server('REQUEST_URI'), PHP_URL_PATH);
     }
@@ -299,7 +305,7 @@ class HttpRequest
         return $this->uploadedFiles;
     }
 
-    public function appendVars($array): void
+    public function appendVars(array $array): void
     {
         $this->param = array_merge($this->param, $array);
     }

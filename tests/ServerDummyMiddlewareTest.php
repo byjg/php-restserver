@@ -8,7 +8,7 @@ class ServerDummyMiddlewareTest extends TestCase
 {
     use MockServerTrait;
 
-    public function testHandle1WithAfterMiddleware()
+    public function testHandle1WithAfterMiddleware(): void
     {
         $expectedHeader = [
             "HTTP/1.1 200 OK",

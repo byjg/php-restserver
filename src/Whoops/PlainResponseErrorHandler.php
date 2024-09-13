@@ -41,6 +41,8 @@ class PlainResponseErrorHandler extends Handler
 
     /**
      * @return int
+     *
+     * @psalm-return 48
      */
     public function handle()
     {

@@ -15,16 +15,25 @@ class HtmlOutputProcessor extends BaseOutputProcessor
         $this->contentType = "text/html";
     }
 
+    /**
+     * @return PrettyPageHandler
+     */
     public function getDetailedErrorHandler(): Handler
     {
         return new PrettyPageHandler();
     }
 
+    /**
+     * @return PlainResponseErrorHandler
+     */
     public function getErrorHandler(): Handler
     {
         return new PlainResponseErrorHandler();
     }
 
+    /**
+     * @return PlainTextFormatter
+     */
     public function getFormatter(): FormatterInterface
     {
         return new PlainTextFormatter();

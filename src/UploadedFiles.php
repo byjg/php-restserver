@@ -6,17 +6,28 @@ use InvalidArgumentException;
 
 class UploadedFiles
 {
+    /**
+     * @psalm-return int<0, max>
+     */
     public function count(): int
     {
         return count($_FILES);
     }
 
+    /**
+     * @return string[]
+     *
+     * @psalm-return list<non-empty-string>
+     */
     public function getKeys(): array
     {
         return array_keys($_FILES);
     }
 
-    public function isOk($key): bool
+    /**
+     * @psalm-param 'test' $key
+     */
+    public function isOk(string $key): bool
     {
         return empty($this->getFileByKey($key, 'error'));
     }
@@ -26,7 +37,10 @@ class UploadedFiles
         return $this->getFileByKey($key, 'error');
     }
 
-    public function getUploadedFile(string $key): bool|string
+    /**
+     * @return false|string
+     */
+    public function getUploadedFile(string $key): string|false
     {
         return file_get_contents((string)$this->getFileByKey($key, 'tmp_name'));
     }
@@ -36,7 +50,10 @@ class UploadedFiles
         return $this->getFileByKey($key, 'name');
     }
 
-    public function getFileType($key): int|string|null
+    /**
+     * @psalm-param 'test' $key
+     */
+    public function getFileType(string $key): int|string|null
     {
         return $this->getFileByKey($key, 'type');
     }
@@ -60,7 +77,13 @@ class UploadedFiles
         return $this->getFileByKey($key, 'size');
     }
 
-    private function getFileByKey(string $key, string $property): string|int|null
+    /**
+     * @param string $key
+     * @param string $property
+     * @return int|string
+     *
+     */
+    private function getFileByKey(string $key, string $property): string|int
     {
         if (!isset($_FILES[$key])) {
             throw new InvalidArgumentException("The upload '$key' does not exists");

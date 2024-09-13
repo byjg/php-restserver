@@ -18,7 +18,7 @@ class ServerStaticMiddlewareTest extends TestCase
      * @throws \ByJG\RestServer\Exception\Error520Exception
      * @throws \ByJG\RestServer\Exception\InvalidClassException
      */
-    public function testHandle6()
+    public function testHandle6(): void
     {
         $expectedHeader = [
             "HTTP/1.1 200 OK",
@@ -44,7 +44,7 @@ class ServerStaticMiddlewareTest extends TestCase
      * @throws \ByJG\RestServer\Exception\Error520Exception
      * @throws \ByJG\RestServer\Exception\InvalidClassException
      */
-    public function testHandle7()
+    public function testHandle7(): void
     {
         $this->expectException(Error415Exception::class);
         $expectedData = "[]";
@@ -56,7 +56,12 @@ class ServerStaticMiddlewareTest extends TestCase
         $this->processAndGetContent($this->object, null, $expectedData, new ServerStaticMiddleware());
     }
 
-    public function mimeDataProvider()
+    /**
+     * @return string[][]
+     *
+     * @psalm-return list{list{'/home/jg/Projects/opensource/github/byjg/php-restserver/tests/mimefiles/test.json', 'application/json'}, list{'/home/jg/Projects/opensource/github/byjg/php-restserver/tests/mimefiles/test.pdf', 'application/pdf'}, list{'/home/jg/Projects/opensource/github/byjg/php-restserver/tests/mimefiles/test.png', 'image/png'}}
+     */
+    public function mimeDataProvider(): array
     {
         return [
             [ __DIR__ . "/mimefiles/test.json", "application/json"],
@@ -68,17 +73,19 @@ class ServerStaticMiddlewareTest extends TestCase
 
     /**
      * @dataProvider mimeDataProvider
+     *
      * @param $entry
      * @param $expected
+     *
      * @throws Error404Exception
      */
-    public function testMimeContentType($entry, $expected)
+    public function testMimeContentType($entry, $expected): void
     {
         $serverStatic = new ServerStaticMiddleware();
         $this->assertEquals($expected, $serverStatic->mimeContentType($entry));
     }
 
-    public function testFileNotFound()
+    public function testFileNotFound(): void
     {
         $serverStatic = new ServerStaticMiddleware();
         $this->assertNull($serverStatic->mimeContentType("test/aaaa"));

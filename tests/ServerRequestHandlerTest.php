@@ -11,9 +11,7 @@ class ServerRequestHandlerTest extends TestCase
 {
     use MockServerTrait;
 
-    /**
-     */
-    public function testHandle1()
+    public function testHandle1(): void
     {
         $expectedHeader = [
             "HTTP/1.1 200 OK",
@@ -30,9 +28,7 @@ class ServerRequestHandlerTest extends TestCase
         $this->assertTrue($this->reach);
     }
 
-    /**
-     */
-    public function testHandle2()
+    public function testHandle2(): void
     {
         $expectedHeader = [
             "HTTP/1.1 200 OK",
@@ -49,9 +45,7 @@ class ServerRequestHandlerTest extends TestCase
         $this->assertEquals(45, $this->reach);
     }
 
-    /**
-     */
-    public function testHandle3()
+    public function testHandle3(): void
     {
         $this->expectException(Error405Exception::class);
         $expectedData = '[]';
@@ -63,9 +57,7 @@ class ServerRequestHandlerTest extends TestCase
         $this->processAndGetContent($this->object, null, $expectedData);
     }
 
-    /**
-     */
-    public function testHandle4()
+    public function testHandle4(): void
     {
         $this->expectException(Error404Exception::class);
         $expectedData = '[]';
@@ -77,9 +69,7 @@ class ServerRequestHandlerTest extends TestCase
         $this->processAndGetContent($this->object, null, $expectedData);
     }
 
-    /**
-     */
-    public function testHandle5()
+    public function testHandle5(): void
     {
         $this->expectException(ClassNotFoundException::class);
         $expectedData = '';

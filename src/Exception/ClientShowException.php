@@ -8,17 +8,17 @@ use Exception;
 abstract class ClientShowException extends Exception
 {
     /** @var HttpResponse */
-    protected $response;
+    protected HttpResponse $response;
 
-    protected function sendHeader($status, $description)
+    protected function sendHeader(int $status, string $description): void
     {
         $this->response->setResponseCode($status, $description);
     }
 
-    public function setResponse(HttpResponse $response)
+    public function setResponse(HttpResponse $response): void
     {
         $this->response = $response;
     }
 
-    abstract public function handleHeader();
+    abstract public function handleHeader(): void;
 }

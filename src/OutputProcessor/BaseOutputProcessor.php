@@ -22,6 +22,9 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         $this->writer = $writer;
     }
 
+    /**
+     * @psalm-return HtmlOutputProcessor::class|JsonOutputProcessor::class|XmlOutputProcessor::class
+     */
     public static function getFromContentType(string $contentType): string
     {
         $mimeTypeOutputProcessor = [
@@ -42,7 +45,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
     /**
      * @throws OperationIdInvalidException
      */
-    public static function getFromHttpAccept(): object
+    public static function getFromHttpAccept(): OutputProcessorInterface
     {
         $accept = $_SERVER["HTTP_ACCEPT"] ?? "application/json";
         
@@ -63,7 +66,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         return new $className();
     }
 
-    public static function getOutputProcessorInstance($contentType)
+    public static function getOutputProcessorInstance($contentType): object
     {
         $class = self::getFromContentType($contentType);
 
@@ -96,7 +99,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         }
     }
 
-    public function writeData(mixed $data): void
+    public function writeData(array|string $data): void
     {
         $this->writer->echo($data);
     }

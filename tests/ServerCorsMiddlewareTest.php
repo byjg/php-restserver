@@ -10,7 +10,7 @@ class ServerCorsMiddlewareTest extends TestCase
 {
     use MockServerTrait;
 
-    public function testHandleCors()
+    public function testHandleCors(): void
     {
         $expectedHeader = [
             "HTTP/1.1 200 OK",
@@ -33,7 +33,7 @@ class ServerCorsMiddlewareTest extends TestCase
 
     }
 
-    public function testHandleCorsOptions()
+    public function testHandleCorsOptions(): void
     {
         $expectedHeader = [
             "HTTP/1.1 204 No Content",
@@ -54,7 +54,7 @@ class ServerCorsMiddlewareTest extends TestCase
         $this->processAndGetContent($this->object, $expectedHeader, $expectedData, (new CorsMiddleware())->withCorsOrigins(["server\.com", "localhost"]));
     }
 
-    public function testFailedCorsWrongAllowedServer()
+    public function testFailedCorsWrongAllowedServer(): void
     {
         $this->expectException(Error401Exception::class);
         $this->expectExceptionMessage("CORS verification failed. Request Blocked.");
@@ -67,7 +67,7 @@ class ServerCorsMiddlewareTest extends TestCase
         $this->processAndGetContent($this->object, null, '[]', (new CorsMiddleware())->withCorsOrigins("anotherhost"));
     }
 
-    public function testDefaultCorsSetup()
+    public function testDefaultCorsSetup(): void
     {
         $expectedHeader = [
             "HTTP/1.1 200 OK",
@@ -88,7 +88,7 @@ class ServerCorsMiddlewareTest extends TestCase
         $this->assertEquals('tCors', $this->reach);
     }
 
-    public function testCorsDisabled()
+    public function testCorsDisabled(): void
     {
         $expectedHeader = [
             "HTTP/1.1 200 OK",

@@ -61,7 +61,10 @@ class CorsMiddleware implements BeforeMiddlewareInterface
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     *
      * @return string
+     *
+     * @psalm-return 'CORS_FAILED'|'CORS_OK'|'CORS_OPTIONS'
      */
     protected function preFlight(HttpResponse $response, HttpRequest $request): string
     {

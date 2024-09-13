@@ -21,12 +21,12 @@ class ServerHandlerAttributeTest extends TestCase
         $this->definition->addClass(RouteFromAttributes::class);
     }
 
-    public function testSanity()
+    public function testSanity(): void
     {
         $this->assertCount(2, $this->definition->getRoutes());
     }
 
-    public function testRoute1()
+    public function testRoute1(): void
     {
         $expectedHeader = [
             "HTTP/1.1 200 OK",
@@ -41,7 +41,7 @@ class ServerHandlerAttributeTest extends TestCase
         $this->processAndGetContent($this->object, $expectedHeader, $expectedData);
     }
 
-    public function testRoute2()
+    public function testRoute2(): void
     {
         $expectedHeader = [
             "HTTP/1.1 200 OK",

@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 
 class MockHttpRequestTest extends TestCase
 {
-    public function testInitializePHPFile()
+    public function testInitializePHPFile(): void
     {
         $multiPartItems = [
             new MultiPartItem("note", "somenote"),
@@ -62,7 +62,7 @@ class MockHttpRequestTest extends TestCase
         );
     }
 
-    public function testFormUrlEncoded()
+    public function testFormUrlEncoded(): void
     {
         $multiPartItems = [
             new MultiPartItem("note", "somenote"),
@@ -101,7 +101,7 @@ class MockHttpRequestTest extends TestCase
         );
     }
 
-    public function testFormUrlEncodedAndCookie()
+    public function testFormUrlEncodedAndCookie(): void
     {
         $multiPartItems = [
             new MultiPartItem("note", "somenote"),

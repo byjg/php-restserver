@@ -12,7 +12,7 @@ class ServerJwtMiddlewareTest extends TestCase
 {
     use MockServerTrait;
 
-    public function testJwtMiddlewareWithToken()
+    public function testJwtMiddlewareWithToken(): void
     {
         $jwtKey = new JwtHashHmacSecret("password", decode: false);
         $jwtWrapper = new JwtWrapper("localhost", $jwtKey);
@@ -33,7 +33,7 @@ class ServerJwtMiddlewareTest extends TestCase
         $this->processAndGetContent($this->object, $expectedHeader, $expectedData, new JwtMiddleware($jwtWrapper));
     }
 
-    public function testJwtMiddlewareEmptyToken()
+    public function testJwtMiddlewareEmptyToken(): void
     {
         $jwtKey = new JwtHashHmacSecret("password", decode: false);
         $jwtWrapper = new JwtWrapper("localhost", $jwtKey);
@@ -53,7 +53,7 @@ class ServerJwtMiddlewareTest extends TestCase
     }
 
 
-    public function testJwtMiddlewareWrongToken()
+    public function testJwtMiddlewareWrongToken(): void
     {
         $this->expectException(Error401Exception::class);
 

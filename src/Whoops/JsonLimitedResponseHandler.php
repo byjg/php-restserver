@@ -23,6 +23,8 @@ class JsonLimitedResponseHandler extends ParentJsonErrorHandler
 
     /**
      * @return int
+     *
+     * @psalm-return 48
      */
     public function handle()
     {

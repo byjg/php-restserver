@@ -14,6 +14,9 @@ class XmlOutputProcessor extends BaseOutputProcessor
         $this->contentType = "text/xml";
     }
 
+    /**
+     * @return XmlResponseHandler
+     */
     public function getDetailedErrorHandler(): Handler
     {
         return new XmlResponseHandler();
@@ -24,6 +27,9 @@ class XmlOutputProcessor extends BaseOutputProcessor
         return $this->getDetailedErrorHandler();
     }
 
+    /**
+     * @return XmlFormatter
+     */
     public function getFormatter(): FormatterInterface
     {
         return new XmlFormatter();

@@ -8,7 +8,7 @@ class StdoutWriter implements WriterInterface
     protected string $data = '';
     protected int $statusCode = 0;
 
-    public function header($header, $replace = true): void
+    public function header(string $header, $replace = true): void
     {
         if (preg_match("~^HTTP/~", $header) === 1) {
             array_unshift($this->headerList, $header);

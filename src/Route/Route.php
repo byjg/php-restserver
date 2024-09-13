@@ -35,7 +35,7 @@ class Route
         return $this;
     }
 
-    public function withClass($class, $methodName): static
+    public function withClass(string $class, string $methodName): static
     {
         $this->setClass([$class, $methodName]);
         return $this;

@@ -18,6 +18,8 @@ use ReflectionException;
 trait ClassNameBeautifier
 {
     /**
+     * @param string $ex
+     * @return array|string|null
      * @throws ReflectionException
      */
     public function getClassAsTitle(string $ex): array|string|null

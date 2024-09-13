@@ -10,14 +10,14 @@ class RouteFromAttributes
 {
     #[RouteDefinition('GET', '/route1')]
     #[BeforeProcess]
-    public function route1(HttpResponse $response, HttpRequest $request)
+    public function route1(HttpResponse $response, HttpRequest $request): void
     {
         $response->write(["a" => 'Route 1 get']);
     }
 
     #[RouteDefinition('POST', '/route1')]
     #[AfterProcess]
-    public function route1Post(HttpResponse $response, HttpRequest $request)
+    public function route1Post(HttpResponse $response, HttpRequest $request): void
     {
         $response->write(["a" => 'Route 1 post']);
     }

@@ -59,6 +59,8 @@ class HttpRequestHandler implements RequestHandler
      * @throws Error520Exception
      * @throws InvalidClassException
      * @throws Exception
+     *
+     * @return true
      */
     protected function process(RouteListInterface $routeDefinition): bool
     {

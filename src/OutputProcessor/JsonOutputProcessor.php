@@ -15,6 +15,9 @@ class JsonOutputProcessor extends BaseOutputProcessor
         $this->contentType = "application/json";
     }
 
+    /**
+     * @return JsonResponseHandler
+     */
     public function getDetailedErrorHandler(): Handler
     {
         $jsonHandler = new JsonResponseHandler();
@@ -22,11 +25,17 @@ class JsonOutputProcessor extends BaseOutputProcessor
         return $jsonHandler;
     }
 
+    /**
+     * @return JsonLimitedResponseHandler
+     */
     public function getErrorHandler(): Handler
     {
         return new JsonLimitedResponseHandler();
     }
 
+    /**
+     * @return JsonFormatter
+     */
     public function getFormatter(): FormatterInterface
     {
         return new JsonFormatter();

@@ -75,7 +75,7 @@ class MockRequestHandler extends HttpRequestHandler
 
     protected Response|null $psr7Response = null;
 
-    public function getPsr7Response()
+    public function getPsr7Response(): \ByJG\Util\Psr7\Message
     {
         if (is_null($this->psr7Response)) {
             /** @psalm-suppress UndefinedInterfaceMethod Always using MemoryWriter */

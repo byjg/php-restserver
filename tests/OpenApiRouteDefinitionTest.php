@@ -21,7 +21,7 @@ class OpenApiRouteDefinitionTest extends TestCase
      * @throws SchemaNotFoundException
      * @throws InvalidArgumentException
      */
-    public function testGenerateRoutesOpenApi2()
+    public function testGenerateRoutesOpenApi2(): void
     {
         $object = new OpenApiRouteList(__DIR__ . '/fixtures/swagger-example.json');
         $object->withOutputProcessorForRoute('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class);
@@ -35,7 +35,7 @@ class OpenApiRouteDefinitionTest extends TestCase
      * @throws SchemaNotFoundException
      * @throws InvalidArgumentException
      */
-    public function testGenerateRoutesOpenApi3()
+    public function testGenerateRoutesOpenApi3(): void
     {
         $object = new OpenApiRouteList(__DIR__ . '/fixtures/openapi-example.yaml');
         $object
@@ -51,7 +51,7 @@ class OpenApiRouteDefinitionTest extends TestCase
      * @throws SchemaNotFoundException
      * @throws InvalidArgumentException
      */
-    public function testGenerateRoutesOverrideMimeOpenApi2()
+    public function testGenerateRoutesOverrideMimeOpenApi2(): void
     {
         $object = new OpenApiRouteList(__DIR__ . '/fixtures/swagger-example.json');
         $object->withOutputProcessorForMimeType('application/xml', JsonCleanOutputProcessor::class);
@@ -65,7 +65,7 @@ class OpenApiRouteDefinitionTest extends TestCase
      * @throws SchemaNotFoundException
      * @throws InvalidArgumentException
      */
-    public function testGenerateRoutesOverrideMimeOpenApi3()
+    public function testGenerateRoutesOverrideMimeOpenApi3(): void
     {
         $object = new OpenApiRouteList(__DIR__ . '/fixtures/openapi-example.yaml');
 
@@ -76,7 +76,7 @@ class OpenApiRouteDefinitionTest extends TestCase
         $this->assertMime($object);
     }
 
-    public function testSortPaths()
+    public function testSortPaths(): void
     {
         // Expose the method
         $testObject = new OpenApiWrapperExposed(__DIR__ . "/fixtures/swagger-example.json");
@@ -174,7 +174,7 @@ class OpenApiRouteDefinitionTest extends TestCase
     }
 
 
-    protected function assert(OpenApiRouteList $object)
+    protected function assert(OpenApiRouteList $object): void
     {
         $this->assertEquals(
             [
@@ -243,7 +243,7 @@ class OpenApiRouteDefinitionTest extends TestCase
         );
     }
 
-    protected function assertMime(OpenApiRouteList $object)
+    protected function assertMime(OpenApiRouteList $object): void
     {
         $this->assertEquals(
             [
