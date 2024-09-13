@@ -6,9 +6,6 @@ use InvalidArgumentException;
 
 class UploadedFiles
 {
-    /**
-     * @psalm-return int<0, max>
-     */
     public function count(): int
     {
         return count($_FILES);
@@ -16,8 +13,6 @@ class UploadedFiles
 
     /**
      * @return string[]
-     *
-     * @psalm-return list<non-empty-string>
      */
     public function getKeys(): array
     {

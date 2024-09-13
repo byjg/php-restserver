@@ -6,6 +6,7 @@
 
 namespace ByJG\RestServer\Whoops;
 
+use ReflectionException;
 use Whoops\Exception\Formatter;
 use Whoops\Handler\Handler;
 
@@ -41,8 +42,7 @@ class PlainResponseErrorHandler extends Handler
 
     /**
      * @return int
-     *
-     * @psalm-return 48
+     * @throws ReflectionException
      */
     public function handle()
     {

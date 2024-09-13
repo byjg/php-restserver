@@ -22,9 +22,6 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         $this->writer = $writer;
     }
 
-    /**
-     * @psalm-return HtmlOutputProcessor::class|JsonOutputProcessor::class|XmlOutputProcessor::class
-     */
     public static function getFromContentType(string $contentType): string
     {
         $mimeTypeOutputProcessor = [
