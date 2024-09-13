@@ -2,8 +2,13 @@
 
 namespace Tests;
 
+use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
+use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error415Exception;
+use ByJG\RestServer\Exception\Error500Exception;
+use ByJG\RestServer\Exception\Error520Exception;
+use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\Middleware\ServerStaticMiddleware;
 use PHPUnit\Framework\TestCase;
 
@@ -13,10 +18,10 @@ class ServerStaticMiddlewareTest extends TestCase
 
     /**
      * @throws Error404Exception
-     * @throws \ByJG\RestServer\Exception\ClassNotFoundException
-     * @throws \ByJG\RestServer\Exception\Error405Exception
-     * @throws \ByJG\RestServer\Exception\Error520Exception
-     * @throws \ByJG\RestServer\Exception\InvalidClassException
+     * @throws ClassNotFoundException
+     * @throws Error405Exception
+     * @throws Error520Exception
+     * @throws InvalidClassException
      */
     public function testHandle6(): void
     {
@@ -39,10 +44,10 @@ class ServerStaticMiddlewareTest extends TestCase
 
     /**
      * @throws Error404Exception
-     * @throws \ByJG\RestServer\Exception\ClassNotFoundException
-     * @throws \ByJG\RestServer\Exception\Error405Exception
-     * @throws \ByJG\RestServer\Exception\Error520Exception
-     * @throws \ByJG\RestServer\Exception\InvalidClassException
+     * @throws ClassNotFoundException
+     * @throws Error405Exception
+     * @throws Error520Exception
+     * @throws InvalidClassException
      */
     public function testHandle7(): void
     {
@@ -58,8 +63,6 @@ class ServerStaticMiddlewareTest extends TestCase
 
     /**
      * @return string[][]
-     *
-     * @psalm-return list{list{'/home/jg/Projects/opensource/github/byjg/php-restserver/tests/mimefiles/test.json', 'application/json'}, list{'/home/jg/Projects/opensource/github/byjg/php-restserver/tests/mimefiles/test.pdf', 'application/pdf'}, list{'/home/jg/Projects/opensource/github/byjg/php-restserver/tests/mimefiles/test.png', 'image/png'}}
      */
     public function mimeDataProvider(): array
     {
@@ -77,7 +80,8 @@ class ServerStaticMiddlewareTest extends TestCase
      * @param $entry
      * @param $expected
      *
-     * @throws Error404Exception
+     * @throws Error415Exception
+     * @throws Error500Exception
      */
     public function testMimeContentType($entry, $expected): void
     {
