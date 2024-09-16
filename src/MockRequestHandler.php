@@ -10,9 +10,9 @@ use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\Route\RouteListInterface;
 use ByJG\RestServer\Writer\MemoryWriter;
 use ByJG\WebRequest\Psr7\MemoryStream;
-use ByJG\WebRequest\Psr7\Message;
 use ByJG\WebRequest\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -76,7 +76,7 @@ class MockRequestHandler extends HttpRequestHandler
 
     protected Response|null $psr7Response = null;
 
-    public function getPsr7Response(): Message
+    public function getPsr7Response(): ResponseInterface
     {
         if (is_null($this->psr7Response)) {
             /** @psalm-suppress UndefinedInterfaceMethod Always using MemoryWriter */
