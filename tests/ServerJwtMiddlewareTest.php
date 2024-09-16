@@ -2,10 +2,10 @@
 
 namespace Tests;
 
+use ByJG\JwtWrapper\JwtHashHmacSecret;
+use ByJG\JwtWrapper\JwtWrapper;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Middleware\JwtMiddleware;
-use ByJG\Util\JwtHashHmacSecret;
-use ByJG\Util\JwtWrapper;
 use PHPUnit\Framework\TestCase;
 
 class ServerJwtMiddlewareTest extends TestCase

@@ -2,11 +2,11 @@
 
 namespace ByJG\RestServer\Middleware;
 
+use ByJG\JwtWrapper\JwtWrapper;
+use ByJG\JwtWrapper\JwtWrapperException;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\Util\JwtWrapper;
-use ByJG\Util\JwtWrapperException;
 
 class JwtMiddleware implements BeforeMiddlewareInterface
 {
