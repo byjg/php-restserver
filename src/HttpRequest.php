@@ -37,11 +37,8 @@ class HttpRequest
     /**
      * Get a parameter passed by GET (the same as $_GET). If not found return false.
      *
-     * @param string|null $value
-     * @param bool $default
-     * @return string|array|boolean
      */
-    public function get(?string $value = null, mixed $default = false): string|array|bool
+    public function get(?string $value = null, mixed $default = null): string|array|bool|null
     {
         if (is_null($value)) {
             return $this->get;
@@ -57,11 +54,8 @@ class HttpRequest
     /**
      * Get a parameter passed by POST (the same as $_POST). If not found return false.
      *
-     * @param ?string $value
-     * @param bool $default
-     * @return string|boolean|array
      */
-    public function post(?string $value = null, mixed $default = false): string|array|bool
+    public function post(?string $value = null, mixed $default = null): string|array|bool|null
     {
         if (is_null($value)) {
             return $this->post;
@@ -77,11 +71,8 @@ class HttpRequest
     /**
      * Get the parameters sent by server (the same as $_SERVER). If not found return false.
      *
-     * @param ?string $value
-     * @param mixed $default
-     * @return string|boolean|array
      */
-    public function server(?string $value = null, mixed $default = false): string|array|bool
+    public function server(?string $value = null, mixed $default = null): string|array|bool|null
     {
         if (is_null($value)) {
             return $this->server;
@@ -97,11 +88,8 @@ class HttpRequest
     /**
      * Get a server session value(the same as $_SESSION). If not found return false.
      *
-     * @param ?string $value
-     * @param mixed $default
-     * @return string|boolean|array
      */
-    public function session(?string $value = null, mixed $default = false): bool|array|string
+    public function session(?string $value = null, mixed $default = null): string|array|bool|null
     {
         if (is_null($value)) {
             return $this->session;
@@ -117,11 +105,8 @@ class HttpRequest
     /**
      * Get the cookie sent by the client (the same as $_COOKIE). If not found return false.
      *
-     * @param ?string $value
-     * @param mixed $default
-     * @return string|boolean|array
      */
-    public function cookie(?string $value = null, mixed $default = false): bool|array|string
+    public function cookie(?string $value = null, mixed $default = null): string|array|bool|null
     {
         if (is_null($value)) {
             return $this->cookie;
@@ -137,11 +122,8 @@ class HttpRequest
     /**
      * Get a value from any of get, post, server, cookie or session. If not found return false.
      *
-     * @param ?string $value
-     * @param mixed $default
-     * @return string|boolean|array
      */
-    public function request(?string $value = null, mixed $default = false): bool|array|string
+    public function request(?string $value = null, mixed $default = null): string|array|bool|null
     {
         if (is_null($value)) {
             return $this->phpRequest;
@@ -161,7 +143,7 @@ class HttpRequest
      * @param mixed $default
      * @return mixed
      */
-    public function param(?string $value = null, mixed $default = false): mixed
+    public function param(?string $value = null, mixed $default = null): mixed
     {
         if (is_null($value)) {
             return $this->param;
@@ -239,7 +221,7 @@ class HttpRequest
         return $request->getUserAgent();
     }
 
-    public function getServerName(): bool|array|string
+    public function getServerName(): bool|array|string|null
     {
         $headers = [
             'SERVER_NAME',
@@ -257,9 +239,9 @@ class HttpRequest
      * Use this method to get the SERVER NAME.
      * @param bool $port
      * @param bool $protocol
-     * @return bool|array<array-key, mixed>|string
+     * @return bool|array<array-key, mixed>|string|null
      */
-    public function getRequestServer(bool $port = false, bool $protocol = false): bool|array|string
+    public function getRequestServer(bool $port = false, bool $protocol = false): bool|array|string|null
     {
         $servername = $this->getServerName();
 
@@ -277,7 +259,7 @@ class HttpRequest
         return $servername;
     }
 
-    public function getHeader(string $header): bool|array|string
+    public function getHeader(string $header): bool|array|string|null
     {
         $header = strtoupper(str_replace('-', '_', $header));
         $header = 'HTTP_' . $header;
@@ -285,11 +267,11 @@ class HttpRequest
     }
 
     /**
-     * @return false|null|string
+     * @return bool|array|string|null
      */
     public function getRequestPath(): bool|array|string|null
     {
-        return parse_url($this->server('REQUEST_URI'), PHP_URL_PATH);
+        return parse_url($this->server('REQUEST_URI', ""), PHP_URL_PATH);
     }
 
     private ?UploadedFiles $uploadedFiles = null;

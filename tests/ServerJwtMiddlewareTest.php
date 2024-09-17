@@ -22,7 +22,7 @@ class ServerJwtMiddlewareTest extends TestCase
             "HTTP/1.1 200 OK",
             "Content-Type: application/json",
         ];
-        $expectedData = '{"jwt.parse.status":"success","jwt.parse.message":false,"jwt.userid":"123"}';
+        $expectedData = '{"jwt.parse.status":"success","jwt.parse.message":null,"jwt.userid":"123"}';
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/testjwt";
@@ -42,7 +42,7 @@ class ServerJwtMiddlewareTest extends TestCase
             "HTTP/1.1 200 OK",
             "Content-Type: application/json",
         ];
-        $expectedData = '{"jwt.parse.status":"failed","jwt.parse.message":"Absent authorization token","jwt.userid":false}';
+        $expectedData = '{"jwt.parse.status":"failed","jwt.parse.message":"Absent authorization token","jwt.userid":null}';
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/testjwt";
