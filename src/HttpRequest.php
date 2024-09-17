@@ -41,7 +41,7 @@ class HttpRequest
      * @param bool $default
      * @return string|array|boolean
      */
-    public function get(?string $value = null, bool $default = false): string|array|bool
+    public function get(?string $value = null, mixed $default = false): string|array|bool
     {
         if (is_null($value)) {
             return $this->get;
@@ -61,7 +61,7 @@ class HttpRequest
      * @param bool $default
      * @return string|boolean|array
      */
-    public function post(?string $value = null, bool $default = false): string|array|bool
+    public function post(?string $value = null, mixed $default = false): string|array|bool
     {
         if (is_null($value)) {
             return $this->post;
@@ -78,10 +78,10 @@ class HttpRequest
      * Get the parameters sent by server (the same as $_SERVER). If not found return false.
      *
      * @param ?string $value
-     * @param bool $default
+     * @param mixed $default
      * @return string|boolean|array
      */
-    public function server(?string $value = null, bool $default = false): string|array|bool
+    public function server(?string $value = null, mixed $default = false): string|array|bool
     {
         if (is_null($value)) {
             return $this->server;
@@ -98,10 +98,10 @@ class HttpRequest
      * Get a server session value(the same as $_SESSION). If not found return false.
      *
      * @param ?string $value
-     * @param bool $default
+     * @param mixed $default
      * @return string|boolean|array
      */
-    public function session(?string $value = null, bool $default = false): bool|array|string
+    public function session(?string $value = null, mixed $default = false): bool|array|string
     {
         if (is_null($value)) {
             return $this->session;
@@ -118,10 +118,10 @@ class HttpRequest
      * Get the cookie sent by the client (the same as $_COOKIE). If not found return false.
      *
      * @param ?string $value
-     * @param bool $default
+     * @param mixed $default
      * @return string|boolean|array
      */
-    public function cookie(?string $value = null, bool $default = false): bool|array|string
+    public function cookie(?string $value = null, mixed $default = false): bool|array|string
     {
         if (is_null($value)) {
             return $this->cookie;
@@ -138,10 +138,10 @@ class HttpRequest
      * Get a value from any of get, post, server, cookie or session. If not found return false.
      *
      * @param ?string $value
-     * @param bool $default
+     * @param mixed $default
      * @return string|boolean|array
      */
-    public function request(?string $value = null, bool $default = false): bool|array|string
+    public function request(?string $value = null, mixed $default = false): bool|array|string
     {
         if (is_null($value)) {
             return $this->phpRequest;
@@ -158,10 +158,10 @@ class HttpRequest
      * Get a value from the params found in the URL
      *
      * @param ?string $value
-     * @param bool $default
+     * @param mixed $default
      * @return mixed
      */
-    public function param(?string $value = null, bool $default = false): mixed
+    public function param(?string $value = null, mixed $default = false): mixed
     {
         if (is_null($value)) {
             return $this->param;
