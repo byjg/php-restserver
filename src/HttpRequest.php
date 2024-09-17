@@ -192,7 +192,7 @@ class HttpRequest
         ];
         foreach ($headers as $header) {
             if ($this->server($header) !== false) {
-                $list = explode(",", $this->server($header));
+                $list = explode(",", $this->server($header, ""));
                 return reset($list);
             }
         }

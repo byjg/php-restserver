@@ -108,7 +108,7 @@ class MockHttpRequest extends HttpRequest
         $_FILES = [];
 
         $contentType = $this->psrRequest->getHeaderLine("Content-Type");
-        if (empty($contentType) || strpos($contentType, "multipart/") === false) {
+        if (empty($contentType) || !str_contains($contentType, "multipart/")) {
             return;
         }
 
