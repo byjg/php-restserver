@@ -191,8 +191,8 @@ class HttpRequest
             'HTTP_CLIENT_IP',
         ];
         foreach ($headers as $header) {
-            if ($this->server($header) !== false) {
-                $list = explode(",", $this->server($header, ""));
+            if ($this->server($header, false) !== false) {
+                $list = explode(",", $this->server($header));
                 return reset($list);
             }
         }
@@ -228,8 +228,8 @@ class HttpRequest
             'HTTP_HOST',
         ];
         foreach ($headers as $header) {
-            if ($this->server($header) !== false) {
-                return $this->server('SERVER_NAME');
+            if ($this->server($header, false) !== false) {
+                return $this->server($header);
             }
         }
         return $this->server('SERVER_ADDR');
@@ -245,7 +245,7 @@ class HttpRequest
     {
         $servername = $this->getServerName();
 
-        if ($port && $this->server('SERVER_PORT') !== false) {
+        if ($port && $this->server('SERVER_PORT', false) !== false) {
             $servername .= ':' . $this->server('SERVER_PORT');
         }
 
