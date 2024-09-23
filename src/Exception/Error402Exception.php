@@ -4,7 +4,10 @@ namespace ByJG\RestServer\Exception;
 
 class Error402Exception extends ClientShowException
 {
-    public function handleHeader()
+    /**
+     * @return void
+     */
+    public function handleHeader(): void
     {
         $this->sendHeader(402, 'Payment Required');
     }

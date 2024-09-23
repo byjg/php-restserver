@@ -8,23 +8,23 @@ class HttpResponse
     /**
      * @var ResponseBag
      */
-    protected $response;
+    protected ResponseBag $response;
 
     /**
-     * @var ResponseBag
+     * @var ResponseBag|null
      */
-    protected $responseDebug;
+    protected ?ResponseBag $responseDebug = null;
 
     /**
      * @var array
      */
-    protected $headers = [];
+    protected array $headers = [];
 
     /**
      * @var int
      */
-    protected $responseCode = 200;
-    protected $responseCodeDescription = 'OK';
+    protected int $responseCode = 200;
+    protected string $responseCodeDescription = 'OK';
 
     public function __construct()
     {
@@ -37,7 +37,7 @@ class HttpResponse
      * @param string $name
      * @param string $value
      */
-    public function setSession($name, $value)
+    public function setSession(string $name, string $value): void
     {
         $_SESSION[$name] = $value;
     }
@@ -47,7 +47,7 @@ class HttpResponse
      *
      * @param string $name
      */
-    public function removeSession($name)
+    public function removeSession(string $name): void
     {
         unset($_SESSION[$name]);
     }
@@ -57,11 +57,11 @@ class HttpResponse
      *
      * @param string $name
      * @param string $value
-     * @param int $expire (seconds from now)
-     * @param int $path (directory into domain in which the cookie will be available on )
-     * @param string $domain
+     * @param int|null $expire (seconds from now)
+     * @param string|null $path (directory into domain in which the cookie will be available on )
+     * @param string|null $domain
      */
-    public function addCookie($name, $value, $expire = null, $path = null, $domain = null)
+    public function addCookie(string $name, string $value, int $expire = null, string $path = null, string $domain = null): void
     {
         if (!is_null($expire)) {
             $expire = time() + $expire;
@@ -74,9 +74,9 @@ class HttpResponse
      *
      * @param string $name
      */
-    public function removeCookie($name)
+    public function removeCookie(string $name): void
     {
-        setcookie($name, null, time() - 3600);
+        setcookie($name, "", time() - 3600);
         unset($_COOKIE[$name]);
     }
 
@@ -86,7 +86,7 @@ class HttpResponse
      *
      * @return ResponseBag
      */
-    public function getResponseBag()
+    public function getResponseBag(): ResponseBag
     {
         return $this->response;
     }
@@ -96,19 +96,19 @@ class HttpResponse
      *
      * @param mixed $object
      */
-    public function write($object)
+    public function write(mixed $object): void
     {
         $this->response->add($object);
     }
 
     /**
-     * Added informations for debug purposes only.
+     * Added information for debug purposes only.
      * In case the error it will showed and the result a node called "debug" will be added.
      *
      * @param string $key
      * @param mixed $string
      */
-    public function writeDebug($key, $string)
+    public function writeDebug(string $key, mixed $string): void
     {
         // @todo Review this.
         if (is_null($this->responseDebug)) {
@@ -119,7 +119,7 @@ class HttpResponse
         // ErrorHandler::getInstance()->addExtraInfo($key, serialize($string));
     }
 
-    public function emptyResponse()
+    public function emptyResponse(): void
     {
         $this->response = new ResponseBag();
     }
@@ -128,31 +128,31 @@ class HttpResponse
      * Undocumented function
      *
      * @param string $header
-     * @param string|array $value
+     * @param array|string $value
      * @return void
      */
-    public function addHeader($header, $value)
+    public function addHeader(string $header, array|string $value): void
     {
         $this->headers[$header] = $value;
     }
 
-    public function getHeaders()
+    public function getHeaders(): array
     {
         return $this->headers;
     }
 
-    public function setResponseCode($code, $description = "")
+    public function setResponseCode(int $code, string $description = ""): void
     {
         $this->responseCode = $code;
         $this->responseCodeDescription = $description;
     }
 
-    public function getResponseCode()
+    public function getResponseCode(): int
     {
         return $this->responseCode;
     }
 
-    public function getResponseCodeDescription()
+    public function getResponseCodeDescription(): string
     {
         return $this->responseCodeDescription;
     }

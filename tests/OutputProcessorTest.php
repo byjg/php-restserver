@@ -42,7 +42,11 @@ class OutputProcessorTest extends TestCase
         $this->httpResponse = null;
     }
 
-    public function dataProvider()
+    /**
+     * @return string[][]
+     *
+     */
+    public function dataProvider(): array
     {
         return [
             [
@@ -75,7 +79,7 @@ class OutputProcessorTest extends TestCase
     /**
      * @dataProvider dataProvider
      */
-    public function testOutputProcessor($class, $contentType, $expectedProcess, $expectedResponse)
+    public function testOutputProcessor($class, $contentType, $expectedProcess, $expectedResponse): void
     {
         $writer = new MemoryWriter();
 

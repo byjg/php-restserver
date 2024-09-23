@@ -23,7 +23,7 @@ class HttpResponseTest extends TestCase
         $this->object = null;
     }
 
-    public function testGetHeaders()
+    public function testGetHeaders(): void
     {
         $this->assertEquals(
             [],
@@ -70,7 +70,7 @@ class HttpResponseTest extends TestCase
         );
     }
 
-    public function testSetResponseCode()
+    public function testSetResponseCode(): void
     {
         $this->assertEquals(
             200,

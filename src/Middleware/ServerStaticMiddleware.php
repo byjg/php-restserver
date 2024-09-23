@@ -6,14 +6,14 @@ use ByJG\RestServer\Exception\Error415Exception;
 use ByJG\RestServer\Exception\Error500Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\ResponseBag;
+use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\Util\Uri;
 use FastRoute\Dispatcher;
 
 class ServerStaticMiddleware implements BeforeMiddlewareInterface
 {
 
-    protected $mimeTypes = [
+    protected array $mimeTypes = [
         '123' => 'application/vnd.lotus-1-2-3',
         '3dml' => 'text/vnd.in3d.3dml',
         '3ds' => 'image/x-3ds',
@@ -1012,13 +1012,13 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
      * @throws Error500Exception
      */
     public function beforeProcess(
-        $dispatcherStatus,
+        mixed        $dispatcherStatus,
         HttpResponse $response,
-        HttpRequest $request
-    )
+        HttpRequest  $request
+    ): MiddlewareResult
     {
         if ($dispatcherStatus != Dispatcher::NOT_FOUND) {
-            return MiddlewareResult::continue();
+            return MiddlewareResult::continue;
         }
 
         $requestUri = new Uri($_SERVER['REQUEST_URI']);
@@ -1034,28 +1034,28 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
             $mime = $this->mimeContentType($file);
 
             if (empty($mime)) {
-                return MiddlewareResult::continue();
+                return MiddlewareResult::continue;
             }
 
             $response->addHeader("Content-Type", $mime);
             $response->emptyResponse();
-            $response->getResponseBag()->setSerializationRule(ResponseBag::RAW);
+            $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::Raw);
             $response->write(file_get_contents($file));
-            return MiddlewareResult::stopProcessingOthers();
+            return MiddlewareResult::stopProcessingOthers;
         }
 
-        return MiddlewareResult::continue();
+        return MiddlewareResult::continue;
     }
 
     /**
      * Get the Mime Type based on the filename
      *
      * @param string $filename
-     * @return string
+     * @return string|null
      * @throws Error415Exception
      * @throws Error500Exception
      */
-    public function mimeContentType($filename)
+    public function mimeContentType(string $filename): ?string
     {
         if (!file_exists($filename)) {
             return null;
@@ -1083,7 +1083,7 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
         return $this->getContentType($filename);
     }
 
-    private function getContentType($filename)
+    private function getContentType(string $filename): string
     {
         // get the file extension
         $ext = substr(strrchr($filename, "."), 1);

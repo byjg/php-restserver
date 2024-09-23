@@ -4,11 +4,11 @@ namespace ByJG\RestServer\Writer;
 
 class StdoutWriter implements WriterInterface
 {
-    protected $headerList = [];
-    protected $data = '';
-    protected $statusCode = 0;
+    protected array $headerList = [];
+    protected string $data = '';
+    protected int $statusCode = 0;
 
-    public function header($header, $replace = true)
+    public function header(string $header, $replace = true): void
     {
         if (preg_match("~^HTTP/~", $header) === 1) {
             array_unshift($this->headerList, $header);
@@ -28,19 +28,19 @@ class StdoutWriter implements WriterInterface
         $this->headerList[] = $header;
     }
 
-    public function responseCode($responseCode, $description)
+    public function responseCode(int $responseCode, string $description): void
     {
         $this->header("HTTP/1.1 $responseCode $description");
         http_response_code($responseCode);
         $this->statusCode = $responseCode;
     }
 
-    public function echo($data)
+    public function echo(string $data): void
     {
         $this->data .= $data;
     }
 
-    public function flush()
+    public function flush(): void
     {
         echo implode("\r\n", $this->headerList);
         echo "\r\n";

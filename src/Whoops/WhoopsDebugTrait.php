@@ -21,10 +21,11 @@ trait WhoopsDebugTrait
      * Adds an entry to the list of tables displayed in the template.
      * The expected data is a simple associative array. Any nested arrays
      * will be flattened with print_r
+     *
      * @param string $label
      * @param array $data
      */
-    public function addDataTable($label, array $data)
+    public function addDataTable($label, array $data): void
     {
         $this->extraTables[$label] = $data;
     }

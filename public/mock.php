@@ -3,12 +3,11 @@
 namespace My;
 
 use ByJG\RestServer\Exception\Error401Exception;
-use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\MockRequestHandler;
 use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
 use ByJG\RestServer\Route\RouteList;
-use ByJG\Util\Psr7\Request;
 use ByJG\Util\Uri;
+use ByJG\WebRequest\Psr7\Request;
 
 /**
  * Basic Handler Object

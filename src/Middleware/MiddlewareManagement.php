@@ -4,6 +4,7 @@ namespace ByJG\RestServer\Middleware;
 
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
+use Exception;
 
 class MiddlewareManagement
 {
@@ -17,11 +18,12 @@ class MiddlewareManagement
      * @return MiddlewareResult
      */
     public static function processBefore(
-        $middlewareList,
-        $dispatcherStatus,
+        array $middlewareList,
+        mixed $dispatcherStatus,
         HttpResponse $response,
         HttpRequest $request
-    ) {
+    ): MiddlewareResult
+    {
         return self::processMiddleware($middlewareList, $dispatcherStatus, $response, $request);
     }
 
@@ -32,19 +34,20 @@ class MiddlewareManagement
      * @param mixed $middlewareList
      * @param HttpResponse $response
      * @param HttpRequest $request
-     * @param $class
-     * @param $method
-     * @param $exception
+     * @param string|null $class
+     * @param string|null $method
+     * @param Exception|null $exception
      * @return MiddlewareResult
      */
     public static function processAfter(
-        $middlewareList,
+        array $middlewareList,
         HttpResponse $response,
         HttpRequest $request,
-        $class,
-        $method,
-        $exception
-    ) {
+        ?string $class,
+        ?string $method,
+        ?Exception $exception
+    ): MiddlewareResult
+    {
         return self::processMiddleware($middlewareList, null, $response, $request, $class, $method, $exception);
     }
 
@@ -55,21 +58,22 @@ class MiddlewareManagement
      * @param mixed $dispatcherStatus
      * @param HttpResponse $response
      * @param HttpRequest $request
-     * @param null $class
-     * @param null $method
-     * @param null $exception
+     * @param string|null $class
+     * @param string|null $method
+     * @param Exception|null $exception
      * @return MiddlewareResult
      */
     protected static function processMiddleware(
-        $middlewareList,
-        $dispatcherStatus,
+        array $middlewareList,
+        mixed $dispatcherStatus,
         HttpResponse $response,
         HttpRequest $request,
-        $class = null,
-        $method = null,
-        $exception = null
-    ) {
-        $continue = MiddlewareResult::continue();
+        ?string $class = null,
+        ?string $method = null,
+        ?Exception $exception = null
+    ): MiddlewareResult
+    {
+        $continue = MiddlewareResult::continue;
 
         if (empty($middlewareList)) {
             return $continue;
@@ -89,9 +93,9 @@ class MiddlewareManagement
                 $result = $middleWare->afterProcess($response, $request, $class, $method, $exception);
             }
             
-            if ($result->getStatus() === MiddlewareResult::STOP_PROCESSING_OTHERS) {
+            if ($result === MiddlewareResult::stopProcessingOthers) {
                 return $result;
-            } elseif ($result->getStatus() === MiddlewareResult::STOP_PROCESSING) {
+            } elseif ($result === MiddlewareResult::stopProcessing) {
                 $continue = $result;
             }
         }

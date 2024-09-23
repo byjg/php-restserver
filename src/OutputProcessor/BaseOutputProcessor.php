@@ -4,26 +4,25 @@ namespace ByJG\RestServer\OutputProcessor;
 
 use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\ResponseBag;
+use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\RestServer\Writer\WriterInterface;
 use Closure;
 
 abstract class BaseOutputProcessor implements OutputProcessorInterface
 {
-    protected $buildNull = true;
-    protected $onlyString = false;
-    protected $header = [];
-    protected $contentType = "";
+    protected bool $buildNull = true;
+    protected bool $onlyString = false;
+    protected array $header = [];
+    protected string $contentType = "";
 
-    /** @var WriterInterface */
-    protected $writer;
+    protected WriterInterface $writer;
 
-    public function setWriter(WriterInterface $writer)
+    public function setWriter(WriterInterface $writer): void
     {
         $this->writer = $writer;
     }
 
-    public static function getFromContentType($contentType)
+    public static function getFromContentType(string $contentType): string
     {
         $mimeTypeOutputProcessor = [
             "text/xml" => XmlOutputProcessor::class,
@@ -39,8 +38,11 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
 
         return $mimeTypeOutputProcessor[$contentType];
     }
-    
-    public static function getFromHttpAccept()
+
+    /**
+     * @throws OperationIdInvalidException
+     */
+    public static function getFromHttpAccept(): OutputProcessorInterface
     {
         $accept = $_SERVER["HTTP_ACCEPT"] ?? "application/json";
         
@@ -50,10 +52,10 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
     }
 
     /**
-     * @param $className
+     * @param Closure|string $className
      * @return OutputProcessorInterface
      */
-    public static function getFromClassName($className)
+    public static function getFromClassName(Closure|string $className): object
     {
         if ($className instanceof Closure) {
             return $className();
@@ -61,24 +63,24 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         return new $className();
     }
 
-    public static function getOutputProcessorInstance($contentType)
+    public static function getOutputProcessorInstance($contentType): object
     {
         $class = self::getFromContentType($contentType);
 
         return new $class();
     }
 
-    public function writeContentType()
+    public function writeContentType(): void
     {
         $this->writer->header("Content-Type: $this->contentType", true);
     }
 
-    public function getContentType()
+    public function getContentType(): string
     {
         return $this->contentType;
     }
 
-    public function writeHeader(HttpResponse $response)
+    public function writeHeader(HttpResponse $response): void
     {
         $this->writer->responseCode($response->getResponseCode(), $response->getResponseCodeDescription());
 
@@ -94,12 +96,12 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         }
     }
 
-    public function writeData($data)
+    public function writeData(array|string $data): void
     {
         $this->writer->echo($data);
     }
 
-    public function processResponse(HttpResponse $response)
+    public function processResponse(HttpResponse $response): void
     {
         $this->writeHeader($response);
 
@@ -107,7 +109,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
             ->getResponseBag()
             ->process($this->buildNull, $this->onlyString);
 
-        if ($response->getResponseBag()->getSerializationRule() === ResponseBag::RAW) {
+        if ($response->getResponseBag()->getSerializationRule() === SerializationRuleEnum::Raw) {
             $this->writeData($serialized);
         } else {
             $this->writeData(
