@@ -2,6 +2,9 @@
 
 namespace ByJG\RestServer;
 
+use ByJG\RestServer\Attributes\AfterRouteInterface;
+use ByJG\RestServer\Attributes\AttributeParse;
+use ByJG\RestServer\Attributes\BeforeRouteInterface;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
@@ -29,20 +32,19 @@ class HttpRequestHandler implements RequestHandler
     const METHOD_NOT_ALLOWED = "NOT_ALLOWED";
     const NOT_FOUND = "NOT FOUND";
 
-    protected $useErrorHandler = true;
-    protected $detailedErrorHandler = false;
+    protected bool $useErrorHandler = true;
+    protected bool $detailedErrorHandler = false;
 
-    protected $defaultOutputProcessor = null;
-    protected $defaultOutputProcessorArgs = [];
+    protected Closure|string|null $defaultOutputProcessor = null;
 
-    protected $afterMiddlewareList = [];
-    protected $beforeMiddlewareList = [];
+    protected array $afterMiddlewareList = [];
+    protected array $beforeMiddlewareList = [];
 
-    protected $httpRequest = null;
-    protected $httpResponse = null;
+    protected ?HttpRequest $httpRequest = null;
+    protected ?HttpResponse $httpResponse = null;
 
     /** @var WriterInterface */
-    protected $writer;
+    protected WriterInterface $writer;
 
     public function __construct(LoggerInterface $logger = null)
     {
@@ -51,15 +53,16 @@ class HttpRequestHandler implements RequestHandler
     }
 
     /**
-     * @param RouteListInterface $routeDefinition
-     * @return bool
      * @throws ClassNotFoundException
      * @throws Error404Exception
      * @throws Error405Exception
      * @throws Error520Exception
      * @throws InvalidClassException
+     * @throws Exception
+     *
+     * @return true
      */
-    protected function process(RouteListInterface $routeDefinition)
+    protected function process(RouteListInterface $routeDefinition): bool
     {
 
         // Initialize ErrorHandler with default error handler
@@ -96,7 +99,7 @@ class HttpRequestHandler implements RequestHandler
             throw $ex;
         }
         
-        if ($middlewareResult->getStatus() != MiddlewareResult::CONTINUE) {
+        if ($middlewareResult != MiddlewareResult::continue) {
             $outputProcessor->processResponse($this->getHttpResponse());
             return true;
         }
@@ -139,7 +142,7 @@ class HttpRequestHandler implements RequestHandler
         return true;
     }
 
-    protected function initializeProcessor($class = null)
+    protected function initializeProcessor($class = null): mixed
     {
         if (!empty($class)) {
             $outputProcessor = BaseOutputProcessor::getFromClassName($class);
@@ -166,7 +169,7 @@ class HttpRequestHandler implements RequestHandler
      *
      * @return HttpRequest
      */
-    protected function getHttpRequest()
+    protected function getHttpRequest(): HttpRequest
     {
         if (is_null($this->httpRequest)) {
             $this->httpRequest = new HttpRequest($_GET, $_POST, $_SERVER, $_SESSION ?? [], $_COOKIE);
@@ -180,7 +183,7 @@ class HttpRequestHandler implements RequestHandler
      *
      * @return HttpResponse
      */
-    protected function getHttpResponse()
+    protected function getHttpResponse(): HttpResponse
     {
         if (is_null($this->httpResponse)) {
             $this->httpResponse = new HttpResponse();
@@ -191,14 +194,13 @@ class HttpRequestHandler implements RequestHandler
 
     /**
      * @param OutputProcessorInterface $outputProcessor
-     * @param $class
-     * @throws ClassNotFoundException
-     * @throws InvalidClassException
+     * @param $classDefinition
+     * @throws Exception
      */
     protected function executeRequest(
         OutputProcessorInterface $outputProcessor,
         $classDefinition
-    )
+    ): void
     {
         $className = null;
         $methodName = null;
@@ -220,7 +222,9 @@ class HttpRequestHandler implements RequestHandler
                 if (!method_exists($instance, $methodName)) {
                     throw new InvalidClassException("There is no method '$className::$methodName''");
                 }
+                AttributeParse::processAttribute(BeforeRouteInterface::class, $instance, $methodName, $this->getHttpResponse(), $this->getHttpRequest());
                 $instance->$methodName($this->getHttpResponse(), $this->getHttpRequest());
+                AttributeParse::processAttribute(AfterRouteInterface::class, $instance, $methodName, $this->getHttpResponse(), $this->getHttpRequest());
             }
         } catch (Exception $ex) {
             $exception = $ex;
@@ -256,7 +260,7 @@ class HttpRequestHandler implements RequestHandler
      * @throws Error520Exception
      * @throws InvalidClassException
      */
-    public function handle(RouteListInterface $routeDefinition, $outputBuffer = true, $session = false)
+    public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = false): bool
     {
         if ($outputBuffer) {
             ob_start();
@@ -271,19 +275,19 @@ class HttpRequestHandler implements RequestHandler
         return $this->process($routeDefinition);
     }
 
-    public function withErrorHandlerDisabled()
+    public function withErrorHandlerDisabled(): static
     {
         $this->useErrorHandler = false;
         return $this;
     }
 
-    public function withDetailedErrorHandler()
+    public function withDetailedErrorHandler(): static
     {
         $this->detailedErrorHandler = true;
         return $this;
     }
 
-    public function withMiddleware($middleware, $routePattern = null)
+    public function withMiddleware(AfterMiddlewareInterface|BeforeMiddlewareInterface $middleware, string $routePattern = null): static
     {
         $item = [
             'middleware' => $middleware,
@@ -300,12 +304,9 @@ class HttpRequestHandler implements RequestHandler
         return $this;
     }
 
-    public function withDefaultOutputProcessor($processor, $args = [])
+    public function withDefaultOutputProcessor(string|\Closure $processor, array $args = []): static
     {
         if (!($processor instanceof Closure)) {
-            if (!is_string($processor)) {
-                throw new InvalidArgumentException("Default processor needs to class name of an OutputProcessor");
-            }
             if (!is_subclass_of($processor, BaseOutputProcessor::class)) {
                 throw new InvalidArgumentException("Needs to be a class of " . BaseOutputProcessor::class);
             }
@@ -316,7 +317,7 @@ class HttpRequestHandler implements RequestHandler
         return $this;
     }
 
-    public function withWriter(WriterInterface $writer)
+    public function withWriter(WriterInterface $writer): static
     {
         $this->writer = $writer;
         return $this;

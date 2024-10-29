@@ -12,7 +12,7 @@ use Whoops\Handler\JsonResponseHandler as ParentJsonErrorHandler;
 
 /**
  * Catches an exception and converts it to a JSON
- * response. Additionally can also return exception
+ * response. Additionally, can also return exception
  * frames for consumption by an API.
  */
 class JsonLimitedResponseHandler extends ParentJsonErrorHandler
@@ -23,6 +23,7 @@ class JsonLimitedResponseHandler extends ParentJsonErrorHandler
 
     /**
      * @return int
+     * @throws \ReflectionException
      */
     public function handle()
     {

@@ -10,17 +10,17 @@ use ByJG\RestServer\Middleware\MiddlewareResult;
 class DummyAfterMiddleware implements AfterMiddlewareInterface
 {
 
-    protected $here = 0;
+    protected int $here = 0;
     /**
      * @inheritDoc
      */
-    public function afterProcess(HttpResponse $response, HttpRequest $request, $class, $method, $exception)
+    public function afterProcess(HttpResponse $response, HttpRequest $request, string $class, string $method, ?string $exception): MiddlewareResult
     {
         $this->here++;
-        return MiddlewareResult::continue();
+        return MiddlewareResult::continue;
     }
 
-    public function getHere()
+    public function getHere(): int
     {
         return $this->here;
     }

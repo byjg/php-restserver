@@ -24,42 +24,42 @@ interface OutputProcessorInterface
      * @param WriterInterface $writer
      * @return void
      */
-    public function setWriter(WriterInterface $writer);
+    public function setWriter(WriterInterface $writer): void;
 
     /**
      * @return void
      */
-    public function writeContentType();
+    public function writeContentType(): void;
 
     /**
      * @return string
      */
-    public function getContentType();
+    public function getContentType(): string;
 
     /**
      * @param HttpResponse $response
-     * @return string
+     * @return void
      */
-    public function processResponse(HttpResponse $response);
+    public function processResponse(HttpResponse $response): void;
 
     /**
      * @return Handler
      */
-    public function getDetailedErrorHandler();
+    public function getDetailedErrorHandler(): Handler;
 
         /**
      * @return Handler
      */
-    public function getErrorHandler();
+    public function getErrorHandler(): Handler;
 
     /**
      * @return FormatterInterface
      */
-    public function getFormatter();
+    public function getFormatter(): FormatterInterface;
 
     /**
      * @param HttpResponse $response
      * @return void
      */
-    public function writeHeader(HttpResponse $response);
+    public function writeHeader(HttpResponse $response): void;
 }

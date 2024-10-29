@@ -3,15 +3,15 @@
 namespace Tests;
 
 use ByJG\RestServer\MockHttpRequest;
-use ByJG\Util\Helper\RequestFormUrlEncoded;
-use ByJG\Util\Helper\RequestMultiPart;
-use ByJG\Util\MultiPartItem;
 use ByJG\Util\Uri;
+use ByJG\WebRequest\Helper\RequestFormUrlEncoded;
+use ByJG\WebRequest\Helper\RequestMultiPart;
+use ByJG\WebRequest\MultiPartItem;
 use PHPUnit\Framework\TestCase;
 
 class MockHttpRequestTest extends TestCase
 {
-    public function testInitializePHPFile()
+    public function testInitializePHPFile(): void
     {
         $multiPartItems = [
             new MultiPartItem("note", "somenote"),
@@ -62,7 +62,7 @@ class MockHttpRequestTest extends TestCase
         );
     }
 
-    public function testFormUrlEncoded()
+    public function testFormUrlEncoded(): void
     {
         $multiPartItems = [
             new MultiPartItem("note", "somenote"),
@@ -101,7 +101,7 @@ class MockHttpRequestTest extends TestCase
         );
     }
 
-    public function testFormUrlEncodedAndCookie()
+    public function testFormUrlEncodedAndCookie(): void
     {
         $multiPartItems = [
             new MultiPartItem("note", "somenote"),

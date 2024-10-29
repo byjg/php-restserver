@@ -5,7 +5,7 @@ namespace ByJG\RestServer\Middleware;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\ResponseBag;
+use ByJG\RestServer\SerializationRuleEnum;
 
 class CorsMiddleware implements BeforeMiddlewareInterface
 {
@@ -14,9 +14,9 @@ class CorsMiddleware implements BeforeMiddlewareInterface
     const CORS_FAILED = 'CORS_FAILED';
     const CORS_OPTIONS = 'CORS_OPTIONS';
 
-    protected $corsOrigins = ['.*'];
-    protected $corsMethods = [ 'GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
-    protected $corsHeaders = [
+    protected array $corsOrigins = ['.*'];
+    protected array $corsMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    protected array $corsHeaders = [
         'Authorization',
         'Content-Type',
         'Accept',
@@ -38,23 +38,23 @@ class CorsMiddleware implements BeforeMiddlewareInterface
      * @throws Error401Exception
      */
     public function beforeProcess(
-        $dispatcherStatus,
+        mixed        $dispatcherStatus,
         HttpResponse $response,
-        HttpRequest $request
-    )
+        HttpRequest  $request
+    ): MiddlewareResult
     {
         $corsStatus = $this->preFlight($response, $request);
         if ($corsStatus != self::CORS_OK) {
             if ($corsStatus == self::CORS_OPTIONS) {
                 $response->emptyResponse();
-                $response->getResponseBag()->setSerializationRule(ResponseBag::RAW);
-                return MiddlewareResult::stopProcessingOthers();
+                $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::Raw);
+                return MiddlewareResult::stopProcessingOthers;
             } elseif ($corsStatus == self::CORS_FAILED) {
                 throw new Error401Exception("CORS verification failed. Request Blocked.");
             }
         }
 
-        return MiddlewareResult::continue();
+        return MiddlewareResult::continue;
     }
 
     /**
@@ -62,9 +62,10 @@ class CorsMiddleware implements BeforeMiddlewareInterface
      *
      * @param HttpResponse $response
      * @param HttpRequest $request
+     *
      * @return string
      */
-    protected function preFlight(HttpResponse $response, HttpRequest $request)
+    protected function preFlight(HttpResponse $response, HttpRequest $request): string
     {
         // TODO: Still missing some headers
         // https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request
@@ -73,9 +74,9 @@ class CorsMiddleware implements BeforeMiddlewareInterface
         if (!empty($request->server('HTTP_ORIGIN'))) {
             $corsStatus = self::CORS_FAILED;
 
-            foreach ((array)$this->corsOrigins as $origin) {
+            foreach ($this->corsOrigins as $origin) {
                 if (preg_match("~^.*//$origin$~", $request->server('HTTP_ORIGIN'))) {
-                    $response->addHeader("Access-Control-Allow-Origin", $request->server('HTTP_ORIGIN'));
+                    $response->addHeader("Access-Control-Allow-Origin", (string)$request->server('HTTP_ORIGIN'));
                     $response->addHeader('Access-Control-Allow-Credentials', 'true');
                     $response->addHeader('Access-Control-Max-Age', '86400');    // cache for 1 day
 
@@ -94,19 +95,19 @@ class CorsMiddleware implements BeforeMiddlewareInterface
         return $corsStatus;
     }
 
-    public function withCorsOrigins($origins)
+    public function withCorsOrigins(array|string $origins): static
     {
-        $this->corsOrigins = $origins;
+        $this->corsOrigins = (array)$origins;
         return $this;
     }
 
-    public function withAcceptCorsHeaders($headers)
+    public function withAcceptCorsHeaders(array $headers): static
     {
         $this->corsHeaders = $headers;
         return $this;
     }
 
-    public function withAcceptCorsMethods($methods)
+    public function withAcceptCorsMethods(array $methods): static
     {
         $this->corsMethods = $methods;
         return $this;

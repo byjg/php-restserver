@@ -9,18 +9,19 @@ use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\Route\RouteListInterface;
 use ByJG\RestServer\Writer\MemoryWriter;
-use ByJG\Util\Psr7\MemoryStream;
-use ByJG\Util\Psr7\Response;
+use ByJG\WebRequest\Psr7\MemoryStream;
+use ByJG\WebRequest\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 class MockRequestHandler extends HttpRequestHandler
 {
     /**
-     * @var RequestInterface
+     * @var RequestInterface|null
      */
-    protected $requestInterface;
+    private ?RequestInterface $requestInterface = null;
 
     /**
      * MockRequestHandler constructor.
@@ -32,7 +33,7 @@ class MockRequestHandler extends HttpRequestHandler
         ErrorHandler::getInstance()->setLogger($logger ?? new NullLogger());
     }
 
-    public function withRequestObject(RequestInterface $request)
+    public function withRequestObject(RequestInterface $request): static
     {
         $this->requestInterface = $request;
         return $this;
@@ -58,9 +59,9 @@ class MockRequestHandler extends HttpRequestHandler
     }
 
     /**
-     * @return RequestInterface
+     * @return HttpRequest
      */
-    protected function getHttpRequest()
+    protected function getHttpRequest(): HttpRequest
     {
         if (is_null($this->httpRequest) && !is_null($this->requestInterface)) {
             $this->httpRequest = new MockHttpRequest($this->requestInterface);
@@ -73,17 +74,20 @@ class MockRequestHandler extends HttpRequestHandler
         return $this->httpRequest;
     }
 
-    protected $psr7Response = null;
+    protected Response|null $psr7Response = null;
 
-    public function getPsr7Response()
+    public function getPsr7Response(): ResponseInterface
     {
         if (is_null($this->psr7Response)) {
+            /** @psalm-suppress UndefinedInterfaceMethod Always using MemoryWriter */
             $this->psr7Response = new Response($this->writer->getStatusCode());
 
+            /** @psalm-suppress UndefinedInterfaceMethod Always using MemoryWriter */
             foreach ($this->writer->getHeaders() as $header => $value) {
                 $this->psr7Response = $this->psr7Response->withHeader($header, $value);
             }
 
+            /** @psalm-suppress UndefinedInterfaceMethod Always using MemoryWriter */
             $this->psr7Response = $this->psr7Response->withBody(new MemoryStream($this->writer->getData()));
         }
 
@@ -91,8 +95,8 @@ class MockRequestHandler extends HttpRequestHandler
         return $this->psr7Response;
     }
 
-    public function handle(RouteListInterface $routeDefinition, $outputBuffer = true, $session = false)
+    public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = false): bool
     {
-        parent::handle($routeDefinition, false, false);
+        return parent::handle($routeDefinition, false, false);
     }
 }

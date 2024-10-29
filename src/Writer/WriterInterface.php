@@ -4,11 +4,11 @@ namespace ByJG\RestServer\Writer;
 
 interface WriterInterface
 {
-    public function header($header, $replace = true);
+    public function header(string $header, bool $replace = true): void;
 
-    public function responseCode($responseCode, $description);
+    public function responseCode(int $responseCode, string $description): void;
 
-    public function echo($data);
+    public function echo(string $data): void;
 
-    public function flush();
+    public function flush(): void;
 }

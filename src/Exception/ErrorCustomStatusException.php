@@ -16,7 +16,10 @@ class ErrorCustomStatusException extends ClientShowException
         parent::__construct($message, $code, $previous);
     }
 
-    public function handleHeader()
+    /**
+     * @return void
+     */
+    public function handleHeader(): void
     {
         $this->sendHeader($this->status, $this->description);
     }

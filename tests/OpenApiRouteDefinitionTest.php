@@ -8,8 +8,8 @@ use ByJG\RestServer\Exception\SchemaNotFoundException;
 use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
-use ByJG\RestServer\Route\Route;
 use ByJG\RestServer\Route\OpenApiRouteList;
+use ByJG\RestServer\Route\Route;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -21,9 +21,9 @@ class OpenApiRouteDefinitionTest extends TestCase
      * @throws SchemaNotFoundException
      * @throws InvalidArgumentException
      */
-    public function testGenerateRoutesOpenApi2()
+    public function testGenerateRoutesOpenApi2(): void
     {
-        $object = new OpenApiRouteList(__DIR__ . '/swagger-example.json');
+        $object = new OpenApiRouteList(__DIR__ . '/fixtures/swagger-example.json');
         $object->withOutputProcessorForRoute('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class);
 
         $this->assert($object);
@@ -35,9 +35,9 @@ class OpenApiRouteDefinitionTest extends TestCase
      * @throws SchemaNotFoundException
      * @throws InvalidArgumentException
      */
-    public function testGenerateRoutesOpenApi3()
+    public function testGenerateRoutesOpenApi3(): void
     {
-        $object = new OpenApiRouteList(__DIR__ . '/openapi-example.yaml');
+        $object = new OpenApiRouteList(__DIR__ . '/fixtures/openapi-example.yaml');
         $object
             ->withOutputProcessorForRoute('get', '/v2/pet/{petId}', JsonCleanOutputProcessor::class)
             ->withDefaultProcessor(XmlOutputProcessor::class);
@@ -51,9 +51,9 @@ class OpenApiRouteDefinitionTest extends TestCase
      * @throws SchemaNotFoundException
      * @throws InvalidArgumentException
      */
-    public function testGenerateRoutesOverrideMimeOpenApi2()
+    public function testGenerateRoutesOverrideMimeOpenApi2(): void
     {
-        $object = new OpenApiRouteList(__DIR__ . '/swagger-example.json');
+        $object = new OpenApiRouteList(__DIR__ . '/fixtures/swagger-example.json');
         $object->withOutputProcessorForMimeType('application/xml', JsonCleanOutputProcessor::class);
 
         $this->assertMime($object);
@@ -65,9 +65,9 @@ class OpenApiRouteDefinitionTest extends TestCase
      * @throws SchemaNotFoundException
      * @throws InvalidArgumentException
      */
-    public function testGenerateRoutesOverrideMimeOpenApi3()
+    public function testGenerateRoutesOverrideMimeOpenApi3(): void
     {
-        $object = new OpenApiRouteList(__DIR__ . '/openapi-example.yaml');
+        $object = new OpenApiRouteList(__DIR__ . '/fixtures/openapi-example.yaml');
 
         $object
             ->withOutputProcessorForMimeType('application/xml', JsonCleanOutputProcessor::class)
@@ -76,10 +76,10 @@ class OpenApiRouteDefinitionTest extends TestCase
         $this->assertMime($object);
     }
 
-    public function testSortPaths()
+    public function testSortPaths(): void
     {
         // Expose the method
-        $testObject = new OpenApiWrapperExposed(__DIR__ . "/swagger-example.json");
+        $testObject = new OpenApiWrapperExposed(__DIR__ . "/fixtures/swagger-example.json");
 
         $pathList = [
             "/rest/accessible/recentPosts",
@@ -174,7 +174,7 @@ class OpenApiRouteDefinitionTest extends TestCase
     }
 
 
-    protected function assert(OpenApiRouteList $object)
+    protected function assert(OpenApiRouteList $object): void
     {
         $this->assertEquals(
             [
@@ -243,7 +243,7 @@ class OpenApiRouteDefinitionTest extends TestCase
         );
     }
 
-    protected function assertMime(OpenApiRouteList $object)
+    protected function assertMime(OpenApiRouteList $object): void
     {
         $this->assertEquals(
             [

@@ -3,10 +3,10 @@
 namespace Tests;
 
 use ByJG\RestServer\ResponseBag;
+use ByJG\RestServer\SerializationRuleEnum;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-
-require __DIR__ . '/ModelSample.php';
+use Tests\Model\ModelSample;
 
 class ResponseBagTest extends TestCase
 {
@@ -25,7 +25,7 @@ class ResponseBagTest extends TestCase
         $this->object = null;
     }
 
-    public function testAddStringAutomatic()
+    public function testAddStringAutomatic(): void
     {
         $this->object->add('Test1');
         $this->assertEquals(
@@ -43,9 +43,9 @@ class ResponseBagTest extends TestCase
         );
     }
 
-    public function testAddStringArray()
+    public function testAddStringArray(): void
     {
-        $this->object->setSerializationRule(ResponseBag::OBJECT_LIST);
+        $this->object->setSerializationRule(SerializationRuleEnum::ObjectList);
         $this->object->add('Test1');
         $this->assertEquals(
             [
@@ -64,9 +64,9 @@ class ResponseBagTest extends TestCase
         );
     }
 
-    public function testAddStringSingleObject()
+    public function testAddStringSingleObject(): void
     {
-        $this->object->setSerializationRule(ResponseBag::SINGLE_OBJECT);
+        $this->object->setSerializationRule(SerializationRuleEnum::SingleObject);
         $this->object->add('Test1');
         $this->assertEquals(
             'Test1',
@@ -83,7 +83,7 @@ class ResponseBagTest extends TestCase
         );
     }
 
-    public function testAddArrayAutomatic()
+    public function testAddArrayAutomatic(): void
     {
         $this->object->add(['key1' => 'Test1']);
         $this->assertEquals(
@@ -101,9 +101,9 @@ class ResponseBagTest extends TestCase
         );
     }
 
-    public function testAddArrayArray()
+    public function testAddArrayArray(): void
     {
-        $this->object->setSerializationRule(ResponseBag::OBJECT_LIST);
+        $this->object->setSerializationRule(SerializationRuleEnum::ObjectList);
         $this->object->add(['key1' => 'Test1']);
         $this->assertEquals(
             [
@@ -122,9 +122,9 @@ class ResponseBagTest extends TestCase
         );
     }
 
-    public function testAddArraySingleObject()
+    public function testAddArraySingleObject(): void
     {
-        $this->object->setSerializationRule(ResponseBag::SINGLE_OBJECT);
+        $this->object->setSerializationRule(SerializationRuleEnum::SingleObject);
         $this->object->add(['key1' => 'Test1']);
         $this->assertEquals(
             ['key1' => 'Test1'],
@@ -141,7 +141,7 @@ class ResponseBagTest extends TestCase
         );
     }
 
-    public function testAddObjectAutomatic()
+    public function testAddObjectAutomatic(): void
     {
         $obj1 = new \stdClass();
         $obj1->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
@@ -174,7 +174,7 @@ class ResponseBagTest extends TestCase
         );
     }
 
-    public function testAddObjectArray()
+    public function testAddObjectArray(): void
     {
         $obj1 = new \stdClass();
         $obj1->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
@@ -182,7 +182,7 @@ class ResponseBagTest extends TestCase
 
         $obj2 = new ModelSample('value3', 'value4');
 
-        $this->object->setSerializationRule(ResponseBag::OBJECT_LIST);
+        $this->object->setSerializationRule(SerializationRuleEnum::ObjectList);
         $this->object->add($obj1);
         $this->assertEquals(
             [
@@ -210,7 +210,7 @@ class ResponseBagTest extends TestCase
         );
     }
 
-    public function testAddObjectSingleObject()
+    public function testAddObjectSingleObject(): void
     {
         $obj1 = new \stdClass();
         $obj1->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
@@ -218,7 +218,7 @@ class ResponseBagTest extends TestCase
 
         $obj2 = new ModelSample('value3', 'value4');
 
-        $this->object->setSerializationRule(ResponseBag::SINGLE_OBJECT);
+        $this->object->setSerializationRule(SerializationRuleEnum::SingleObject);
         $this->object->add($obj1);
         $this->assertEquals(
             [
@@ -245,9 +245,9 @@ class ResponseBagTest extends TestCase
     }
 
 
-    public function testRaw()
+    public function testRaw(): void
     {
-        $this->object->setSerializationRule(ResponseBag::RAW);
+        $this->object->setSerializationRule(SerializationRuleEnum::Raw);
         $this->object->add('Test1');
         $this->assertEquals(
             'Test1',
@@ -261,10 +261,10 @@ class ResponseBagTest extends TestCase
         );
     }
 
-    public function testRawInvalid()
+    public function testRawInvalid(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->object->setSerializationRule(ResponseBag::RAW);
+        $this->object->setSerializationRule(SerializationRuleEnum::Raw);
         $this->object->add(['Test1']);
     }
 }

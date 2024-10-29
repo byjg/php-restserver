@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace Tests\Model;
 
 class ModelSample
 {
@@ -30,7 +30,7 @@ class ModelSample
     /**
      * @param mixed $prop1
      */
-    public function setProp1($prop1)
+    public function setProp1($prop1): void
     {
         $this->prop1 = $prop1;
     }
@@ -46,7 +46,7 @@ class ModelSample
     /**
      * @param mixed $prop2
      */
-    public function setProp2($prop2)
+    public function setProp2($prop2): void
     {
         $this->prop2 = $prop2;
     }

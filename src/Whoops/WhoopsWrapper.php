@@ -10,7 +10,6 @@ use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
 use ReflectionMethod;
 use Throwable;
-use Whoops\Exception\Inspector;
 use Whoops\Handler\Handler;
 use Whoops\Inspector\InspectorInterface;
 use Whoops\RunInterface;
@@ -45,7 +44,7 @@ class WhoopsWrapper extends Handler
         $this->effectiveHandler = $handler;
     }
 
-    public function setOutputProcessor(OutputProcessorInterface $processor, HttpResponse $response, HttpRequest $request)
+    public function setOutputProcessor(OutputProcessorInterface $processor, HttpResponse $response, HttpRequest $request): void
     {
         $this->outputProcessor = $processor;
         $this->response = $response;
@@ -111,7 +110,7 @@ class WhoopsWrapper extends Handler
     }
 
     /**
-     * @param  Inspector $inspector
+     * @param  InspectorInterface $inspector
      * @return void|null
      */
     public function setInspector(InspectorInterface $inspector)

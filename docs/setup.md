@@ -3,14 +3,34 @@
 You need to set up your restserver to handle ALL requests to a single PHP file. 
 Normally is "app.php"
 
-## PHP Built-in server
+## Create a file "app.php"
+
+```php
+<?php
+require_once __DIR__ . '/vendor/autoload.php';
+
+// Define your routes
+// The routes can be defined:
+//   1. using PHP Attributes,
+//   2. Closures
+//   3. manually
+//   4. or auto-generate from an OpenApi definition
+
+// Set up the RestServer
+$restServer = new HttpRequestHandler();
+$restServer->handle($routeDefintion);
+```
+
+## Configure your web server to handle all requests to "app.php"
+
+### PHP Built-in server
 
 ```bash
 cd public
 php -S localhost:8080 app.php
 ```
 
-## Nginx
+### Nginx
 
 ```nginx
 location / {
@@ -18,7 +38,7 @@ location / {
 }
 ```
 
-## Apache .htaccess
+### Apache .htaccess
 
 ```apache
 RewriteEngine On

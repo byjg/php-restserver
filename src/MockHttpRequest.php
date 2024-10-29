@@ -3,7 +3,6 @@
 namespace ByJG\RestServer;
 
 use ByJG\RestServer\Exception\OperationIdInvalidException;
-use ByJG\Util\Psr7\Request;
 use Psr\Http\Message\RequestInterface;
 
 class MockHttpRequest extends HttpRequest
@@ -11,11 +10,11 @@ class MockHttpRequest extends HttpRequest
     /**
      * @var RequestInterface
      */
-    protected $psrRequest ;
+    protected RequestInterface $psrRequest ;
 
     /**
      *
-     * @param Request $psrRequest
+     * @param RequestInterface $psrRequest
      */
     public function __construct(RequestInterface $psrRequest, $param = [])
     {
@@ -26,22 +25,16 @@ class MockHttpRequest extends HttpRequest
         parent::__construct($this->get, $this->post, $this->server, $this->session, $this->cookie, $param);
     }
 
-    private $payload;
-
     /**
      * Get the payload passed during the request(the same as php://input). If not found return empty.
      *
      * @return string
      */
-    public function payload()
+    public function payload(): string
     {
         if (is_null($this->payload)) {
             $body = $this->psrRequest->getBody();
-            if (empty($body)) {
-                $this->payload = "";
-            } else {
-                $this->payload = $body->getContents();
-            }
+            $this->payload = $body->getContents();
         }
 
         return $this->payload;
@@ -51,7 +44,7 @@ class MockHttpRequest extends HttpRequest
     /**
      * Initilize PHP variables based on the request
      */
-    protected function initializePhpVariables()
+    protected function initializePhpVariables(): void
     {
         $this->session = [];
 
@@ -110,12 +103,12 @@ class MockHttpRequest extends HttpRequest
     /**
      * Inicialize the PHP variable $_FILE
      */
-    protected function initializePhpFileVar()
+    protected function initializePhpFileVar(): void
     {
         $_FILES = [];
 
         $contentType = $this->psrRequest->getHeaderLine("Content-Type");
-        if (empty($contentType) || strpos($contentType, "multipart/") === false) {
+        if (empty($contentType) || !str_contains($contentType, "multipart/")) {
             return;
         }
 
