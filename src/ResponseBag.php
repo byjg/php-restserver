@@ -7,12 +7,6 @@ use InvalidArgumentException;
 
 class ResponseBag
 {
-
-//    const AUTOMATIC = 0;
-//    const SINGLE_OBJECT = 1;
-//    const OBJECT_LIST = 2;
-//    const RAW = 3;
-
     protected array $collection = [];
     protected SerializationRuleEnum $serializationRule = SerializationRuleEnum::Automatic;
 

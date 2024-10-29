@@ -5,6 +5,7 @@ namespace ByJG\RestServer\Middleware;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
+use ByJG\RestServer\SerializationRuleEnum;
 
 class CorsMiddleware implements BeforeMiddlewareInterface
 {
@@ -14,7 +15,7 @@ class CorsMiddleware implements BeforeMiddlewareInterface
     const CORS_OPTIONS = 'CORS_OPTIONS';
 
     protected array $corsOrigins = ['.*'];
-    protected array $corsMethods = [ 'GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    protected array $corsMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     protected array $corsHeaders = [
         'Authorization',
         'Content-Type',
@@ -46,7 +47,7 @@ class CorsMiddleware implements BeforeMiddlewareInterface
         if ($corsStatus != self::CORS_OK) {
             if ($corsStatus == self::CORS_OPTIONS) {
                 $response->emptyResponse();
-                $response->getResponseBag()->setSerializationRule(\ByJG\RestServer\SerializationRuleEnum::Raw);
+                $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::Raw);
                 return MiddlewareResult::stopProcessingOthers;
             } elseif ($corsStatus == self::CORS_FAILED) {
                 throw new Error401Exception("CORS verification failed. Request Blocked.");
