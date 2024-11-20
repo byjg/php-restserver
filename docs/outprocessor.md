@@ -5,24 +5,48 @@ The available handlers are:
 
 - JsonOutputProcessor
 - XmlOutputProcessor
-- HtmlHandler
-- JsonCleanOutputProcessor
+- HtmlOutputProcessor
+- JsonCleanOutputProcessor (same as JsonOutputProcessor but don't output empty keys)
 
-### Using Custom Response Handler
+## What is an OutputProcessor?
 
-The Default Response Handler will process all "$response->write" into a JSON.
-You can choose another Handlers. See below for a list of Available Response Handlers.
+An OutputProcessor is a class that will handle the output of the route.
+
+The main responsibility are:
+- Parse the object returned by the `HttpResponse::write()` and output in the proper format.
+- Handle the exceptions and output in the proper format.
+
+## How it works
+
+The HttpRequestHandler will call the route and the route will call the OutputProcessor to process the
+proper output for that route.
+
+You can create a route on several ways. e.g.:
+
+- [Using closure](routes-using-closures.md);
+- [Using a class and method](routes-manually.md);
+- [Using PHP Attributes](routes-using-php-attributes.md);
+- [From an OpenAPI file](autogenerator-routes-openapi.md);
+
+Each option has your own way to define the OutputProcessor. Check the documentation for each one.
+
+Once you have the route defined, you can initialize the HttpRequestHandler and handle the request.
 
 ```php
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
+use ByJG\RestServer\HttpRequestHandler;
 
-$routeDefinition = new \ByJG\RestServer\Route\RouteList();
-$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/test")
-    ->withOutputProcessor(XmlOutputProcessor::class)
-    ->withClass(\My\ClassName::class, "someMethod")
-);
+$server = new HttpRequestHandler();
 
-$restServer = new \ByJG\RestServer\HttpRequestHandler();
-$restServer->handle($routeDefinition);
+// This is the default processor for the routes that don't have a specific output processor
+$server->withDefaultOutputProcessor(JsonOutputProcessor::class);
+// $server->withErrorHandlerDisabled(); // Disable the error handler completely
+// $server->withDetailedErrorHandler(); // Enable the detailed error handler, for debug purposes
+
+// Handle the request
+$server->handle($routeList);
 ```
+## Creating your own OutputProcessor
+
+You can create your own OutputProcessor. Just create a class that implements the `OutputProcessorInterface` or
+inherit from any existent OutputProcessor.
