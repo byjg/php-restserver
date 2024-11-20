@@ -22,3 +22,28 @@ all matches values can be obtained by
 ```php
 $this->getRequest()->param('variable');
 ```
+
+## Best Practices for Route Names
+
+- Use lowercase for all route names.
+- Use hyphen to separate words.
+- Use nouns to define the route name and the method to define the action.
+- Use plural nouns when you are able to work with list of items
+- Use singular nouns when you'll handle always a single item.
+- Forwards slashes are used to define a hierarchy of resources.
+- Use query parameters to filter the list of items. 
+
+e.g.
+
+| Method | Route Name           | Description                       |
+|:-------|:---------------------|:----------------------------------|
+| GET    | /product/{id}        | Get a specif product              |
+| GET    | /products            | Get a list of product             |
+| POST   | /product             | Create a new product              |
+| PUT    | /product             | Update a product                  |
+| DELETE | /product             | Delete a product                  |
+| GET    | /product/{id}/images | Get the images of a product       |
+| GET    | /product?page=1      | Get the first page of products    |
+
+
+
