@@ -1,44 +1,45 @@
 # Error Handler
 
-RestServer uses the project `flip/whoops` to handle the errors. The default behavior is return the error with the minimum information necessary.
+RestServer uses by default the project `flip/whoops` to handle all the errors. 
 
-```php
-[
-    "type" => Exception Type,
-    "message" => Error Message. 
-]
-```
+It will intercept any exception and return a formatted error message according to the 
+OutputProcessor defined in the route.
 
-To disable completely any error handler you can:
+## How it works
+
+1. Each route has an OutputProcessor that will handle the output of the route. (See [OutputProcessor](outprocessor.md))
+2. Initialize the HttpRequestHandler (it will handle the request and call the route)
+3. Once an exception is thrown, the OutputProcessor will call the ErrorHandler 
+to handle the exception and return a detailed message (debug, dev, etc) or a simple one suitable
+for production.
+
+## Disabling the Error Handler
+
+You can disable the error handler completely and handle the exceptions by yourself.
 
 ```php
 <?php
+use ByJG\RestServer\HttpRequestHandler;
 
-$http = (new HttpErrorHandler())
-    ->withDoNotUseErrorHandler();
-
+$server = new HttpRequestHandler();
+$server->withErrorHandlerDisabled(); // Disable the error handler completely
 try {
-    $http->handle(.....);
-} catch (Exception $ex) {
-    // You have to handle by yourself the errors
+    $server->handle($routeList);
+} catch (\Exception $ex) {
+    // Handle the exception
 }
 ```
 
-or you can get the detailed error handler with all information necessary to debug your application:
+## Enabling the Detailed Error Handler
+
+You can enable the detailed error handler. It will return a detailed message with the exception message,
+stack trace, etc.
 
 ```php
 <?php
+use ByJG\RestServer\HttpRequestHandler;
 
-$http = (new HttpErrorHandler())
-    ->withDetailedErrorHandler();
-
-$http->handle(.....);
+$server = new HttpRequestHandler();
+$server->withDetailedErrorHandler(); // Enable the detailed error handler, for debug purposes
+$server->handle($routeList);
 ```
-
-The error handler return the data based on the format defined by first accept content type header.
-
-The currently implementation are:
-
-- HTML
-- JSON
-- XML
