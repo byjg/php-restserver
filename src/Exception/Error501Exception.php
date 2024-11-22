@@ -2,13 +2,10 @@
 
 namespace ByJG\RestServer\Exception;
 
-class Error501Exception extends ClientShowException
+class Error501Exception extends HttpResponseException
 {
-    /**
-     * @return void
-     */
-    public function handleHeader(): void
+    public function __construct(string $message = "", int $code = 0, ?\Throwable $previous = null, array $meta = [])
     {
-        $this->sendHeader(501, 'Not Implemented');
+        parent::__construct(501, $message, $code, $previous, $meta);
     }
 }
