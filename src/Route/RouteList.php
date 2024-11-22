@@ -20,7 +20,7 @@ class RouteList implements RouteListInterface
      */
     public function getRoutes(): array
     {
-        return $this->routes;
+        return array_values($this->routes);
     }
 
     /**
@@ -41,7 +41,7 @@ class RouteList implements RouteListInterface
      */
     public function addRoute(Route $route): static
     {
-        $this->routes[] = $route;
+        $this->routes[strtoupper($route->getMethod()) . " " . strtolower($route->getPath())] = $route;
         return $this;
     }
 
@@ -85,4 +85,8 @@ class RouteList implements RouteListInterface
         });
     }
 
+    public function getRoute(string $method, string $path): ?Route
+    {
+        return $this->routes[strtoupper($method) . " " . strtolower($path)] ?? null;
+    }
 }
