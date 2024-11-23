@@ -52,7 +52,7 @@ class ServerStaticMiddlewareTest extends TestCase
     public function testHandle7(): void
     {
         $this->expectException(Error415Exception::class);
-        $expectedData = "[]";
+        $expectedData = '{"error":{"type":"Error 415","message":"File type not supported"}}';
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "file://" . __DIR__ . "/mimefiles/test.php";

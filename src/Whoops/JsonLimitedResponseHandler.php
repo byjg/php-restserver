@@ -43,7 +43,7 @@ class JsonLimitedResponseHandler extends ParentJsonErrorHandler
         ];
 
         $exception = $this->getInspector()->getException();
-        if ($exception instanceof HttpResponseException) {
+        if ($exception instanceof HttpResponseException && !empty($exception->getMeta())) {
             $response['error']['meta'] = $exception->getMeta();
         }
 
