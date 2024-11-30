@@ -10,12 +10,14 @@ use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
+use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\Middleware\AfterMiddlewareInterface;
 use ByJG\RestServer\Middleware\BeforeMiddlewareInterface;
 use ByJG\RestServer\Middleware\MiddlewareManagement;
 use ByJG\RestServer\Middleware\MiddlewareResult;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
+use ByJG\RestServer\Route\RouteList;
 use ByJG\RestServer\Route\RouteListInterface;
 use ByJG\RestServer\Writer\HttpWriter;
 use ByJG\RestServer\Writer\WriterInterface;
@@ -82,9 +84,13 @@ class HttpRequestHandler implements RequestHandler
         // Generic Dispatcher for RestServer
         $dispatcher = $routeDefinition->getDispatcher();
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
+        $this->getHttpRequest()->setRouteMetadata($routeInfo[1] ?? []);
+        $this->getHttpRequest()->appendVars(array_merge($routeInfo[2] ?? [], $queryStr));
 
         // Get OutputProcessor
-        $outputProcessor = $this->initializeProcessor();
+        $outputProcessor = $this->initializeProcessor(
+            $this->getHttpRequest()->getRouteMetadata(RouteList::META_OUTPUT_PROCESSOR)
+        );
         
         // Process Before Middleware
         try {
@@ -106,32 +112,18 @@ class HttpRequestHandler implements RequestHandler
 
         // Processing
         switch ($routeInfo[0]) {
-            case Dispatcher::NOT_FOUND:
+            case Dispatcher::NOT_FOUND: // 0
                 $outputProcessor->processResponse($this->getHttpResponse());
                 throw new Error404Exception("Route '$uri' not found");
 
-            case Dispatcher::METHOD_NOT_ALLOWED:
+            case Dispatcher::METHOD_NOT_ALLOWED: // 2
                 $outputProcessor->processResponse($this->getHttpResponse());
                 throw new Error405Exception('Method not allowed');
 
-            case Dispatcher::FOUND:
+            case Dispatcher::FOUND:  // 1
                 // ... 200 Process:
-                $vars = array_merge($routeInfo[2], $queryStr);
-
-                // Get the Selected Route
-                $selectedRoute = $routeInfo[1];
-
-                // Class
-                $class = $selectedRoute["class"];
-                $this->getHttpRequest()->appendVars($vars);
-
-                // Get OutputProcessor
-                $outputProcessor = $this->initializeProcessor(
-                    $selectedRoute["output_processor"]
-                );
-                
                 // Execute the request
-                $this->executeRequest($outputProcessor, $class);
+                $this->executeRequest($outputProcessor, $this->getHttpRequest()->getRouteMetadata(RouteList::META_CLASS));
 
                 break;
 
@@ -142,23 +134,28 @@ class HttpRequestHandler implements RequestHandler
         return true;
     }
 
+    /**
+     * Initialize the OutputProcessor
+     * @param null $class
+     * @return mixed
+     * @throws OperationIdInvalidException
+     */
     protected function initializeProcessor($class = null): mixed
     {
+        $class = $class ?? $this->defaultOutputProcessor;
         if (!empty($class)) {
             $outputProcessor = BaseOutputProcessor::getFromClassName($class);
-        } elseif (!empty($this->defaultOutputProcessor)) {
-            $outputProcessor = BaseOutputProcessor::getFromClassName($this->defaultOutputProcessor);
         } else {
             $outputProcessor = BaseOutputProcessor::getFromHttpAccept();
         }
         $outputProcessor->setWriter($this->writer);
         $outputProcessor->writeContentType();
+
         if ($this->detailedErrorHandler) {
             ErrorHandler::getInstance()->setHandler($outputProcessor->getDetailedErrorHandler());
         } else {
             ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
         }
-
         ErrorHandler::getInstance()->setOutputProcessor($outputProcessor, $this->getHttpResponse(), $this->getHttpRequest());
         
         return $outputProcessor;

@@ -13,6 +13,9 @@ use function FastRoute\simpleDispatcher;
 
 class RouteList implements RouteListInterface
 {
+    const META_OUTPUT_PROCESSOR = 'output_processor';
+    const META_CLASS = 'class';
+
     protected array $routes = [];
 
     /**
@@ -76,10 +79,10 @@ class RouteList implements RouteListInterface
                 $r->addRoute(
                     $route->getMethod(),
                     $route->getPath(),
-                    [
-                        "output_processor" => $route->getOutputProcessor(),
-                        "class" => $route->getClass(),
-                    ]
+                    array_merge([
+                        self::META_OUTPUT_PROCESSOR => $route->getOutputProcessor(),
+                        self::META_CLASS => $route->getClass(),
+                    ], $route->getMetadata())
                 );
             }
         });

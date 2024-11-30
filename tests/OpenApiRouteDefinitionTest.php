@@ -180,64 +180,144 @@ class OpenApiRouteDefinitionTest extends TestCase
             [
                 (new Route("GET", "/v2/pet/findByStatus"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "findPetsByStatus"),
+                    ->withClass("PetStore\Pet", "findPetsByStatus")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet/findByStatus"
+                    ]),
                 (new Route("GET", "/v2/pet/findByTags"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "findPetsByTags"),
+                    ->withClass("PetStore\Pet", "findPetsByTags")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet/findByTags"
+                    ]),
                 (new Route("POST", "/v2/pet"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "addPet"),
+                    ->withClass("PetStore\Pet", "addPet")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet"
+                    ]),
                 (new Route("PUT", "/v2/pet"))
                     ->withOutputProcessor(JsonOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "updatePet"),
+                    ->withClass("PetStore\Pet", "updatePet")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet"
+                    ]),
                 (new Route("GET", "/v2/store/inventory"))
                     ->withOutputProcessor(JsonOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "getInventory"),
+                    ->withClass("PetStore\Pet", "getInventory")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/store/inventory"
+                    ]),
                 (new Route("POST", "/v2/store/order"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "placeOrder"),
+                    ->withClass("PetStore\Pet", "placeOrder")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/store/order"
+                    ]),
                 (new Route("POST", "/v2/user/createWithArray"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "createUsersWithArrayInput"),
+                    ->withClass("PetStore\Pet", "createUsersWithArrayInput")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user/createWithArray"
+                    ]),
                 (new Route("POST", "/v2/user/createWithList"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "createUsersWithListInput"),
+                    ->withClass("PetStore\Pet", "createUsersWithListInput")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user/createWithList"
+                    ]),
                 (new Route("GET", "/v2/user/login"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "loginUser"),
+                    ->withClass("PetStore\Pet", "loginUser")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user/login"
+                    ]),
                 (new Route("GET", "/v2/user/logout"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "logoutUser"),
+                    ->withClass("PetStore\Pet", "logoutUser")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user/logout"
+                    ]),
                 (new Route("POST", "/v2/user"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "createUser"),
+                    ->withClass("PetStore\Pet", "createUser")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user"
+                    ]),
                 (new Route("POST", "/v2/pet/{petId}/uploadImage"))
                     ->withOutputProcessor(JsonOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "uploadFile"),
+                    ->withClass("PetStore\Pet", "uploadFile")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet/{petId}/uploadImage"
+                    ]),
                 (new Route("GET", "/v2/pet/{petId}"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "getPetById"),
+                    ->withClass("PetStore\Pet", "getPetById")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet/{petId}"
+                    ]),
                 (new Route("POST", "/v2/pet/{petId}"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "updatePetWithForm"),
+                    ->withClass("PetStore\Pet", "updatePetWithForm")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet/{petId}"
+                    ]),
                 (new Route("DELETE", "/v2/pet/{petId}"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "deletePet"),
+                    ->withClass("PetStore\Pet", "deletePet")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet/{petId}"
+                    ]),
                 (new Route("GET", "/v2/store/order/{orderId}"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "getOrderById"),
+                    ->withClass("PetStore\Pet", "getOrderById")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/store/order/{orderId}"
+                    ]),
                 (new Route("DELETE", "/v2/store/order/{orderId}"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "deleteOrder"),
+                    ->withClass("PetStore\Pet", "deleteOrder")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/store/order/{orderId}"
+                    ]),
                 (new Route("GET", "/v2/user/{username}"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "getUserByName"),
+                    ->withClass("PetStore\Pet", "getUserByName")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user/{username}"
+                    ]),
                 (new Route("PUT", "/v2/user/{username}"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "updateUser"),
+                    ->withClass("PetStore\Pet", "updateUser")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user/{username}"
+                    ]),
                 (new Route("DELETE", "/v2/user/{username}"))
                     ->withOutputProcessor(XmlOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "deleteUser"),
+                    ->withClass("PetStore\Pet", "deleteUser")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user/{username}"
+                    ]),
             ],
             $object->getRoutes()
         );
@@ -249,64 +329,144 @@ class OpenApiRouteDefinitionTest extends TestCase
             [
                 (new Route("GET", "/v2/pet/findByStatus"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "findPetsByStatus"),
+                    ->withClass("PetStore\Pet", "findPetsByStatus")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet/findByStatus"
+                    ]),
                 (new Route("GET", "/v2/pet/findByTags"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "findPetsByTags"),
+                    ->withClass("PetStore\Pet", "findPetsByTags")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet/findByTags"
+                    ]),
                 (new Route("POST", "/v2/pet"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "addPet"),
+                    ->withClass("PetStore\Pet", "addPet")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet"
+                    ]),
                 (new Route("PUT", "/v2/pet"))
                     ->withOutputProcessor(JsonOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "updatePet"),
+                    ->withClass("PetStore\Pet", "updatePet")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet"
+                    ]),
                 (new Route("GET", "/v2/store/inventory"))
                     ->withOutputProcessor(JsonOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "getInventory"),
+                    ->withClass("PetStore\Pet", "getInventory")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/store/inventory"
+                    ]),
                 (new Route("POST", "/v2/store/order"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "placeOrder"),
+                    ->withClass("PetStore\Pet", "placeOrder")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/store/order"
+                    ]),
                 (new Route("POST", "/v2/user/createWithArray"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "createUsersWithArrayInput"),
+                    ->withClass("PetStore\Pet", "createUsersWithArrayInput")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user/createWithArray"
+                    ]),
                 (new Route("POST", "/v2/user/createWithList"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "createUsersWithListInput"),
+                    ->withClass("PetStore\Pet", "createUsersWithListInput")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user/createWithList"
+                    ]),
                 (new Route("GET", "/v2/user/login"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "loginUser"),
+                    ->withClass("PetStore\Pet", "loginUser")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user/login"
+                    ]),
                 (new Route("GET", "/v2/user/logout"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "logoutUser"),
+                    ->withClass("PetStore\Pet", "logoutUser")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user/logout"
+                    ]),
                 (new Route("POST", "/v2/user"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "createUser"),
+                    ->withClass("PetStore\Pet", "createUser")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user"
+                    ]),
                 (new Route("POST", "/v2/pet/{petId}/uploadImage"))
                     ->withOutputProcessor(JsonOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "uploadFile"),
+                    ->withClass("PetStore\Pet", "uploadFile")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet/{petId}/uploadImage"
+                    ]),
                 (new Route("GET", "/v2/pet/{petId}"))
                     ->withOutputProcessor(JsonOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "getPetById"),
+                    ->withClass("PetStore\Pet", "getPetById")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet/{petId}"
+                    ]),
                 (new Route("POST", "/v2/pet/{petId}"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "updatePetWithForm"),
+                    ->withClass("PetStore\Pet", "updatePetWithForm")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet/{petId}"
+                    ]),
                 (new Route("DELETE", "/v2/pet/{petId}"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "deletePet"),
+                    ->withClass("PetStore\Pet", "deletePet")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/pet/{petId}"
+                    ]),
                 (new Route("GET", "/v2/store/order/{orderId}"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "getOrderById"),
+                    ->withClass("PetStore\Pet", "getOrderById")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/store/order/{orderId}"
+                    ]),
                 (new Route("DELETE", "/v2/store/order/{orderId}"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "deleteOrder"),
+                    ->withClass("PetStore\Pet", "deleteOrder")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/store/order/{orderId}"
+                    ]),
                 (new Route("GET", "/v2/user/{username}"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "getUserByName"),
+                    ->withClass("PetStore\Pet", "getUserByName")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user/{username}"
+                    ]),
                 (new Route("PUT", "/v2/user/{username}"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "updateUser"),
+                    ->withClass("PetStore\Pet", "updateUser")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user/{username}"
+                    ]),
                 (new Route("DELETE", "/v2/user/{username}"))
                     ->withOutputProcessor(JsonCleanOutputProcessor::class)
-                    ->withClass("PetStore\Pet", "deleteUser"),
+                    ->withClass("PetStore\Pet", "deleteUser")
+                    ->withMetadata([
+                        OpenApiRouteList::OPENAPI_BASE_PATH => "/v2",
+                        OpenApiRouteList::OPENAPI_PATH => "/user/{username}"
+                    ]),
             ],
             $object->getRoutes()
         );

@@ -33,6 +33,14 @@ $routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testclosure")
     })
 );
 
+$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testerror/{code}")
+    ->withClosure(function ($response, $request) {
+        $code = $request->param('code');
+        $class = "ByJG\RestServer\Exception\Error" . $code . "Exception";
+        throw new $class("Teste");
+    })
+);
+
 // Handle Request
 $restServer = new \ByJG\RestServer\HttpRequestHandler();
 $restServer->withDefaultOutputProcessor(JsonOutputProcessor::class);
