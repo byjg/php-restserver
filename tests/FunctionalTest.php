@@ -6,7 +6,7 @@ use ByJG\Util\Uri;
 use ByJG\WebRequest\Exception\NetworkException;
 use ByJG\WebRequest\HttpClient;
 use ByJG\WebRequest\Psr7\Request;
-use Monolog\Test\TestCase;
+use PHPUnit\Framework\TestCase;
 
 class FunctionalTest extends TestCase
 {

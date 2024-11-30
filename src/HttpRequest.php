@@ -293,9 +293,16 @@ class HttpRequest
         $this->param = array_merge($this->param, $array);
     }
 
-    public function routeMethod(): array
+    public function routeMethod(): ?string
     {
-        return $this->server('REQUEST_METHOD', 'GET');
+        $value = $this->server('REQUEST_METHOD', 'GET');
+        if (is_array($value)) {
+            return $value[0];
+        }
+        if (is_bool($value)) {
+            return 'GET';
+        }
+        return $value;
     }
 
     public function getRouteMetadata(string $key = null): mixed
