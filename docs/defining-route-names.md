@@ -34,15 +34,12 @@ $this->getRequest()->param('variable');
 
 e.g.
 
-| Method | Route Name            | Description                       |
-|:-------|:----------------------|:----------------------------------|
-| GET    | /products/{id}        | Get a specif product              |
-| GET    | /products             | Get a list of product             |
-| POST   | /products             | Create a new product              |
-| PUT    | /products             | Update a product                  |
-| DELETE | /products             | Delete a product                  |
-| GET    | /products/{id}/images | Get the images of a product       |
-| GET    | /products?page=1      | Get the first page of products    |
-
-
-
+| Method | Route Name              | Description                    |
+|:-------|:------------------------|:-------------------------------|
+| GET    | `/products/{id}`        | Get a specif product           |
+| GET    | `/products`             | Get a list of product          |
+| POST   | `/products`             | Create a new product           |
+| PUT    | `/products`             | Update a product               |
+| DELETE | `/products`             | Delete a product               |
+| GET    | `/products/{id}/images` | Get the images of a product    |
+| GET    | `/products?page=1`      | Get the first page of products |
