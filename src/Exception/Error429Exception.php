@@ -2,13 +2,10 @@
 
 namespace ByJG\RestServer\Exception;
 
-class Error429Exception extends ClientShowException
+class Error429Exception extends HttpResponseException
 {
-    /**
-     * @return void
-     */
-    public function handleHeader(): void
+    public function __construct(string $message = "", int $code = 0, ?\Throwable $previous = null, array $meta = [])
     {
-        $this->sendHeader(429, 'Too many requests');
+        parent::__construct(429, $message, $code, $previous, $meta);
     }
 }

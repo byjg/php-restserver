@@ -2,25 +2,11 @@
 
 namespace ByJG\RestServer\Exception;
 
-use Throwable;
-
-class ErrorCustomStatusException extends ClientShowException
+class ErrorCustomStatusException extends HttpResponseException
 {
-    protected $status;
-    protected $description;
-
-    public function __construct($message = "", $code = 400, Throwable $previous = null)
+    public function __construct(int $statusCode, string $statusMessage, string $message = "", int $code = 0, ?\Throwable $previous = null, array $meta = [])
     {
-        $this->status = $code;
-        $this->description = $message;
-        parent::__construct($message, $code, $previous);
-    }
-
-    /**
-     * @return void
-     */
-    public function handleHeader(): void
-    {
-        $this->sendHeader($this->status, $this->description);
+        $this->statusCodeList[$statusCode] = $statusMessage;
+        parent::__construct($statusCode, $message, $code, $previous, $meta);
     }
 }

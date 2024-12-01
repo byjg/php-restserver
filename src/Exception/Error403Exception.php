@@ -2,13 +2,10 @@
 
 namespace ByJG\RestServer\Exception;
 
-class Error403Exception extends ClientShowException
+class Error403Exception extends HttpResponseException
 {
-    /**
-     * @return void
-     */
-    public function handleHeader(): void
+    public function __construct(string $message = "", int $code = 0, ?\Throwable $previous = null, array $meta = [])
     {
-        $this->sendHeader(403, 'Forbidden');
+        parent::__construct(403, $message, $code, $previous, $meta);
     }
 }

@@ -2,13 +2,10 @@
 
 namespace ByJG\RestServer\Exception;
 
-class Error415Exception extends ClientShowException
+class Error415Exception extends HttpResponseException
 {
-    /**
-     * @return void
-     */
-    public function handleHeader(): void
+    public function __construct(string $message = "", int $code = 0, ?\Throwable $previous = null, array $meta = [])
     {
-        $this->sendHeader(415, 'Unsupported Media Type');
+        parent::__construct(415, $message, $code, $previous, $meta);
     }
 }

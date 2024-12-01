@@ -2,13 +2,10 @@
 
 namespace ByJG\RestServer\Exception;
 
-class Error402Exception extends ClientShowException
+class Error402Exception extends HttpResponseException
 {
-    /**
-     * @return void
-     */
-    public function handleHeader(): void
+    public function __construct(string $message = "", int $code = 0, ?\Throwable $previous = null, array $meta = [])
     {
-        $this->sendHeader(402, 'Payment Required');
+        parent::__construct(402, $message, $code, $previous, $meta);
     }
 }

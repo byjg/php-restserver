@@ -48,7 +48,7 @@ class ServerRequestHandlerTest extends TestCase
     public function testHandle3(): void
     {
         $this->expectException(Error405Exception::class);
-        $expectedData = '[]';
+        $expectedData = '{"error":{"type":"Error 405","message":"Method not allowed"}}';
 
         $_SERVER['REQUEST_METHOD'] = 'POST';
         $_SERVER['REQUEST_URI'] = "http://localhost/test";
@@ -60,7 +60,7 @@ class ServerRequestHandlerTest extends TestCase
     public function testHandle4(): void
     {
         $this->expectException(Error404Exception::class);
-        $expectedData = '[]';
+        $expectedData = '{"error":{"type":"Error 404","message":"Route \'\/doesnotexists\' not found"}}';
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/doesnotexists";
@@ -72,7 +72,13 @@ class ServerRequestHandlerTest extends TestCase
     public function testHandle5(): void
     {
         $this->expectException(ClassNotFoundException::class);
-        $expectedData = '';
+        $data = [
+            "error" => [
+                "type" => "Class Not Found",
+                "message" => "Class '\\My\\Class' defined in the route is not found"
+            ]
+        ];
+        $expectedData = json_encode($data);
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/error";

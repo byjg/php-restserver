@@ -69,6 +69,11 @@ class ServerJwtMiddlewareTest extends TestCase
         $jwtKey2 = new JwtHashHmacSecret("password", decode: false);
         $jwtWrapper2 = new JwtWrapper("localhost", $jwtKey2);
 
-        $this->processAndGetContent($this->object, null, '[]', new JwtMiddleware($jwtWrapper2));
+        $this->processAndGetContent(
+            $this->object,
+            null,
+            '{"error":{"type":"Error 401","message":"Signature verification failed"}}',
+            new JwtMiddleware($jwtWrapper2)
+        );
     }
 }

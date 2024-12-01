@@ -64,7 +64,12 @@ class ServerCorsMiddlewareTest extends TestCase
         $_SERVER['HTTP_ORIGIN'] = "http://localhost";
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
-        $this->processAndGetContent($this->object, null, '[]', (new CorsMiddleware())->withCorsOrigins("anotherhost"));
+        $this->processAndGetContent(
+            $this->object,
+            null,
+            '{"error":{"type":"Error 401","message":"CORS verification failed. Request Blocked."}}',
+            (new CorsMiddleware())->withCorsOrigins("anotherhost")
+        );
     }
 
     public function testDefaultCorsSetup(): void

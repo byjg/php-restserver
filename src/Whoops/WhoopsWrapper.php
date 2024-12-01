@@ -3,7 +3,7 @@
 namespace ByJG\RestServer\Whoops;
 
 use ByJG\RestServer\ErrorHandler;
-use ByJG\RestServer\Exception\ClientShowException;
+use ByJG\RestServer\Exception\HttpResponseException;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
@@ -66,9 +66,9 @@ class WhoopsWrapper extends Handler
         $r = new ReflectionMethod($this->effectiveHandler, 'getException');
         $r->setAccessible(true); // That's necessary because error handler doesn't expose `getException`
         $exception = $r->invoke($this->effectiveHandler);
-        if ($exception instanceof ClientShowException) {
+        if ($exception instanceof HttpResponseException) {
             $exception->setResponse($this->response);
-            $exception->handleHeader();
+            $exception->sendHeader();
         } elseif (!empty($this->response)) {
             $this->response->setResponseCode(500, 'Internal Error');
         }

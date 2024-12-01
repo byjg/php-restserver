@@ -2,13 +2,10 @@
 
 namespace ByJG\RestServer\Exception;
 
-class Error520Exception extends ClientShowException
+class Error520Exception extends HttpResponseException
 {
-    /**
-     * @return void
-     */
-    public function handleHeader(): void
+    public function __construct(string $message = "", int $code = 0, ?\Throwable $previous = null, array $meta = [])
     {
-        $this->sendHeader(520, 'Unknow Error');
+        parent::__construct(520, $message, $code, $previous, $meta);
     }
 }

@@ -23,8 +23,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: composer install
-      - run: ./vendor/bin/phpunit
       - run: ./vendor/bin/psalm
+      - name: Unit Tests
+        run: |
+          php -S localhost:8090 -t public/app-dist.php &
+          ./vendor/bin/phpunit
+          kill %1
 
   Documentation:
     if: github.ref == 'refs/heads/master'
