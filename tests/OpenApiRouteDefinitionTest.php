@@ -45,6 +45,26 @@ class OpenApiRouteDefinitionTest extends TestCase
         $this->assert($object);
     }
 
+    public function testGetRouteWithPathParam(): void
+    {
+        $object = new OpenApiRouteList(__DIR__ . '/fixtures/openapi-example.yaml');
+
+        $routeWithoutPathParam = $object->getRoute('get', '/v2/pet/findByTags');
+        $this->assertNotEmpty($routeWithoutPathParam);
+        $this->assertEquals('/v2/pet/findByTags', $routeWithoutPathParam->getPath());
+
+        $routeWithPathParam = $object->getRoute('get', '/v2/pet/1');
+        $this->assertNotEmpty($routeWithPathParam);
+        $this->assertEquals('/v2/pet/{petId}', $routeWithPathParam->getPath());
+        $this->assertEquals('GET', $routeWithPathParam->getMethod());
+
+
+        $routeWithPathParam = $object->getRoute('post', '/v2/pet/find');
+        $this->assertNotEmpty($routeWithPathParam);
+        $this->assertEquals('/v2/pet/{petId}', $routeWithPathParam->getPath());
+        $this->assertEquals('POST', $routeWithPathParam->getMethod());
+    }
+
     /**
      * @throws OperationIdInvalidException
      * @throws SchemaInvalidException
