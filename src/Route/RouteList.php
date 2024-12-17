@@ -90,6 +90,24 @@ class RouteList implements RouteListInterface
 
     public function getRoute(string $method, string $path): ?Route
     {
-        return $this->routes[strtoupper($method) . " " . strtolower($path)] ?? null;
+        $pathMethod = strtoupper($method) . " " . strtolower($path);
+        $route = $this->routes[$pathMethod] ?? null;
+        if (!empty($route)) {
+            return $route;
+        }
+
+        foreach (array_keys($this->routes) as $pathItem) {
+            if (!str_contains($pathItem, '{')) {
+                continue;
+            }
+
+            $pathItemPattern = '~^' . preg_replace('~{(.*?)}~', '(?<\1>[^/]+)', $pathItem) . '$~';
+
+            if (preg_match($pathItemPattern, $pathMethod, $matches)) {
+                return $this->routes[$pathItem] ?? null;
+            }
+        }
+
+        return null;
     }
 }

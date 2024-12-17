@@ -208,4 +208,14 @@ class OpenApiRouteList extends RouteList
     {
         return $this->schema;
     }
+
+    #[\Override]
+    public function getRoute(string $method, string $path): ?Route
+    {
+        if (empty($this->routes)) {
+            $this->getRoutes();
+        }
+
+        return parent::getRoute($method, $path);
+    }
 }
