@@ -6,6 +6,7 @@
 
 namespace ByJG\RestServer\Whoops;
 
+use ByJG\RestServer\Exception\HttpResponseException;
 use Whoops\Exception\Formatter;
 use Whoops\Handler\Handler;
 use Whoops\Handler\JsonResponseHandler as ParentJsonErrorHandler;
@@ -34,12 +35,17 @@ class JsonLimitedResponseHandler extends ParentJsonErrorHandler
 
         $title = $this->getClassAsTitle($errorData["type"]);
 
-        $response = array(
+        $response = [
             'error' => [
                 "type" => $title,
                 "message" => $errorData["message"]
             ]
-        );
+        ];
+
+        $exception = $this->getInspector()->getException();
+        if ($exception instanceof HttpResponseException && !empty($exception->getMeta())) {
+            $response['error']['meta'] = $exception->getMeta();
+        }
 
         echo json_encode($response, defined('JSON_PARTIAL_OUTPUT_ON_ERROR') ? JSON_PARTIAL_OUTPUT_ON_ERROR : 0);
 

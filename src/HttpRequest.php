@@ -12,6 +12,7 @@ class HttpRequest
     protected array $cookie;
     protected array $param;
     protected array $phpRequest;
+    protected array $routeMetadata = [];
 
     /**
      *
@@ -290,5 +291,31 @@ class HttpRequest
     public function appendVars(array $array): void
     {
         $this->param = array_merge($this->param, $array);
+    }
+
+    public function routeMethod(): ?string
+    {
+        $value = $this->server('REQUEST_METHOD', 'GET');
+        if (is_array($value)) {
+            return $value[0];
+        }
+        if (is_bool($value)) {
+            return 'GET';
+        }
+        return $value;
+    }
+
+    public function getRouteMetadata(string $key = null): mixed
+    {
+        if (empty($key)) {
+            return $this->routeMetadata;
+        }
+
+        return $this->routeMetadata[$key] ?? null;
+    }
+
+    public function setRouteMetadata(array $routeMetadata): void
+    {
+        $this->routeMetadata = $routeMetadata;
     }
 }

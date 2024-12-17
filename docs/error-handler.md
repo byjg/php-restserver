@@ -43,3 +43,12 @@ $server = new HttpRequestHandler();
 $server->withDetailedErrorHandler(); // Enable the detailed error handler, for debug purposes
 $server->handle($routeList);
 ```
+
+## Enabling The Twirp Error Handler
+
+If you are implementing a callback or API that connects to a service handler
+then you might need return the errors as the twirp service expects. 
+
+To do that change the OutputProcessor to `JsonTwirpOutputProcessor`.
+
+See how to change the OutputProcessor [here](outprocessor.md).

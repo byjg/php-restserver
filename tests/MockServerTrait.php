@@ -13,10 +13,12 @@ use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Middleware\AfterMiddlewareInterface;
 use ByJG\RestServer\Middleware\BeforeMiddlewareInterface;
 use ByJG\RestServer\Middleware\JwtMiddleware;
+use ByJG\RestServer\MockResponse;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\Route\Route;
 use ByJG\RestServer\Route\RouteList;
 use ByJG\RestServer\Writer\MemoryWriter;
+use ByJG\Util\Uri;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -94,7 +96,7 @@ trait MockServerTrait
 
         $this->definition->addRoute(
             (new Route('GET', '/error'))
-                ->withClass('\\My\\Class', 'method')
+                ->withClass("\\My\\Class", 'method')
         );
     }
 
@@ -112,11 +114,16 @@ trait MockServerTrait
     }
 
     /**
-     * @throws InvalidClassException
+     * @param HttpRequestHandler $handler
+     * @param array|null $expectedHeader
+     * @param mixed $expectedData
+     * @param AfterMiddlewareInterface|BeforeMiddlewareInterface|null $middleWare
+     * @param array $expectedParams
      * @throws ClassNotFoundException
      * @throws Error404Exception
-     * @throws Error520Exception
      * @throws Error405Exception
+     * @throws Error520Exception
+     * @throws InvalidClassException
      */
     public function processAndGetContent(HttpRequestHandler $handler, ?array $expectedHeader, mixed $expectedData, AfterMiddlewareInterface|BeforeMiddlewareInterface $middleWare = null, array $expectedParams = []): void
     {
@@ -132,15 +139,19 @@ trait MockServerTrait
             }
 
             $handler->handle($this->definition, true, false);
-        } finally {
-            $result = ob_get_contents();
-            ob_clean();
-            ob_end_flush();
-            $this->assertEmpty($result);
+
             if (!is_null($expectedHeader)) {
                 $this->assertEquals($expectedHeader, $writer->getHeaders());
             }
             $this->assertEquals($expectedData, $writer->getData());
+        } catch (\Exception $ex) {
+            $uri = new Uri($_SERVER['REQUEST_URI']);
+            $result = MockResponse::errorHandlerFromEndpoint($ex, new JsonOutputProcessor(), $this->definition, $_SERVER['REQUEST_METHOD'], $uri->getPath());
+            $this->assertEquals($expectedData, $result);
+            throw $ex;
+        } finally {
+            ob_clean();
+            ob_end_flush();
         }
     }
 }

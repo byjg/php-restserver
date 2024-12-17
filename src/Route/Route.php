@@ -10,6 +10,7 @@ class Route
     protected string $path;
     protected ?string $outputProcessor = null;
     protected array|string|Closure|null $class = null;
+    protected array $metadata = [];
 
     /**
      * Route constructor.
@@ -39,6 +40,17 @@ class Route
     {
         $this->setClass([$class, $methodName]);
         return $this;
+    }
+
+    public function withMetadata(array $metadata): Route
+    {
+        $this->metadata = $metadata;
+        return $this;
+    }
+
+    public function getMetadata(): array
+    {
+        return $this->metadata;
     }
 
     /**

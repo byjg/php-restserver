@@ -15,6 +15,9 @@ use Psr\SimpleCache\CacheInterface;
 
 class OpenApiRouteList extends RouteList
 {
+    const OPENAPI_BASE_PATH = 'openapi_base_path';
+    const OPENAPI_PATH = 'openapi_path';
+
     protected CacheInterface $cache;
     protected array $schema;
     protected string $defaultProcessor;
@@ -130,7 +133,11 @@ class OpenApiRouteList extends RouteList
 
                 $routes[] = (new Route(strtoupper($method), $basePath . $path))
                     ->withOutputProcessor($outputProcessor)
-                    ->withClass($parts[count($parts)-2], $parts[count($parts)-1]);
+                    ->withClass($parts[count($parts) - 2], $parts[count($parts) - 1])
+                    ->withMetadata([
+                        self::OPENAPI_BASE_PATH => $basePath,
+                        self::OPENAPI_PATH => $path
+                    ]);
             }
         }
 

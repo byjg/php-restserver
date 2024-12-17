@@ -14,6 +14,13 @@ interface RouteListInterface
     public function getRoutes(): array;
 
     /**
+     * @param string $method
+     * @param string $path
+     * @return Route|null
+     */
+    public function getRoute(string $method, string $path): ?Route;
+
+    /**
      * @param Route[] $routes
      */
     public function setRoutes(array $routes): static;
