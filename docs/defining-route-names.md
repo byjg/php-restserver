@@ -30,7 +30,7 @@ $this->getRequest()->param('variable');
 - Use nouns to define the route name and the method to define the action.
 - Generally, Use plural nouns do the route name.
 - Forwards slashes are used to define a hierarchy of resources.
-- Use query parameters to filter the list of items. 
+- Use query parameters to filter the list of items.
 
 e.g.
 
