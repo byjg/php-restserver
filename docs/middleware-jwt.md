@@ -1,3 +1,6 @@
+---
+sidebar_position: 8.3
+---
 # Jwt Middleware
 
 The JWT Middleware is a middleware that will validate the JWT token in the Authorization header.

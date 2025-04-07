@@ -86,6 +86,7 @@ class OpenApiRouteList extends RouteList
         return $this;
     }
 
+    #[\Override]
     public function getRoutes(): array
     {
         if (empty($this->routes)) {

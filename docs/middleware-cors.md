@@ -1,3 +1,6 @@
+---
+sidebar_position: 8.1
+---
 # CORS support
 
 Enable the Server Handler process the CORS headers and block the access if the origin doesn't match.

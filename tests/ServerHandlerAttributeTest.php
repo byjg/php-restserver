@@ -11,6 +11,7 @@ class ServerHandlerAttributeTest extends TestCase
 {
     use MockServerTrait;
 
+    #[\Override]
     public function setup(): void
     {
         ini_set('output_buffering', 4096);

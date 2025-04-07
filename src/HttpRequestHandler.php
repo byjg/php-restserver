@@ -257,6 +257,7 @@ class HttpRequestHandler implements RequestHandler
      * @throws Error520Exception
      * @throws InvalidClassException
      */
+    #[\Override]
     public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = false): bool
     {
         if ($outputBuffer) {
@@ -272,18 +273,21 @@ class HttpRequestHandler implements RequestHandler
         return $this->process($routeDefinition);
     }
 
+    #[\Override]
     public function withErrorHandlerDisabled(): static
     {
         $this->useErrorHandler = false;
         return $this;
     }
 
+    #[\Override]
     public function withDetailedErrorHandler(): static
     {
         $this->detailedErrorHandler = true;
         return $this;
     }
 
+    #[\Override]
     public function withMiddleware(AfterMiddlewareInterface|BeforeMiddlewareInterface $middleware, string $routePattern = null): static
     {
         $item = [
@@ -301,6 +305,7 @@ class HttpRequestHandler implements RequestHandler
         return $this;
     }
 
+    #[\Override]
     public function withDefaultOutputProcessor(string|\Closure $processor, array $args = []): static
     {
         if (!($processor instanceof Closure)) {

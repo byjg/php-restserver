@@ -1,3 +1,6 @@
+---
+sidebar_position: 6
+---
 # Auto-Generate from an OpenApi definition
 
 [OpenApi](https://www.openapis.org/) is the world's largest framework of API developer tools for the

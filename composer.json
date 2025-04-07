@@ -14,15 +14,17 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "php": ">=8.1 <8.4",
-    "byjg/serializer": "^5.0",
-    "byjg/singleton-pattern": "^5.0",
+    "php": ">=8.1 <8.5",
+    "byjg/serializer": "^6.0",
+    "byjg/singleton-pattern": "^6.0",
     "nikic/fast-route": "v1.3.*",
     "filp/whoops": "^2.14",
-    "byjg/cache-engine": "^5.0",
-    "byjg/webrequest": "^5.0",
-    "byjg/jwt-wrapper": "^5.0",
+    "byjg/cache-engine": "^6.0",
+    "byjg/webrequest": "^6.0",
+    "byjg/jwt-wrapper": "^6.0",
     "psr/log": "^1.0|^2.0|^3.0",
+    "psr/http-client": "^1.0",
+    "psr/http-factory": "^1.0|^1.1",
     "ext-json": "*"
   },
   "suggest": {
@@ -30,8 +32,8 @@
   },
   "require-dev": {
     "monolog/monolog": "^2.9|^3.4",
-    "phpunit/phpunit": "5.7.*|7.4.*|^9.6",
-    "vimeo/psalm": "^5.9"
+    "phpunit/phpunit": "^10.5|^11.5",
+    "vimeo/psalm": "^5.9|^6.2"
   },
   "license": "MIT"
 }

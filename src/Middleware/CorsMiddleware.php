@@ -37,6 +37,7 @@ class CorsMiddleware implements BeforeMiddlewareInterface
      * @return MiddlewareResult
      * @throws Error401Exception
      */
+    #[\Override]
     public function beforeProcess(
         mixed        $dispatcherStatus,
         HttpResponse $response,

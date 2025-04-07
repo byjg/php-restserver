@@ -1,3 +1,7 @@
+---
+sidebar_position: 2
+---
+
 # Defining a Route Name
 
 You can define route with constant and/or variable. For example:

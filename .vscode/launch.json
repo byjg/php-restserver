@@ -30,7 +30,7 @@
             "request": "launch",
             "program": "${file}",
             "cwd": "${fileDirname}",
-            "port": 0,
+            "port": 9003,
             "runtimeArgs": [
                 "-dxdebug.start_with_request=yes"
             ],
@@ -45,7 +45,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/vendor/bin/phpunit",
             "cwd": "${workspaceFolder}",
-            "port": 0,
+            "port": 9003,
             "runtimeArgs": [
                 "-dxdebug.start_with_request=yes"
             ],

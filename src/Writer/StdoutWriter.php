@@ -8,6 +8,7 @@ class StdoutWriter implements WriterInterface
     protected string $data = '';
     protected int $statusCode = 0;
 
+    #[\Override]
     public function header(string $header, $replace = true): void
     {
         if (preg_match("~^HTTP/~", $header) === 1) {
@@ -28,6 +29,7 @@ class StdoutWriter implements WriterInterface
         $this->headerList[] = $header;
     }
 
+    #[\Override]
     public function responseCode(int $responseCode, string $description): void
     {
         $this->header("HTTP/1.1 $responseCode $description");
@@ -35,11 +37,13 @@ class StdoutWriter implements WriterInterface
         $this->statusCode = $responseCode;
     }
 
+    #[\Override]
     public function echo(string $data): void
     {
         $this->data .= $data;
     }
 
+    #[\Override]
     public function flush(): void
     {
         echo implode("\r\n", $this->headerList);

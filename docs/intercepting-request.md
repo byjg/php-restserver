@@ -1,3 +1,6 @@
+---
+sidebar_position: 10
+---
 # Intercepting Request
 
 It is possible add a PHP attribute to intercept the request before or after the route is executed.
@@ -11,7 +14,10 @@ It is possible add a PHP attribute to intercept the request before or after the 
 
 namespace My;
 
+use Attribute;
 use ByJG\RestServer\Attributes\BeforeRouteInterface;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
 
 #[Attribute(Attribute::TARGET_METHOD)]
 class MyBeforeProcess implements BeforeRouteInterface
@@ -30,7 +36,10 @@ class MyBeforeProcess implements BeforeRouteInterface
 
 namespace My;
 
+use Attribute;
 use ByJG\RestServer\Attributes\AfterRouteInterface;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
 
 #[Attribute(Attribute::TARGET_METHOD)]
 class MyAfterProcess implements AfterRouteInterface
@@ -47,6 +56,10 @@ class MyAfterProcess implements AfterRouteInterface
 ```php
 <?php
 namespace My;
+
+use ByJG\RestServer\Attributes\RouteDefinition;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
 
 class ClassName
 {
@@ -68,3 +81,12 @@ class ClassName
     //...
 }
 ```
+
+## Combining Middleware and Request Intercepting
+
+Middleware operates at the HTTP server level, affecting all routes or specific route patterns, while request
+intercepting operates at the route level using PHP attributes. Both can be used together to provide a comprehensive
+request handling pipeline.
+
+- Use Middleware for server-wide or pattern-based functionality (authentication, CORS, static files)
+- Use Request Intercepting for route-specific functionality

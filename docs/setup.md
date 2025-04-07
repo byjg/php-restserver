@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # Running the rest server
 
 You need to set up your restserver to handle ALL requests to a single PHP file. 
@@ -17,8 +21,20 @@ require_once __DIR__ . '/vendor/autoload.php';
 //   4. or auto-generate from an OpenApi definition
 
 // Set up the RestServer
-$restServer = new HttpRequestHandler();
-$restServer->handle($routeDefintion);
+$restServer = new \ByJG\RestServer\HttpRequestHandler();
+
+// Optional configurations
+$restServer
+    ->withDefaultOutputProcessor(\ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class)
+    ->withDetailedErrorHandler()  // For development environments
+    // ->withErrorHandlerDisabled()  // If you want to use your own error handler
+    // ->withWriter(new CustomWriter())  // If you want to use a custom writer
+    // ->withMiddleware($middleware, $routePattern)  // Add middleware
+;
+
+// Handle the request
+// Parameters: routeDefinition, outputBuffer (default: true), session (default: true)
+$restServer->handle($routeDefinition);
 ```
 
 ## Configure your web server to handle all requests to "app.php"

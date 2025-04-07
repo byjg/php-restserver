@@ -14,6 +14,7 @@ class DummyAfterMiddleware implements AfterMiddlewareInterface
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function afterProcess(HttpResponse $response, HttpRequest $request, string $class, string $method, ?string $exception): MiddlewareResult
     {
         $this->here++;

@@ -44,6 +44,7 @@ class PlainResponseErrorHandler extends Handler
      * @return int
      * @throws ReflectionException
      */
+    #[\Override]
     public function handle()
     {
         $response = Formatter::formatExceptionAsDataArray(

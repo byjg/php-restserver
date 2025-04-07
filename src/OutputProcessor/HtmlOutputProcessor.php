@@ -18,6 +18,7 @@ class HtmlOutputProcessor extends BaseOutputProcessor
     /**
      * @return PrettyPageHandler
      */
+    #[\Override]
     public function getDetailedErrorHandler(): Handler
     {
         return new PrettyPageHandler();
@@ -26,6 +27,7 @@ class HtmlOutputProcessor extends BaseOutputProcessor
     /**
      * @return PlainResponseErrorHandler
      */
+    #[\Override]
     public function getErrorHandler(): Handler
     {
         return new PlainResponseErrorHandler();
@@ -34,6 +36,7 @@ class HtmlOutputProcessor extends BaseOutputProcessor
     /**
      * @return PlainTextFormatter
      */
+    #[\Override]
     public function getFormatter(): FormatterInterface
     {
         return new PlainTextFormatter();

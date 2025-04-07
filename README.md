@@ -1,10 +1,10 @@
-# PHP Rest Server
-
 [![Build Status](https://github.com/byjg/php-restserver/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-restserver/actions/workflows/phpunit.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-restserver/)
 [![GitHub license](https://img.shields.io/github/license/byjg/php-restserver.svg)](https://opensource.byjg.com/opensource/licensing.html)
 [![GitHub release](https://img.shields.io/github/release/byjg/php-restserver.svg)](https://github.com/byjg/php-restserver/releases/)
+
+# PHP Rest Server
 
 Create RESTFull services with different and customizable output handlers (JSON, XML, Html, etc.).
 Auto-Generate routes from swagger.json definition.
@@ -28,6 +28,7 @@ Advanced:
 - [Middleware](docs/middleware.md)
 - [Error Handler](docs/error-handler.md)
 - [Intercepting the Request](docs/intercepting-request.md)
+- [Output Processors](docs/outprocessor.md)
 - [Caching Routes](docs/caching-routes.md)
 
 ## Installation

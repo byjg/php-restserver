@@ -21,6 +21,7 @@ class RouteList implements RouteListInterface
     /**
      * @return Route[]
      */
+    #[\Override]
     public function getRoutes(): array
     {
         return array_values($this->routes);
@@ -30,6 +31,7 @@ class RouteList implements RouteListInterface
      * @param Route[] $routes
      * @return static
      */
+    #[\Override]
     public function setRoutes(array $routes): static
     {
         foreach ($routes as $route) {
@@ -42,6 +44,7 @@ class RouteList implements RouteListInterface
      * @param Route $route
      * @return static
      */
+    #[\Override]
     public function addRoute(Route $route): static
     {
         $this->routes[strtoupper($route->getMethod()) . " " . strtolower($route->getPath())] = $route;
@@ -51,6 +54,7 @@ class RouteList implements RouteListInterface
     /**
      * @throws ReflectionException
      */
+    #[\Override]
     public function addClass(string $className): static
     {
         $reflection = new ReflectionClass($className);
@@ -70,6 +74,7 @@ class RouteList implements RouteListInterface
     /**
      * @return Dispatcher
      */
+    #[\Override]
     public function getDispatcher(): Dispatcher
     {
         // Generic Dispatcher for RestServer
@@ -88,6 +93,7 @@ class RouteList implements RouteListInterface
         });
     }
 
+    #[\Override]
     public function getRoute(string $method, string $path): ?Route
     {
         $pathMethod = strtoupper($method) . " " . strtolower($path);

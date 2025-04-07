@@ -1011,6 +1011,7 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
      * @throws Error415Exception
      * @throws Error500Exception
      */
+    #[\Override]
     public function beforeProcess(
         mixed        $dispatcherStatus,
         HttpResponse $response,

@@ -19,14 +19,12 @@ use ByJG\RestServer\Exception\Error501Exception;
 use ByJG\RestServer\Exception\Error503Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\HttpResponseException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class HttpResponseExceptionTest extends TestCase
 {
-    /**
-     * @dataProvider dataProvider
-     * @return void
-     */
+    #[DataProvider('dataProvider')]
     public function testConstructor(string $class, int $code, string $description)
     {
         /** @var HttpResponseException $ex */
@@ -35,7 +33,7 @@ class HttpResponseExceptionTest extends TestCase
         $this->assertEquals($description, $ex->getStatusMessage());
     }
 
-    public function dataProvider()
+    public static function dataProvider()
     {
         return [
             [ Error400Exception::class, 400, 'Bad Request' ],
@@ -55,6 +53,5 @@ class HttpResponseExceptionTest extends TestCase
             [ Error503Exception::class, 503, 'Service Unavailable' ],
             [ Error520Exception::class, 520, 'Unknown Error' ],
         ];
-
     }
 }

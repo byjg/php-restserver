@@ -24,6 +24,7 @@ class TwirpResponseErrorHandler extends JsonLimitedResponseHandler
     /**
      * @return int
      */
+    #[\Override]
     public function handle()
     {
         $errorData = Formatter::formatExceptionAsDataArray(

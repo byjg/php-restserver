@@ -6,13 +6,12 @@ use ByJG\Util\Uri;
 use ByJG\WebRequest\Exception\NetworkException;
 use ByJG\WebRequest\HttpClient;
 use ByJG\WebRequest\Psr7\Request;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class FunctionalTest extends TestCase
 {
-    /**
-     * @dataProvider dataProvider
-     */
+    #[DataProvider('dataProvider')]
     public function testHttpRequestJson(string $url, int $statusCode, string $contentType, string $contentBody): void
     {
         try {
@@ -30,7 +29,7 @@ class FunctionalTest extends TestCase
     }
 
 
-    public function dataProvider()
+    public static function dataProvider()
     {
         return [
             ['http://localhost:8090/testjson', 200, 'application/json', '{"name":"It worked"}'],
@@ -55,7 +54,5 @@ class FunctionalTest extends TestCase
             ['http://localhost:8090/testerror/503', 503, 'application/json', '{"error":{"type":"Error 503","message":"Teste"}}'],
             ['http://localhost:8090/testerror/520', 520, 'application/json', '{"error":{"type":"Error 520","message":"Teste"}}'],
         ];
-
     }
-
 }

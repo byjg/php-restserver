@@ -18,6 +18,7 @@ class JsonOutputProcessor extends BaseOutputProcessor
     /**
      * @return JsonResponseHandler
      */
+    #[\Override]
     public function getDetailedErrorHandler(): Handler
     {
         $jsonHandler = new JsonResponseHandler();
@@ -28,6 +29,7 @@ class JsonOutputProcessor extends BaseOutputProcessor
     /**
      * @return JsonLimitedResponseHandler
      */
+    #[\Override]
     public function getErrorHandler(): Handler
     {
         return new JsonLimitedResponseHandler();
@@ -36,6 +38,7 @@ class JsonOutputProcessor extends BaseOutputProcessor
     /**
      * @return JsonFormatter
      */
+    #[\Override]
     public function getFormatter(): FormatterInterface
     {
         return new JsonFormatter();

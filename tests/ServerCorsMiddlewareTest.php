@@ -29,8 +29,6 @@ class ServerCorsMiddlewareTest extends TestCase
         $this->processAndGetContent($this->object, $expectedHeader, $expectedData, new CorsMiddleware());
 
         $this->assertEquals('tCors', $this->reach);
-
-
     }
 
     public function testHandleCorsOptions(): void

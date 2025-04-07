@@ -61,6 +61,7 @@ class WhoopsWrapper extends Handler
      * @return int|null A handler may return nothing, or a Handler::HANDLE_* constant
      * @throws \ReflectionException
      */
+    #[\Override]
     public function handle()
     {
         $r = new ReflectionMethod($this->effectiveHandler, 'getException');
@@ -95,6 +96,7 @@ class WhoopsWrapper extends Handler
      * @param  RunInterface  $run
      * @return void|null
      */
+    #[\Override]
     public function setRun(RunInterface $run)
     {
         return $this->effectiveHandler->setRun($run);
@@ -104,6 +106,7 @@ class WhoopsWrapper extends Handler
      * @param  Throwable $exception
      * @return void|null
      */
+    #[\Override]
     public function setException($exception)
     {
         return $this->effectiveHandler->setException($exception);
@@ -113,6 +116,7 @@ class WhoopsWrapper extends Handler
      * @param  InspectorInterface $inspector
      * @return void|null
      */
+    #[\Override]
     public function setInspector(InspectorInterface $inspector)
     {
         return $this->effectiveHandler->setInspector($inspector);

@@ -13,11 +13,13 @@ class HttpResponseTest extends TestCase
      */
     protected $object;
 
+    #[\Override]
     public function setup(): void
     {
         $this->object = new HttpResponse();
     }
 
+    #[\Override]
     public function tearDown(): void
     {
         $this->object = null;

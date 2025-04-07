@@ -30,6 +30,7 @@ class MockHttpRequest extends HttpRequest
      *
      * @return string
      */
+    #[\Override]
     public function payload(): string
     {
         if (is_null($this->payload)) {

@@ -12,6 +12,7 @@ class HttpRequestTest extends TestCase
      */
     protected $request;
 
+    #[\Override]
     protected function setUp(): void
     {
         $_FILES = [];

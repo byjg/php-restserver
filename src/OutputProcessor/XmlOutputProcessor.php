@@ -17,11 +17,13 @@ class XmlOutputProcessor extends BaseOutputProcessor
     /**
      * @return XmlResponseHandler
      */
+    #[\Override]
     public function getDetailedErrorHandler(): Handler
     {
         return new XmlResponseHandler();
     }
 
+    #[\Override]
     public function getErrorHandler(): Handler
     {
         return $this->getDetailedErrorHandler();
@@ -30,6 +32,7 @@ class XmlOutputProcessor extends BaseOutputProcessor
     /**
      * @return XmlFormatter
      */
+    #[\Override]
     public function getFormatter(): FormatterInterface
     {
         return new XmlFormatter();

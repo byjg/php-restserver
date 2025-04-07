@@ -111,6 +111,9 @@ trait MockServerTrait
         $_REQUEST = [];
         $_COOKIE = [];
         $_FILES = [];
+
+        // Unregister error handler to prevent overlap between tests
+        \ByJG\RestServer\ErrorHandler::getInstance()->unregister();
     }
 
     /**

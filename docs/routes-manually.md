@@ -1,3 +1,6 @@
+---
+sidebar_position: 4
+---
 # Create Routes Using Classes
 
 ```php

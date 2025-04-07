@@ -26,6 +26,7 @@ class JsonLimitedResponseHandler extends ParentJsonErrorHandler
      * @return int
      * @throws \ReflectionException
      */
+    #[\Override]
     public function handle()
     {
         $errorData = Formatter::formatExceptionAsDataArray(

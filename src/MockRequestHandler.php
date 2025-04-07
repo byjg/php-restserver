@@ -61,6 +61,7 @@ class MockRequestHandler extends HttpRequestHandler
     /**
      * @return HttpRequest
      */
+    #[\Override]
     protected function getHttpRequest(): HttpRequest
     {
         if (is_null($this->httpRequest) && !is_null($this->requestInterface)) {
@@ -95,6 +96,7 @@ class MockRequestHandler extends HttpRequestHandler
         return $this->psr7Response;
     }
 
+    #[\Override]
     public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = false): bool
     {
         return parent::handle($routeDefinition, false, false);

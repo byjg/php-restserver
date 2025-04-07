@@ -167,7 +167,8 @@ class HttpRequest
     public function payload(): string
     {
         if (is_null($this->payload)) {
-            $this->payload = file_get_contents("php://input");
+            $content = file_get_contents("php://input");
+            $this->payload = $content !== false ? $content : '';
         }
 
         return $this->payload;

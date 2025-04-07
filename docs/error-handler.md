@@ -1,3 +1,6 @@
+---
+sidebar_position: 9
+---
 # Error Handler
 
 RestServer uses by default the project `flip/whoops` to handle all the errors. 
@@ -13,7 +16,30 @@ OutputProcessor defined in the route.
 to handle the exception and return a detailed message (debug, dev, etc) or a simple one suitable
 for production.
 
-## Disabling the Error Handler
+## Configuration
+
+### Setting a Logger
+
+You can provide a PSR-3 compatible logger to the HttpRequestHandler when initializing it:
+
+```php
+<?php
+use ByJG\RestServer\HttpRequestHandler;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
+// Create a logger
+$logger = new Logger('app');
+$logger->pushHandler(new StreamHandler('path/to/your.log', Logger::WARNING));
+
+// Initialize with logger
+$server = new HttpRequestHandler($logger);
+$server->handle($routeList);
+```
+
+If no logger is provided, a NullLogger instance will be used (no logging).
+
+### Disabling the Error Handler
 
 You can disable the error handler completely and handle the exceptions by yourself.
 
@@ -30,7 +56,7 @@ try {
 }
 ```
 
-## Enabling the Detailed Error Handler
+### Enabling the Detailed Error Handler
 
 You can enable the detailed error handler. It will return a detailed message with the exception message,
 stack trace, etc.
@@ -47,7 +73,7 @@ $server->handle($routeList);
 ## Enabling The Twirp Error Handler
 
 If you are implementing a callback or API that connects to a service handler
-then you might need return the errors as the twirp service expects. 
+then you might need to return the errors as the twirp service expects.
 
 To do that change the OutputProcessor to `JsonTwirpOutputProcessor`.
 

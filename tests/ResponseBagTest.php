@@ -15,11 +15,13 @@ class ResponseBagTest extends TestCase
      */
     private $object;
 
+    #[\Override]
     public function setup(): void
     {
         $this->object = new ResponseBag();
     }
 
+    #[\Override]
     public function tearDown(): void
     {
         $this->object = null;

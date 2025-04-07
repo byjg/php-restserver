@@ -11,6 +11,7 @@ class LoggerErrorHandler extends Handler
     /**
      * @inheritDoc
      */
+    #[\Override]
     public function handle()
     {
         ErrorHandler::getInstance()->getLogger()->error($this->getException()->getMessage(), ['exception' => $this->getException()]);

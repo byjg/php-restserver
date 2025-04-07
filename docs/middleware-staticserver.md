@@ -1,3 +1,6 @@
+---
+sidebar_position: 8.2
+---
 # Server Static Files
 
 By default, Http Server Handler will only process the defined routes. Using this middleware, if a route is not found,

@@ -17,6 +17,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
 
     protected WriterInterface $writer;
 
+    #[\Override]
     public function setWriter(WriterInterface $writer): void
     {
         $this->writer = $writer;
@@ -70,16 +71,19 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         return new $class();
     }
 
+    #[\Override]
     public function writeContentType(): void
     {
         $this->writer->header("Content-Type: $this->contentType", true);
     }
 
+    #[\Override]
     public function getContentType(): string
     {
         return $this->contentType;
     }
 
+    #[\Override]
     public function writeHeader(HttpResponse $response): void
     {
         $this->writer->responseCode($response->getResponseCode(), $response->getResponseCodeDescription());
@@ -96,11 +100,16 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         }
     }
 
-    public function writeData(array|string $data): void
+    public function writeData(string|bool $data): void
     {
-        $this->writer->echo($data);
+        if (is_bool($data)) {
+            $this->writer->echo($data ? 'true' : 'false');
+        } else {
+            $this->writer->echo($data);
+        }
     }
 
+    #[\Override]
     public function processResponse(HttpResponse $response): void
     {
         $this->writeHeader($response);

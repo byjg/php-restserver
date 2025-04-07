@@ -15,16 +15,13 @@ use ByJG\RestServer\Exception\Error500Exception;
 use ByJG\RestServer\Exception\Error501Exception;
 use ByJG\RestServer\Exception\Error503Exception;
 use ByJG\RestServer\Whoops\TwirpResponseErrorHandler;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Whoops\Exception\Inspector;
 
 class TwirpResponseErrorHandlerTest extends TestCase
 {
-
-    /**
-     * @dataProvider dataProvider
-     * @return void
-     */
+    #[DataProvider('dataProvider')]
     public function testTwirpResponse(string $class, int $code, string $description)
     {
         $handler = new TwirpResponseErrorHandler();
@@ -38,7 +35,7 @@ class TwirpResponseErrorHandlerTest extends TestCase
         $this->assertEquals('{"code":"' . $description . '","msg":"teste"}', $result);
     }
 
-    public function dataProvider()
+    public static function dataProvider()
     {
         return [
             [ Error408Exception::class, 408, "canceled" ],
@@ -56,10 +53,7 @@ class TwirpResponseErrorHandlerTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider dataProvider
-     * @return void
-     */
+    #[DataProvider('dataProvider')]
     public function testTwirpResponseMeta(string $class, int $code, string $description)
     {
         $handler = new TwirpResponseErrorHandler();
@@ -77,6 +71,5 @@ class TwirpResponseErrorHandlerTest extends TestCase
         $result = ob_get_contents();
         ob_end_clean();
         $this->assertEquals('{"code":"' . $description . '","msg":"teste"' . $meta . '}', $result);
-
     }
 }
