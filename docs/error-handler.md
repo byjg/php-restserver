@@ -78,3 +78,91 @@ then you might need to return the errors as the twirp service expects.
 To do that change the OutputProcessor to `JsonTwirpOutputProcessor`.
 
 See how to change the OutputProcessor [here](outprocessor.md).
+
+## Exception Types
+
+RestServer provides several exception types that map to different HTTP status codes:
+
+| Exception Class   | HTTP Status Code | Description            |
+|-------------------|:----------------:|------------------------|
+| Error400Exception |       400        | Bad Request            |
+| Error401Exception |       401        | Unauthorized           |
+| Error402Exception |       402        | Payment Required       |
+| Error403Exception |       403        | Forbidden              |
+| Error404Exception |       404        | Not Found              |
+| Error405Exception |       405        | Method Not Allowed     |
+| Error406Exception |       406        | Not Acceptable         |
+| Error408Exception |       408        | Request Timeout        |
+| Error409Exception |       409        | Conflict               |
+| Error412Exception |       412        | Precondition Failed    |
+| Error415Exception |       415        | Unsupported Media Type |
+| Error422Exception |       422        | Unprocessable Entity   |
+| Error429Exception |       429        | Too Many Requests      |
+| Error500Exception |       500        | Internal Server Error  |
+| Error501Exception |       501        | Not Implemented        |
+| Error503Exception |       503        | Service Unavailable    |
+| Error520Exception |       520        | Unknown Error          |
+
+### Using Custom Status Codes
+
+You can use the `ErrorCustomStatusException` to define your own HTTP status codes:
+
+```php
+<?php
+use ByJG\RestServer\Exception\ErrorCustomStatusException;
+
+// Throws an exception with custom status code 499 and message
+throw new ErrorCustomStatusException(499, "Custom Status Message", "Detailed error explanation");
+```
+
+## Using Metadata with Exceptions
+
+All HTTP exceptions in RestServer support metadata, which allows you to include additional structured information with
+your error responses:
+
+```php
+<?php
+use ByJG\RestServer\Exception\Error400Exception;
+
+// Basic exception
+throw new Error400Exception("Validation failed");
+
+// Exception with metadata
+throw new Error400Exception("Validation failed", 0, null, [
+    'fields' => [
+        'email' => 'Invalid email format',
+        'password' => 'Password must be at least 8 characters'
+    ],
+    'request_id' => '12345-abcde',
+    'documentation_url' => 'https://example.com/api/errors#validation'
+]);
+```
+
+The metadata will be included in the response according to the OutputProcessor format.
+
+## Custom Error Handling with Metadata
+
+You can create custom error handlers that process exception metadata in specific ways:
+
+```php
+<?php
+// Example of a controller with custom error handling
+public function processRequest(HttpRequest $request, HttpResponse $response)
+{
+    try {
+        // Business logic...
+        $this->validateData($request->body());
+    } catch (Error400Exception $ex) {
+        $metadata = $ex->getMeta();
+        
+        // Log specific metadata fields
+        $this->logger->error("Validation error", [
+            'fields' => $metadata['fields'] ?? [],
+            'request_id' => $metadata['request_id'] ?? null
+        ]);
+        
+        // Rethrow the exception for the framework to handle
+        throw $ex;
+    }
+}
+```

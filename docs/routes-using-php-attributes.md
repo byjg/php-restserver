@@ -69,3 +69,187 @@ The `RouteDefinition` attribute accepts the following parameters:
 
 By default, the output processor is set to `JsonOutputProcessor`. You can change it to any class that implements the
 `OutputProcessorInterface`.
+
+## Route Interceptors
+
+Route interceptors are a powerful feature that allow you to execute code before or after a route handler, using PHP 8
+attributes.
+
+### Creating Interceptors
+
+#### Before Route Interceptor
+
+```php
+<?php
+namespace My\Interceptors;
+
+use Attribute;
+use ByJG\RestServer\Attributes\BeforeRouteInterface;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
+
+#[Attribute(Attribute::TARGET_METHOD)]
+class ValidateUserAccess implements BeforeRouteInterface
+{
+    private array $requiredRoles;
+
+    public function __construct(array $requiredRoles = ['user'])
+    {
+        $this->requiredRoles = $requiredRoles;
+    }
+
+    public function processBefore(HttpResponse $response, HttpRequest $request)
+    {
+        $userRoles = $this->getUserRoles($request);
+        
+        // Check if user has required roles
+        foreach ($this->requiredRoles as $role) {
+            if (!in_array($role, $userRoles)) {
+                throw new \ByJG\RestServer\Exception\Error403Exception('Insufficient permissions');
+            }
+        }
+    }
+    
+    private function getUserRoles(HttpRequest $request): array
+    {
+        // Implementation to get user roles from request
+        // For example, from JWT token
+        return $request->param('jwt.roles') ?? [];
+    }
+}
+```
+
+#### After Route Interceptor
+
+```php
+<?php
+namespace My\Interceptors;
+
+use Attribute;
+use ByJG\RestServer\Attributes\AfterRouteInterface;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
+
+#[Attribute(Attribute::TARGET_METHOD)]
+class LogApiCall implements AfterRouteInterface
+{
+    private string $logLevel;
+
+    public function __construct(string $logLevel = 'info')
+    {
+        $this->logLevel = $logLevel;
+    }
+
+    public function processAfter(HttpResponse $response, HttpRequest $request)
+    {
+        // Implementation to log the API call
+        $logger = /* Get your logger instance */;
+        $logger->{$this->logLevel}('API call', [
+            'path' => $request->getRequestPath(),
+            'method' => $request->getMethod(),
+            'status' => $response->getResponseCode(),
+            'user' => $request->param('jwt.sub') ?? 'anonymous'
+        ]);
+    }
+}
+```
+
+### Using Interceptors with Routes
+
+You can apply interceptors to route methods by adding the attribute:
+
+```php
+<?php
+namespace My\Controllers;
+
+use ByJG\RestServer\Attributes\RouteDefinition;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
+use My\Interceptors\ValidateUserAccess;
+use My\Interceptors\LogApiCall;
+
+class UserController
+{
+    #[RouteDefinition('GET', '/users')]
+    #[ValidateUserAccess(['admin'])]
+    #[LogApiCall('debug')]
+    public function listUsers(HttpResponse $response, HttpRequest $request)
+    {
+        // Only admin users can get here due to ValidateUserAccess interceptor
+        $response->write(['users' => $this->getUserList()]);
+        // After response is sent, LogApiCall will log this request
+    }
+    
+    #[RouteDefinition('POST', '/users')]
+    #[ValidateUserAccess(['admin'])]
+    public function createUser(HttpResponse $response, HttpRequest $request)
+    {
+        // Only admins can create users
+        $userData = $request->body();
+        $userId = $this->createUserInDatabase($userData);
+        $response->write(['id' => $userId]);
+    }
+    
+    #[RouteDefinition('GET', '/users/profile')]
+    #[ValidateUserAccess(['user', 'admin'])]
+    public function getUserProfile(HttpResponse $response, HttpRequest $request)
+    {
+        // Both users and admins can access profiles
+        $userId = $request->param('jwt.sub');
+        $profile = $this->getUserProfile($userId);
+        $response->write($profile);
+    }
+}
+```
+
+### Multiple Interceptors
+
+You can apply multiple interceptors to a single route. They will be executed in the order they are declared:
+
+```php
+#[RouteDefinition('POST', '/sensitive-operation')]
+#[ValidateUserAccess(['admin'])]
+#[ValidateCSRFToken]
+#[RateLimitOperation(10)]
+#[LogApiCall('warning')]
+public function performSensitiveOperation(HttpResponse $response, HttpRequest $request)
+{
+    // Implementation...
+}
+```
+
+### Common Use Cases for Interceptors
+
+1. **Authentication and Authorization**
+   - Validate user roles and permissions
+   - Check API keys
+   - Verify tokens
+
+2. **Input Validation**
+   - Validate request parameters
+   - Check required fields
+   - Sanitize inputs
+
+3. **Logging and Monitoring**
+   - Log API calls
+   - Track performance metrics
+   - Record audit trails
+
+4. **Rate Limiting**
+   - Limit frequency of requests
+   - Prevent abuse
+
+5. **Data Transformation**
+   - Transform request data before processing
+   - Format response data after processing
+
+6. **Caching**
+   - Implement response caching
+   - Cache invalidation
+
+7. **Cross-cutting Concerns**
+   - Transaction management
+   - Error handling
+
+Interceptors help keep your route handler methods focused on business logic by moving cross-cutting concerns into
+reusable attributes.
