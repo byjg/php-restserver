@@ -66,7 +66,7 @@ class HttpResponse
         if (!is_null($expire)) {
             $expire = time() + $expire;
         }
-        setcookie($name, $value, $expire, $path, $domain);
+        setcookie($name, $value, $expire ?? 0, $path ?? "", $domain ?? "");
     }
 
     /**
