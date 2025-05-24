@@ -7,6 +7,7 @@ use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\RestServer\Writer\WriterInterface;
 use Closure;
+use Override;
 
 abstract class BaseOutputProcessor implements OutputProcessorInterface
 {
@@ -17,27 +18,28 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
 
     protected WriterInterface $writer;
 
-    #[\Override]
+    #[Override]
     public function setWriter(WriterInterface $writer): void
     {
         $this->writer = $writer;
     }
 
+    public static array $mimeTypeOutputProcessor = [
+        "text/xml" => XmlOutputProcessor::class,
+        "application/xml" => XmlOutputProcessor::class,
+        "text/html" => HtmlOutputProcessor::class,
+        "text/csv" => CsvOutputProcessor::class,
+        "application/json" => JsonOutputProcessor::class,
+        "*/*" => JsonOutputProcessor::class,
+    ];
+
     public static function getFromContentType(string $contentType): string
     {
-        $mimeTypeOutputProcessor = [
-            "text/xml" => XmlOutputProcessor::class,
-            "application/xml" => XmlOutputProcessor::class,
-            "text/html" => HtmlOutputProcessor::class,
-            "application/json" => JsonOutputProcessor::class,
-            "*/*" => JsonOutputProcessor::class,
-        ];
-
-        if (!isset($mimeTypeOutputProcessor[$contentType])) {
+        if (!isset(self::$mimeTypeOutputProcessor[$contentType])) {
             throw new OperationIdInvalidException("There is no output processor for $contentType");
         }
 
-        return $mimeTypeOutputProcessor[$contentType];
+        return self::$mimeTypeOutputProcessor[$contentType];
     }
 
     /**
@@ -46,9 +48,9 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
     public static function getFromHttpAccept(): OutputProcessorInterface
     {
         $accept = $_SERVER["HTTP_ACCEPT"] ?? "application/json";
-        
+
         $acceptList = explode(",", $accept);
-        
+
         return self::getFromClassName(self::getFromContentType($acceptList[0]));
     }
 
@@ -71,19 +73,19 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         return new $class();
     }
 
-    #[\Override]
+    #[Override]
     public function writeContentType(): void
     {
         $this->writer->header("Content-Type: $this->contentType", true);
     }
 
-    #[\Override]
+    #[Override]
     public function getContentType(): string
     {
         return $this->contentType;
     }
 
-    #[\Override]
+    #[Override]
     public function writeHeader(HttpResponse $response): void
     {
         $this->writer->responseCode($response->getResponseCode(), $response->getResponseCodeDescription());
@@ -109,7 +111,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         }
     }
 
-    #[\Override]
+    #[Override]
     public function processResponse(HttpResponse $response): void
     {
         $this->writeHeader($response);
