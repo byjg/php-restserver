@@ -126,18 +126,27 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         $this->writer->flush();
     }
 
-    public static function factory(string|array|null $class = null): OutputProcessorInterface|null
+    public static function factory(OutputProcessorInterface|string|array|null $class = null): OutputProcessorInterface|null
     {
         $outputProcessor = null;
-        if (empty($class)) {
+        if (is_object($class)) {
+            return $class;
+        } elseif (empty($class)) {
             $outputProcessor = BaseOutputProcessor::getFromHttpAccept();
-        } else {
-            foreach ((array)$class as $className) {
-                $outputProcessor = BaseOutputProcessor::getFromClassName($class);
-                if (!empty($outputProcessor)) {
+        } elseif (is_array($class)) {
+            $currentContentType = BaseOutputProcessor::getFromHttpAccept();
+            foreach ($class as $className) {
+                $validProcessor = BaseOutputProcessor::factory($className);
+                if ($validProcessor->getContentType() === $currentContentType->getContentType()) {
+                    $outputProcessor = $validProcessor;
                     break;
                 }
             }
+        } else {
+            if (str_contains($class, "/")) {
+                $class = BaseOutputProcessor::getFromContentType($class);
+            }
+            $outputProcessor = BaseOutputProcessor::getFromClassName($class);
         }
 
         return $outputProcessor;

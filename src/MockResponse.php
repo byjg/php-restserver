@@ -2,6 +2,7 @@
 
 namespace ByJG\RestServer;
 
+use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
 use ByJG\RestServer\Route\Route;
 use ByJG\RestServer\Route\RouteListInterface;
@@ -24,14 +25,7 @@ class MockResponse
 
     public static function errorHandlerFromRoute(Throwable|string $exception, OutputProcessorInterface $defaultProcessor, ?Route $route): bool|string
     {
-        $outputProcessorStr = $route?->getOutputProcessor();
-
-        /** @var OutputProcessorInterface $outputProcessor */
-        if (empty($outputProcessorStr)) {
-            $outputProcessor = $defaultProcessor;
-        } else {
-            $outputProcessor = new $outputProcessorStr();
-        }
+        $outputProcessor = BaseOutputProcessor::factory($route?->getOutputProcessor() ?? $defaultProcessor) ?? $defaultProcessor;
         $handler = $outputProcessor->getErrorHandler();
 
         if (is_string($exception)) {
