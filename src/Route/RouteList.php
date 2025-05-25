@@ -6,6 +6,7 @@ namespace ByJG\RestServer\Route;
 use ByJG\RestServer\Attributes\RouteDefinition;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
+use Override;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
@@ -15,13 +16,14 @@ class RouteList implements RouteListInterface
 {
     const META_OUTPUT_PROCESSOR = 'output_processor';
     const META_CLASS = 'class';
+    const META_OUTPUT_PROCESSOR_STRICT = 'output_processor_strict';
 
     protected array $routes = [];
 
     /**
      * @return Route[]
      */
-    #[\Override]
+    #[Override]
     public function getRoutes(): array
     {
         return array_values($this->routes);
@@ -31,7 +33,7 @@ class RouteList implements RouteListInterface
      * @param Route[] $routes
      * @return static
      */
-    #[\Override]
+    #[Override]
     public function setRoutes(array $routes): static
     {
         foreach ($routes as $route) {
@@ -44,7 +46,7 @@ class RouteList implements RouteListInterface
      * @param Route $route
      * @return static
      */
-    #[\Override]
+    #[Override]
     public function addRoute(Route $route): static
     {
         $this->routes[strtoupper($route->getMethod()) . " " . strtolower($route->getPath())] = $route;
@@ -54,7 +56,7 @@ class RouteList implements RouteListInterface
     /**
      * @throws ReflectionException
      */
-    #[\Override]
+    #[Override]
     public function addClass(string $className): static
     {
         $reflection = new ReflectionClass($className);
@@ -74,7 +76,7 @@ class RouteList implements RouteListInterface
     /**
      * @return Dispatcher
      */
-    #[\Override]
+    #[Override]
     public function getDispatcher(): Dispatcher
     {
         // Generic Dispatcher for RestServer
@@ -87,13 +89,14 @@ class RouteList implements RouteListInterface
                     array_merge([
                         self::META_OUTPUT_PROCESSOR => $route->getOutputProcessor(),
                         self::META_CLASS => $route->getClass(),
+                        self::META_OUTPUT_PROCESSOR_STRICT => $route->isOutputContentTypeStrict()
                     ], $route->getMetadata())
                 );
             }
         });
     }
 
-    #[\Override]
+    #[Override]
     public function getRoute(string $method, string $path): ?Route
     {
         $pathMethod = strtoupper($method) . " " . strtolower($path);

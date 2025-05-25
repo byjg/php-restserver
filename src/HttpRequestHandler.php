@@ -8,9 +8,9 @@ use ByJG\RestServer\Attributes\BeforeRouteInterface;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
+use ByJG\RestServer\Exception\Error422Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
-use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\Middleware\AfterMiddlewareInterface;
 use ByJG\RestServer\Middleware\BeforeMiddlewareInterface;
 use ByJG\RestServer\Middleware\MiddlewareManagement;
@@ -25,6 +25,7 @@ use Closure;
 use Exception;
 use FastRoute\Dispatcher;
 use InvalidArgumentException;
+use Override;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -37,7 +38,7 @@ class HttpRequestHandler implements RequestHandler
     protected bool $useErrorHandler = true;
     protected bool $detailedErrorHandler = false;
 
-    protected Closure|string|null $defaultOutputProcessor = null;
+    protected string|null $defaultOutputProcessor = null;
 
     protected array $afterMiddlewareList = [];
     protected array $beforeMiddlewareList = [];
@@ -89,7 +90,8 @@ class HttpRequestHandler implements RequestHandler
 
         // Get OutputProcessor
         $outputProcessor = $this->initializeProcessor(
-            $this->getHttpRequest()->getRouteMetadata(RouteList::META_OUTPUT_PROCESSOR)
+            $this->getHttpRequest()->getRouteMetadata(RouteList::META_OUTPUT_PROCESSOR),
+            $this->getHttpRequest()->getRouteMetadata(RouteList::META_OUTPUT_PROCESSOR_STRICT) ?? false,
         );
         
         // Process Before Middleware
@@ -136,17 +138,19 @@ class HttpRequestHandler implements RequestHandler
 
     /**
      * Initialize the OutputProcessor
-     * @param null $class
+     * @param array|string|null $class
+     * @param bool $strict
      * @return mixed
-     * @throws OperationIdInvalidException
+     * @throws Error422Exception
      */
-    protected function initializeProcessor($class = null): mixed
+    protected function initializeProcessor(array|string|null $class = null, bool $strict = false): mixed
     {
-        $class = $class ?? $this->defaultOutputProcessor;
-        if (!empty($class)) {
-            $outputProcessor = BaseOutputProcessor::getFromClassName($class);
-        } else {
-            $outputProcessor = BaseOutputProcessor::getFromHttpAccept();
+        $outputProcessor = BaseOutputProcessor::factory($class);
+        if (empty($outputProcessor) && !$strict) {
+            $outputProcessor = BaseOutputProcessor::factory($this->defaultOutputProcessor);
+        }
+        if (empty($outputProcessor)) {
+            throw new Error422Exception('Accept content not allowed');
         }
         $outputProcessor->setWriter($this->writer);
         $outputProcessor->writeContentType();
@@ -257,7 +261,7 @@ class HttpRequestHandler implements RequestHandler
      * @throws Error520Exception
      * @throws InvalidClassException
      */
-    #[\Override]
+    #[Override]
     public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = false): bool
     {
         if ($outputBuffer) {
@@ -273,21 +277,21 @@ class HttpRequestHandler implements RequestHandler
         return $this->process($routeDefinition);
     }
 
-    #[\Override]
+    #[Override]
     public function withErrorHandlerDisabled(): static
     {
         $this->useErrorHandler = false;
         return $this;
     }
 
-    #[\Override]
+    #[Override]
     public function withDetailedErrorHandler(): static
     {
         $this->detailedErrorHandler = true;
         return $this;
     }
 
-    #[\Override]
+    #[Override]
     public function withMiddleware(AfterMiddlewareInterface|BeforeMiddlewareInterface $middleware, string $routePattern = null): static
     {
         $item = [
@@ -305,13 +309,11 @@ class HttpRequestHandler implements RequestHandler
         return $this;
     }
 
-    #[\Override]
-    public function withDefaultOutputProcessor(string|\Closure $processor, array $args = []): static
+    #[Override]
+    public function withDefaultOutputProcessor(string $processor): static
     {
-        if (!($processor instanceof Closure)) {
-            if (!is_subclass_of($processor, BaseOutputProcessor::class)) {
-                throw new InvalidArgumentException("Needs to be a class of " . BaseOutputProcessor::class);
-            }
+        if (!is_subclass_of($processor, BaseOutputProcessor::class)) {
+            throw new InvalidArgumentException("Needs to be a class of " . BaseOutputProcessor::class);
         }
 
         $this->defaultOutputProcessor = $processor;

@@ -4,6 +4,7 @@ namespace ByJG\RestServer\OutputProcessor;
 
 use ByJG\Serializer\Formatter\FormatterInterface;
 use ByJG\Serializer\Formatter\XmlFormatter;
+use Override;
 use Whoops\Handler\Handler;
 use Whoops\Handler\XmlResponseHandler;
 
@@ -11,19 +12,19 @@ class XmlOutputProcessor extends BaseOutputProcessor
 {
     public function __construct()
     {
-        $this->contentType = "text/xml";
+        $this->contentType = "application/xml";
     }
 
     /**
      * @return XmlResponseHandler
      */
-    #[\Override]
+    #[Override]
     public function getDetailedErrorHandler(): Handler
     {
         return new XmlResponseHandler();
     }
 
-    #[\Override]
+    #[Override]
     public function getErrorHandler(): Handler
     {
         return $this->getDetailedErrorHandler();
@@ -32,7 +33,7 @@ class XmlOutputProcessor extends BaseOutputProcessor
     /**
      * @return XmlFormatter
      */
-    #[\Override]
+    #[Override]
     public function getFormatter(): FormatterInterface
     {
         return new XmlFormatter();

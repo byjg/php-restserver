@@ -2,11 +2,9 @@
 
 namespace ByJG\RestServer\OutputProcessor;
 
-use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\RestServer\Writer\WriterInterface;
-use Closure;
 use Override;
 
 abstract class BaseOutputProcessor implements OutputProcessorInterface
@@ -33,19 +31,15 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         "*/*" => JsonOutputProcessor::class,
     ];
 
-    public static function getFromContentType(string $contentType): string
+    public static function getFromContentType(string $contentType): ?string
     {
-        if (!isset(self::$mimeTypeOutputProcessor[$contentType])) {
-            throw new OperationIdInvalidException("There is no output processor for $contentType");
-        }
-
-        return self::$mimeTypeOutputProcessor[$contentType];
+        return self::$mimeTypeOutputProcessor[$contentType] ?? null;
     }
 
     /**
-     * @throws OperationIdInvalidException
+     * @return OutputProcessorInterface
      */
-    public static function getFromHttpAccept(): OutputProcessorInterface
+    protected static function getFromHttpAccept(): OutputProcessorInterface
     {
         $accept = $_SERVER["HTTP_ACCEPT"] ?? "application/json";
 
@@ -55,13 +49,14 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
     }
 
     /**
-     * @param Closure|string $className
-     * @return OutputProcessorInterface
+     * @param string|null $className
+     * @return object|null
      */
-    public static function getFromClassName(Closure|string $className): object
+    protected static function getFromClassName(string|null $className): ?object
     {
-        if ($className instanceof Closure) {
-            return $className();
+        if (empty($className)) {
+            return null;
+
         }
         return new $className();
     }
@@ -129,5 +124,22 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         }
 
         $this->writer->flush();
+    }
+
+    public static function factory(string|array|null $class = null): OutputProcessorInterface|null
+    {
+        $outputProcessor = null;
+        if (empty($class)) {
+            $outputProcessor = BaseOutputProcessor::getFromHttpAccept();
+        } else {
+            foreach ((array)$class as $className) {
+                $outputProcessor = BaseOutputProcessor::getFromClassName($class);
+                if (!empty($outputProcessor)) {
+                    break;
+                }
+            }
+        }
+
+        return $outputProcessor;
     }
 }

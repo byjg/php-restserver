@@ -8,7 +8,8 @@ class Route
 {
     protected array|string $method;
     protected string $path;
-    protected ?string $outputProcessor = null;
+    protected string|array|null $outputProcessor = null;
+    protected bool $strict = false;
     protected array|string|Closure|null $class = null;
     protected array $metadata = [];
 
@@ -24,9 +25,9 @@ class Route
         $this->setPath($path);
     }
 
-    public function withOutputProcessor(string $outputProcessor): static
+    public function withOutputProcessor(string|array $outputProcessor, bool $strict = false): static
     {
-        $this->setOutputProcessor($outputProcessor);
+        $this->setOutputProcessor($outputProcessor, $strict);
         return $this;
     }
 
@@ -61,6 +62,11 @@ class Route
         return $this->method;
     }
 
+    public function isOutputContentTypeStrict(): bool
+    {
+        return $this->strict;
+    }
+
     /**
      * @param mixed $method
      * @return static
@@ -90,9 +96,9 @@ class Route
     }
 
     /**
-     * @return string
+     * @return string|array|null
      */
-    public function getOutputProcessor(): ?string
+    public function getOutputProcessor(): string|array|null
     {
         return $this->outputProcessor;
     }
@@ -101,9 +107,10 @@ class Route
      * @param mixed $outputProcessor
      * @return static
      */
-    protected function setOutputProcessor(string $outputProcessor): static
+    protected function setOutputProcessor(string|array $outputProcessor, bool $strict): static
     {
         $this->outputProcessor = $outputProcessor;
+        $this->strict = $strict;
         return $this;
     }
 

@@ -36,12 +36,10 @@ class HttpRequestHandlerTest extends TestCase
     {
         $result = $this->handler->withErrorHandlerDisabled();
 
-        $this->assertInstanceOf(HttpRequestHandler::class, $result);
         $this->assertSame($this->handler, $result);
 
         // Test that useErrorHandler is set to false
         $reflectionProperty = new ReflectionProperty(HttpRequestHandler::class, 'useErrorHandler');
-        $reflectionProperty->setAccessible(true);
         $this->assertFalse($reflectionProperty->getValue($this->handler));
     }
 
@@ -52,12 +50,10 @@ class HttpRequestHandlerTest extends TestCase
     {
         $result = $this->handler->withDetailedErrorHandler();
 
-        $this->assertInstanceOf(HttpRequestHandler::class, $result);
         $this->assertSame($this->handler, $result);
 
         // Test that detailedErrorHandler is set to true
         $reflectionProperty = new ReflectionProperty(HttpRequestHandler::class, 'detailedErrorHandler');
-        $reflectionProperty->setAccessible(true);
         $this->assertTrue($reflectionProperty->getValue($this->handler));
     }
 
@@ -68,12 +64,10 @@ class HttpRequestHandlerTest extends TestCase
     {
         $result = $this->handler->withDefaultOutputProcessor(JsonOutputProcessor::class);
 
-        $this->assertInstanceOf(HttpRequestHandler::class, $result);
         $this->assertSame($this->handler, $result);
 
         // Test that defaultOutputProcessor is set correctly
         $reflectionProperty = new ReflectionProperty(HttpRequestHandler::class, 'defaultOutputProcessor');
-        $reflectionProperty->setAccessible(true);
         $this->assertEquals(JsonOutputProcessor::class, $reflectionProperty->getValue($this->handler));
     }
 
@@ -89,26 +83,6 @@ class HttpRequestHandlerTest extends TestCase
     }
 
     /**
-     * Test that withDefaultOutputProcessor() with a closure returns the instance for chaining
-     */
-    public function testWithDefaultOutputProcessorClosure(): void
-    {
-        $closure = function () {
-            return new JsonOutputProcessor();
-        };
-
-        $result = $this->handler->withDefaultOutputProcessor($closure);
-
-        $this->assertInstanceOf(HttpRequestHandler::class, $result);
-        $this->assertSame($this->handler, $result);
-
-        // Test that defaultOutputProcessor is set to the closure
-        $reflectionProperty = new ReflectionProperty(HttpRequestHandler::class, 'defaultOutputProcessor');
-        $reflectionProperty->setAccessible(true);
-        $this->assertSame($closure, $reflectionProperty->getValue($this->handler));
-    }
-
-    /**
      * Test that withWriter() returns the instance for chaining
      */
     public function testWithWriter(): void
@@ -116,12 +90,10 @@ class HttpRequestHandlerTest extends TestCase
         $writer = new MemoryWriter();
         $result = $this->handler->withWriter($writer);
 
-        $this->assertInstanceOf(HttpRequestHandler::class, $result);
         $this->assertSame($this->handler, $result);
 
         // Test that writer is set correctly
         $reflectionProperty = new ReflectionProperty(HttpRequestHandler::class, 'writer');
-        $reflectionProperty->setAccessible(true);
         $this->assertSame($writer, $reflectionProperty->getValue($this->handler));
     }
 
@@ -135,12 +107,10 @@ class HttpRequestHandlerTest extends TestCase
 
         $result = $this->handler->withMiddleware($middleware, '/test');
 
-        $this->assertInstanceOf(HttpRequestHandler::class, $result);
         $this->assertSame($this->handler, $result);
 
         // Test that middleware is added to beforeMiddlewareList
         $reflectionProperty = new ReflectionProperty(HttpRequestHandler::class, 'beforeMiddlewareList');
-        $reflectionProperty->setAccessible(true);
         $beforeList = $reflectionProperty->getValue($this->handler);
 
         $this->assertCount(1, $beforeList);
@@ -170,12 +140,10 @@ class HttpRequestHandlerTest extends TestCase
 
         $result = $this->handler->withMiddleware($middleware, '/test');
 
-        $this->assertInstanceOf(HttpRequestHandler::class, $result);
         $this->assertSame($this->handler, $result);
 
         // Test that middleware is added to afterMiddlewareList
         $reflectionProperty = new ReflectionProperty(HttpRequestHandler::class, 'afterMiddlewareList');
-        $reflectionProperty->setAccessible(true);
         $afterList = $reflectionProperty->getValue($this->handler);
 
         $this->assertCount(1, $afterList);
@@ -219,11 +187,9 @@ class HttpRequestHandlerTest extends TestCase
 
         // Test that middleware is added to both lists
         $reflectionBefore = new ReflectionProperty(HttpRequestHandler::class, 'beforeMiddlewareList');
-        $reflectionBefore->setAccessible(true);
         $beforeList = $reflectionBefore->getValue($this->handler);
 
         $reflectionAfter = new ReflectionProperty(HttpRequestHandler::class, 'afterMiddlewareList');
-        $reflectionAfter->setAccessible(true);
         $afterList = $reflectionAfter->getValue($this->handler);
 
         $this->assertCount(1, $beforeList);

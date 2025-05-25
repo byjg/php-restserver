@@ -5,6 +5,7 @@ namespace Tests;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class ServerRequestHandlerTest extends TestCase
@@ -21,6 +22,46 @@ class ServerRequestHandlerTest extends TestCase
 
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = "http://localhost/test";
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
+
+        $this->processAndGetContent($this->object, $expectedHeader, $expectedData);
+
+        $this->assertTrue($this->reach);
+    }
+
+    public static function typesDataProvider()
+    {
+        return [
+            [
+                'application/json',
+                '{"key":"value"}'
+            ],
+            [
+                'application/xml',
+                "<?xml version=\"1.0\"?>\n<root><key>value</key></root>\n"
+            ],
+            [
+                'text/html',
+                "value\n"
+            ],
+            [
+                'text/csv',
+                "key\nvalue\n"
+            ],
+        ];
+    }
+
+    #[DataProvider('typesDataProvider')]
+    public function testHandle1Types(string $mimeType, string $expectedData): void
+    {
+        $expectedHeader = [
+            "HTTP/1.1 200 OK",
+            "Content-Type: $mimeType",
+        ];
+
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $_SERVER['REQUEST_URI'] = "http://localhost/test";
+        $_SERVER['HTTP_ACCEPT'] = $mimeType;
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
         $this->processAndGetContent($this->object, $expectedHeader, $expectedData);
