@@ -37,9 +37,9 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
     }
 
     /**
-     * @return OutputProcessorInterface
+     * @return OutputProcessorInterface|null
      */
-    protected static function getFromHttpAccept(): OutputProcessorInterface
+    protected static function getFromHttpAccept(): OutputProcessorInterface|null
     {
         $accept = $_SERVER["HTTP_ACCEPT"] ?? "application/json";
 
@@ -50,22 +50,15 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
 
     /**
      * @param string|null $className
-     * @return object|null
+     * @return OutputProcessorInterface|null
      */
-    protected static function getFromClassName(string|null $className): ?object
+    protected static function getFromClassName(string|null $className): ?OutputProcessorInterface
     {
         if (empty($className)) {
             return null;
 
         }
         return new $className();
-    }
-
-    public static function getOutputProcessorInstance($contentType): object
-    {
-        $class = self::getFromContentType($contentType);
-
-        return new $class();
     }
 
     #[Override]

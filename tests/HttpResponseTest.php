@@ -124,6 +124,7 @@ class HttpResponseTest extends TestCase
 
         // Test setSession
         $this->object->setSession('test_key', 'test_value');
+        /** @psalm-suppress EmptyArrayAccess */
         $this->assertEquals('test_value', $_SESSION['test_key']);
 
         // Test removeSession

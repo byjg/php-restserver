@@ -11,6 +11,7 @@ use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\Serializer\Serialize;
 use ByJG\Util\Uri;
+use Override;
 use Psr\SimpleCache\CacheInterface;
 
 class OpenApiRouteList extends RouteList
@@ -86,7 +87,7 @@ class OpenApiRouteList extends RouteList
         return $this;
     }
 
-    #[\Override]
+    #[Override]
     public function getRoutes(): array
     {
         if (empty($this->routes)) {
@@ -174,10 +175,9 @@ class OpenApiRouteList extends RouteList
      * @param string $method
      * @param string $path
      * @param array $properties
-     * @return string
-     * @throws OperationIdInvalidException
+     * @return string|null
      */
-    protected function getMethodOutputProcessor(string $method, string $path, array $properties): string
+    protected function getMethodOutputProcessor(string $method, string $path, array $properties): string|null
     {
         $key = strtoupper($method) . " " . $path;
         if (isset($this->overrideOutputProcessor[$key])) {
@@ -210,7 +210,7 @@ class OpenApiRouteList extends RouteList
         return $this->schema;
     }
 
-    #[\Override]
+    #[Override]
     public function getRoute(string $method, string $path): ?Route
     {
         if (empty($this->routes)) {

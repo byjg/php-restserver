@@ -78,9 +78,6 @@ BaseOutputProcessor::getFromHttpAccept();
 
 // From a specific content type
 BaseOutputProcessor::getFromContentType("application/json");
-
-// Get an instance directly from a content type
-BaseOutputProcessor::getOutputProcessorInstance("application/json");
 ```
 
 ## Creating your own OutputProcessor

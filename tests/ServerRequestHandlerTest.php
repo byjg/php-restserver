@@ -57,10 +57,7 @@ class ServerRequestHandlerTest extends TestCase
         $this->processAndGetContent(
             $handler,
             $expectedHeader,
-            $expectedData,
-            null,
-            [],
-            false // Don't set default output processor
+            $expectedData
         );
 
         // Verify we reached the endpoint
@@ -89,10 +86,7 @@ class ServerRequestHandlerTest extends TestCase
         $this->processAndGetContent(
             $handler,
             null,
-            '{"error":{"type":"Error 422","message":"Accept content not allowed"}}',
-            null,
-            [],
-            false // Don't set default output processor
+            '{"error":{"type":"Error 422","message":"Accept content not allowed"}}'
         );
     }
 
