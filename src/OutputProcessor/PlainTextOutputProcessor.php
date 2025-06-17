@@ -22,7 +22,7 @@ class PlainTextOutputProcessor extends BaseOutputProcessor
 
     public function getErrorHandler(): Handler
     {
-        $this->getDetailedErrorHandler();
+        return $this->getDetailedErrorHandler();
     }
 
     public function getFormatter(): FormatterInterface
