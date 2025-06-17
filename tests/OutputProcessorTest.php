@@ -7,6 +7,7 @@ use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\HtmlOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonCleanOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
+use ByJG\RestServer\OutputProcessor\PlainTextOutputProcessor;
 use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
 use ByJG\RestServer\Writer\MemoryWriter;
 use PHPUnit\Framework\TestCase;
@@ -70,6 +71,12 @@ class OutputProcessorTest extends TestCase
             [
                 HtmlOutputProcessor::class,
                 "text/html",
+                "teste\n\n\n0\n",
+                "teste\n\n\n0\n",
+            ],
+            [
+                PlainTextOutputProcessor::class,
+                "text/plain",
                 "teste\n\n\n0\n",
                 "teste\n\n\n0\n",
             ],

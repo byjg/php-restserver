@@ -29,6 +29,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
             "application/xml" => XmlOutputProcessor::class,
             "text/html" => HtmlOutputProcessor::class,
             "application/json" => JsonOutputProcessor::class,
+            "text/plain" => PlainTextOutputProcessor::class,
             "*/*" => JsonOutputProcessor::class,
         ];
 
