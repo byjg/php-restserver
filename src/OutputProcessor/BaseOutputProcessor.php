@@ -27,6 +27,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
     {
         $mimeTypeOutputProcessor = [
             "text/xml" => XmlOutputProcessor::class,
+            "text/csv" => CsvOutputProcessor::class,
             "application/xml" => XmlOutputProcessor::class,
             "text/html" => HtmlOutputProcessor::class,
             "application/json" => JsonOutputProcessor::class,
