@@ -2,6 +2,7 @@
 
 namespace ByJG\RestServer\OutputProcessor;
 
+use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\RestServer\Writer\WriterInterface;
@@ -22,18 +23,22 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         $this->writer = $writer;
     }
 
-    public static array $mimeTypeOutputProcessor = [
-        "text/xml" => XmlOutputProcessor::class,
-        "application/xml" => XmlOutputProcessor::class,
-        "text/html" => HtmlOutputProcessor::class,
-        "text/csv" => CsvOutputProcessor::class,
-        "application/json" => JsonOutputProcessor::class,
-        "*/*" => JsonOutputProcessor::class,
-    ];
-
-    public static function getFromContentType(string $contentType): ?string
+    public static function getFromContentType(string $contentType): string
     {
-        return self::$mimeTypeOutputProcessor[$contentType] ?? null;
+        $mimeTypeOutputProcessor = [
+            "text/xml" => XmlOutputProcessor::class,
+            "application/xml" => XmlOutputProcessor::class,
+            "text/html" => HtmlOutputProcessor::class,
+            "application/json" => JsonOutputProcessor::class,
+            "text/plain" => PlainTextOutputProcessor::class,
+            "*/*" => JsonOutputProcessor::class,
+        ];
+
+        if (!isset($mimeTypeOutputProcessor[$contentType])) {
+            throw new OperationIdInvalidException("There is no output processor for $contentType");
+        }
+
+        return $mimeTypeOutputProcessor[$contentType];
     }
 
     /**
