@@ -11,10 +11,12 @@ use ByJG\RestServer\Route\RouteListInterface;
 use ByJG\RestServer\Writer\MemoryWriter;
 use ByJG\WebRequest\Psr7\MemoryStream;
 use ByJG\WebRequest\Psr7\Response;
+use Override;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use RuntimeException;
 
 class MockRequestHandler extends HttpRequestHandler
 {
@@ -27,7 +29,7 @@ class MockRequestHandler extends HttpRequestHandler
      * MockRequestHandler constructor.
      * @noinspection PhpMissingParentConstructorInspection
      */
-    public function __construct(LoggerInterface $logger = null)
+    public function __construct(?LoggerInterface $logger = null)
     {
         $this->writer = new MemoryWriter();
         ErrorHandler::getInstance()->setLogger($logger ?? new NullLogger());
@@ -61,7 +63,7 @@ class MockRequestHandler extends HttpRequestHandler
     /**
      * @return HttpRequest
      */
-    #[\Override]
+    #[Override]
     protected function getHttpRequest(): HttpRequest
     {
         if (is_null($this->httpRequest) && !is_null($this->requestInterface)) {
@@ -69,7 +71,7 @@ class MockRequestHandler extends HttpRequestHandler
         }
 
         if (is_null($this->httpRequest)) {
-            throw new \RuntimeException("MockRequestHandler::withRequestObject() must be called before handle method");
+            throw new RuntimeException("MockRequestHandler::withRequestObject() must be called before handle method");
         }
 
         return $this->httpRequest;
@@ -96,7 +98,7 @@ class MockRequestHandler extends HttpRequestHandler
         return $this->psr7Response;
     }
 
-    #[\Override]
+    #[Override]
     public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = false): bool
     {
         return parent::handle($routeDefinition, false, false);
