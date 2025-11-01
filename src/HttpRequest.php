@@ -306,7 +306,7 @@ class HttpRequest
         return $value;
     }
 
-    public function getRouteMetadata(string $key = null): mixed
+    public function getRouteMetadata(?string $key = null): mixed
     {
         if (empty($key)) {
             return $this->routeMetadata;

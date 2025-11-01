@@ -49,7 +49,7 @@ class HttpRequestHandler implements RequestHandler
     /** @var WriterInterface */
     protected WriterInterface $writer;
 
-    public function __construct(LoggerInterface $logger = null)
+    public function __construct(?LoggerInterface $logger = null)
     {
         $this->writer = new HttpWriter();
         ErrorHandler::getInstance()->setLogger($logger ?? new NullLogger());
@@ -292,7 +292,7 @@ class HttpRequestHandler implements RequestHandler
     }
 
     #[Override]
-    public function withMiddleware(AfterMiddlewareInterface|BeforeMiddlewareInterface $middleware, string $routePattern = null): static
+    public function withMiddleware(AfterMiddlewareInterface|BeforeMiddlewareInterface $middleware, ?string $routePattern = null): static
     {
         $item = [
             'middleware' => $middleware,
