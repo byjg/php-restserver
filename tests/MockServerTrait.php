@@ -141,7 +141,7 @@ trait MockServerTrait
      * @throws Error520Exception
      * @throws InvalidClassException
      */
-    public function processAndGetContent(HttpRequestHandler $handler, ?array $expectedHeader, mixed $expectedData, AfterMiddlewareInterface|BeforeMiddlewareInterface $middleWare = null, array $expectedParams = []): void
+    public function processAndGetContent(HttpRequestHandler $handler, ?array $expectedHeader, mixed $expectedData, AfterMiddlewareInterface|BeforeMiddlewareInterface|null $middleWare = null, array $expectedParams = []): void
     {
         $writer = new MemoryWriter();
 

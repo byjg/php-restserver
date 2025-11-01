@@ -5,6 +5,8 @@ namespace Tests;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\ResponseBag;
 use Override;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
 class HttpResponseTest extends TestCase
@@ -112,6 +114,8 @@ class HttpResponseTest extends TestCase
         );
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testSessionManagement(): void
     {
         // Setup session for testing
@@ -135,6 +139,8 @@ class HttpResponseTest extends TestCase
         session_write_close();
     }
 
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function testCookieManagement(): void
     {
         // Since we can't test actual cookies in PHPUnit easily,
