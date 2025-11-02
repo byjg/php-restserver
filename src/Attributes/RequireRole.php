@@ -15,15 +15,18 @@ class RequireRole implements BeforeRouteInterface
 {
     protected string $role;
     protected string $roleParam;
+    protected ?string $roleKey;
 
     /**
      * @param string $role The required role value
      * @param string $roleParam The parameter path where the role is stored (default: 'role')
+     * @param string|null $roleKey Optional key to extract from the parameter if it's an array (e.g., 'role' to get $data['role'])
      */
-    public function __construct(string $role, string $roleParam = 'role')
+    public function __construct(string $role, string $roleParam = 'role', ?string $roleKey = null)
     {
         $this->role = $role;
         $this->roleParam = $roleParam;
+        $this->roleKey = $roleKey;
     }
 
     /**
@@ -40,7 +43,14 @@ class RequireRole implements BeforeRouteInterface
         }
 
         // Then check the role
-        $userRole = $request->param($this->roleParam);
+        $data = $request->param($this->roleParam);
+
+        // If roleKey is specified and data is an array, extract the value from the array
+        if ($this->roleKey !== null && is_array($data)) {
+            $userRole = $data[$this->roleKey] ?? null;
+        } else {
+            $userRole = $data;
+        }
 
         if ($userRole !== $this->role) {
             throw new Error403Exception('Insufficient privileges');

@@ -43,4 +43,11 @@ class RouteWithAuth
     {
         $response->write(['message' => 'Admin action executed']);
     }
+
+    #[RouteDefinition('GET', '/array-role')]
+    #[RequireRole('admin', 'jwt.data', 'role')]
+    public function arrayRoleRoute(HttpResponse $response, HttpRequest $request): void
+    {
+        $response->write(['message' => 'Admin access granted']);
+    }
 }
