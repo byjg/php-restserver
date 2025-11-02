@@ -107,7 +107,10 @@ class ServerRequestHandlerTest extends TestCase
         $this->assertTrue($this->reach);
     }
 
-    public static function typesDataProvider()
+    /**
+     * @return list<array{string, string}>
+     */
+    public static function typesDataProvider(): array
     {
         return [
             [

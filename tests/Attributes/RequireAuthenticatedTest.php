@@ -78,6 +78,7 @@ class RequireAuthenticatedTest extends TestCase
 
         // Create a mock middleware that simulates failed JWT parsing
         $middleware = new class implements BeforeMiddlewareInterface {
+            #[Override]
             public function beforeProcess(
                 mixed                         $dispatcherStatus,
                 HttpResponse $response,
@@ -120,6 +121,7 @@ class RequireAuthenticatedTest extends TestCase
 
         // Create a mock middleware that simulates successful JWT parsing
         $middleware = new class implements BeforeMiddlewareInterface {
+            #[Override]
             public function beforeProcess(
                 mixed                         $dispatcherStatus,
                 HttpResponse $response,

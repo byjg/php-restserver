@@ -22,7 +22,7 @@ use Whoops\Exception\Inspector;
 class TwirpResponseErrorHandlerTest extends TestCase
 {
     #[DataProvider('dataProvider')]
-    public function testTwirpResponse(string $class, int $code, string $description)
+    public function testTwirpResponse(string $class, int $code, string $description): void
     {
         $handler = new TwirpResponseErrorHandler();
         ob_start();
@@ -35,7 +35,12 @@ class TwirpResponseErrorHandlerTest extends TestCase
         $this->assertEquals('{"code":"' . $description . '","msg":"teste"}', $result);
     }
 
-    public static function dataProvider()
+    /**
+     * @return (int|string)[][]
+     *
+     * @psalm-return list{list{Error408Exception::class, 408, 'canceled'}, list{Error400Exception::class, 400, 'invalid_argument'}, list{Error422Exception::class, 422, 'invalid_argument'}, list{Error404Exception::class, 404, 'not_found'}, list{Error403Exception::class, 403, 'permission_denied'}, list{Error401Exception::class, 401, 'unauthenticated'}, list{Error429Exception::class, 429, 'resource_exhausted'}, list{Error412Exception::class, 412, 'failed_precondition'}, list{Error409Exception::class, 409, 'aborted'}, list{Error500Exception::class, 500, 'internal'}, list{Error501Exception::class, 501, 'unimplemented'}, list{Error503Exception::class, 503, 'unavailable'}}
+     */
+    public static function dataProvider(): array
     {
         return [
             [ Error408Exception::class, 408, "canceled" ],
@@ -54,7 +59,7 @@ class TwirpResponseErrorHandlerTest extends TestCase
     }
 
     #[DataProvider('dataProvider')]
-    public function testTwirpResponseMeta(string $class, int $code, string $description)
+    public function testTwirpResponseMeta(string $class, int $code, string $description): void
     {
         $handler = new TwirpResponseErrorHandler();
         ob_start();

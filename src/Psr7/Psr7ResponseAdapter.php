@@ -152,7 +152,8 @@ class Psr7ResponseAdapter
                 $data = $collection;
             }
 
-            return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            $encoded = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            return $encoded !== false ? $encoded : '{}';
         }
 
         // For other content types, convert to string
@@ -167,6 +168,7 @@ class Psr7ResponseAdapter
         }
 
         // Default: serialize as JSON
-        return json_encode($collection, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $encoded = json_encode($collection, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        return $encoded !== false ? $encoded : '[]';
     }
 }

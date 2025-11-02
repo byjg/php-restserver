@@ -8,6 +8,7 @@ use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Middleware\JwtMiddleware;
+use Override;
 
 #[Attribute(Attribute::TARGET_METHOD)]
 class RequireRole implements BeforeRouteInterface
@@ -29,6 +30,7 @@ class RequireRole implements BeforeRouteInterface
      * @throws Error401Exception
      * @throws Error403Exception
      */
+    #[Override]
     public function processBefore(HttpResponse $response, HttpRequest $request): void
     {
         // First check if authenticated

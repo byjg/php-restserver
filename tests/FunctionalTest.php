@@ -29,7 +29,10 @@ class FunctionalTest extends TestCase
     }
 
 
-    public static function dataProvider()
+    /**
+     * @return list<array{string, int, string, string}>
+     */
+    public static function dataProvider(): array
     {
         return [
             ['http://localhost:8090/testjson', 200, 'application/json', '{"name":"It worked"}'],

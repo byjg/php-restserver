@@ -65,6 +65,7 @@ class RequireRoleTest extends TestCase
 
         // Create middleware that simulates successful JWT with 'user' role
         $middleware = new class implements BeforeMiddlewareInterface {
+            #[Override]
             public function beforeProcess(
                 mixed                         $dispatcherStatus,
                 HttpResponse $response,
@@ -107,6 +108,7 @@ class RequireRoleTest extends TestCase
 
         // Create middleware that simulates successful JWT with 'admin' role
         $middleware = new class implements BeforeMiddlewareInterface {
+            #[Override]
             public function beforeProcess(
                 mixed                         $dispatcherStatus,
                 HttpResponse $response,
@@ -138,6 +140,7 @@ class RequireRoleTest extends TestCase
 
         // Create middleware that simulates successful JWT with 'user' role
         $middleware = new class implements BeforeMiddlewareInterface {
+            #[Override]
             public function beforeProcess(
                 mixed                         $dispatcherStatus,
                 HttpResponse $response,
@@ -168,6 +171,7 @@ class RequireRoleTest extends TestCase
 
         // Create middleware that simulates successful JWT with 'admin' role
         $middleware = new class implements BeforeMiddlewareInterface {
+            #[Override]
             public function beforeProcess(
                 mixed                         $dispatcherStatus,
                 HttpResponse $response,
@@ -210,6 +214,7 @@ class RequireRoleTest extends TestCase
 
         // Create middleware that simulates successful JWT with 'admin' role
         $middleware = new class implements BeforeMiddlewareInterface {
+            #[Override]
             public function beforeProcess(
                 mixed                         $dispatcherStatus,
                 HttpResponse $response,
