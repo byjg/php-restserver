@@ -13,10 +13,16 @@ use ByJG\RestServer\Middleware\JwtMiddleware;
 class RequireRole implements BeforeRouteInterface
 {
     protected string $role;
+    protected string $roleParam;
 
-    public function __construct(string $role)
+    /**
+     * @param string $role The required role value
+     * @param string $roleParam The parameter path where the role is stored (default: 'role')
+     */
+    public function __construct(string $role, string $roleParam = 'role')
     {
         $this->role = $role;
+        $this->roleParam = $roleParam;
     }
 
     /**
@@ -27,12 +33,12 @@ class RequireRole implements BeforeRouteInterface
     {
         // First check if authenticated
         if ($request->param(JwtMiddleware::JWT_PARAM_PARSE_STATUS) !== JwtMiddleware::JWT_SUCCESS) {
-            throw new Error401Exception($request->param(JwtMiddleware::JWT_PARAM_PARSE_MESSAGE));
+            $message = $request->param(JwtMiddleware::JWT_PARAM_PARSE_MESSAGE) ?? 'Authentication required';
+            throw new Error401Exception($message);
         }
 
         // Then check the role
-        $data = (array)$request->param("jwt.data");
-        $userRole = $data['role'] ?? null;
+        $userRole = $request->param($this->roleParam);
 
         if ($userRole !== $this->role) {
             throw new Error403Exception('Insufficient privileges');

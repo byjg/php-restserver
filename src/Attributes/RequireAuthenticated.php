@@ -17,7 +17,8 @@ class RequireAuthenticated implements BeforeRouteInterface
     public function processBefore(HttpResponse $response, HttpRequest $request): void
     {
         if ($request->param(JwtMiddleware::JWT_PARAM_PARSE_STATUS) !== JwtMiddleware::JWT_SUCCESS) {
-            throw new Error401Exception($request->param(JwtMiddleware::JWT_PARAM_PARSE_MESSAGE));
+            $message = $request->param(JwtMiddleware::JWT_PARAM_PARSE_MESSAGE) ?? 'Authentication required';
+            throw new Error401Exception($message);
         }
     }
 }
