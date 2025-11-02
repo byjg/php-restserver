@@ -7,3 +7,4 @@ vendor
 .phpunit.result.cache
 .DS_Store
 /phpunit.xml.dist.bak
+/.claude/settings.local.json
