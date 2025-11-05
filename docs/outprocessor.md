@@ -7,10 +7,11 @@ sidebar_label: Output Processors
 An OutputProcessor will parse the `$response->write($obj)` and output in the proper format.
 The available output processors are:
 
-- `JsonOutputProcessor` - Outputs data as JSON
-- `XmlOutputProcessor` - Outputs data as XML
-- `HtmlOutputProcessor` - Outputs data as HTML
-- `JsonCleanOutputProcessor` - Same as JsonOutputProcessor but doesn't output empty keys
+- `JsonOutputProcessor` - Outputs data as JSON (content-type: `application/json`)
+- `XmlOutputProcessor` - Outputs data as XML (content-type: `text/xml` or `application/xml`)
+- `HtmlOutputProcessor` - Outputs data as HTML (content-type: `text/html`)
+- `PlainTextOutputProcessor` - Outputs data as plain text (content-type: `text/plain`)
+- `JsonCleanOutputProcessor` - Same as JsonOutputProcessor but doesn't output empty/null keys
 - `JsonTwirpOutputProcessor` - JSON output format compatible with Twirp service handler
 
 ## What is an OutputProcessor?
@@ -66,6 +67,7 @@ Available MIME types:
 - `application/json` - Uses JsonOutputProcessor
 - `text/xml` or `application/xml` - Uses XmlOutputProcessor
 - `text/html` - Uses HtmlOutputProcessor
+- `text/plain` - Uses PlainTextOutputProcessor
 - `*/*` - Falls back to JsonOutputProcessor
 
 The following methods are available for selecting an output processor:
@@ -335,8 +337,92 @@ see [CSV Endpoint Example](csv-endpoint-example.md).
 
 ## Writer Interface
 
-The OutputProcessor uses a Writer to output the data. The default writer is `HttpWriter`, which outputs directly to the
-HTTP response.
+The OutputProcessor uses a Writer to control how data is sent to the client. RestServer provides three built-in writers,
+and you can create custom ones by implementing the `WriterInterface`.
+
+### Built-in Writers
+
+#### HttpWriter (Default)
+
+The default writer that sends output directly to the HTTP response using PHP's native functions.
+
+```php
+<?php
+use ByJG\RestServer\Writer\HttpWriter;
+use ByJG\RestServer\HttpRequestHandler;
+
+$server = new HttpRequestHandler();
+// HttpWriter is used by default - no need to set explicitly
+```
+
+**Use HttpWriter when:**
+
+- Running in a web server environment (Apache, Nginx, PHP-FPM)
+- Sending standard HTTP responses to browsers or API clients
+- You want default behavior
+
+#### MemoryWriter
+
+Captures all output (headers and body) in memory without sending it to the client. Extends `StdoutWriter` and adds
+methods to retrieve captured data.
+
+```php
+<?php
+use ByJG\RestServer\Writer\MemoryWriter;
+use ByJG\RestServer\HttpRequestHandler;
+
+$writer = new MemoryWriter();
+$server = new HttpRequestHandler();
+$server->withWriter($writer);
+$server->handle($routeDefinition);
+
+// Retrieve captured output
+$statusCode = $writer->getStatusCode();  // e.g., 200
+$headers = $writer->getHeaders();         // ['HTTP/1.1 200 OK', 'Content-Type: application/json']
+$body = $writer->getData();               // '{"result":"success"}'
+```
+
+**Use MemoryWriter when:**
+
+- Writing unit tests and need to assert response content
+- Capturing output for post-processing or logging
+- Building mock responses for testing
+- You don't want output sent to client immediately
+
+**Available methods:**
+
+- `getData(): string` - Get captured response body
+- `getHeaders(): array` - Get all headers that would be sent
+- `getStatusCode(): int` - Get HTTP status code
+
+#### StdoutWriter
+
+Outputs headers and body to stdout (standard output) instead of HTTP. Useful for CLI/console applications.
+
+```php
+<?php
+use ByJG\RestServer\Writer\StdoutWriter;
+use ByJG\RestServer\HttpRequestHandler;
+
+$server = new HttpRequestHandler();
+$server->withWriter(new StdoutWriter());
+$server->handle($routeDefinition);
+
+// Output format:
+// HTTP/1.1 200 OK
+// Content-Type: application/json
+//
+// {"result":"success"}
+```
+
+**Use StdoutWriter when:**
+
+- Running RestServer in CLI/console mode
+- Debugging and want to see raw HTTP output
+- Piping output to files or other commands
+- Testing HTTP responses in terminal
+
+### Creating Custom Writers
 
 You can create your own writer by implementing the `WriterInterface` and setting it in the HttpRequestHandler:
 

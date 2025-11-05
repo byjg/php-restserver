@@ -4,15 +4,22 @@ sidebar_label: Intercepting Request
 ---
 # Intercepting Request
 
-It is possible add a PHP attribute to intercept the request before or after the route is executed.
+> **Note:** For comprehensive examples and use cases, see
+> the [Route Interceptors section](routes-using-php-attributes.md#route-interceptors) in the PHP Attributes documentation.
 
-## Create the class to intercept the request
+Request intercepting allows you to execute code before or after a route handler using PHP 8 attributes. This is useful
+for route-specific validation, logging, transformation, or other cross-cutting concerns at the individual route level.
 
-### Intercepting Before Execute the Route
+## Interfaces
+
+Interceptors are PHP 8 attributes that implement one of two interfaces:
+
+### BeforeRouteInterface
+
+Executes before the route handler:
 
 ```php
 <?php
-
 namespace My;
 
 use Attribute;
@@ -25,16 +32,17 @@ class MyBeforeProcess implements BeforeRouteInterface
 {
     public function processBefore(HttpResponse $response, HttpRequest $request)
     {
-        // Do something before the route is executed
+        // Validation, authentication, logging, etc.
     }
 }
 ```
 
-### Intercepting After Execute the Route
+### AfterRouteInterface
+
+Executes after the route handler:
 
 ```php
 <?php
-
 namespace My;
 
 use Attribute;
@@ -47,12 +55,14 @@ class MyAfterProcess implements AfterRouteInterface
 {
     public function processAfter(HttpResponse $response, HttpRequest $request)
     {
-        // Do something after the route is executed
+        // Response transformation, logging, cleanup, etc.
     }
 }
 ```
 
-## Set the attributes in the class:
+## Usage
+
+Apply interceptor attributes to route methods:
 
 ```php
 <?php
@@ -64,24 +74,24 @@ use ByJG\RestServer\HttpResponse;
 
 class ClassName
 {
-    //...
-    
     #[RouteDefinition('GET', '/route1')]
     #[MyBeforeProcess()]
     public function someMethod(HttpResponse $response, HttpRequest $request)
     {
         $response->write(['result' => 'ok']);
     }
-
-    #[RouteDefinition('PUT', '/route2')]
-    #[MyAfterProcess()]
-    public function anotherMethod(HttpResponse $response, HttpRequest $request)
-    {
-        $response->write(['result' => 'ok']);
-    }
-    //...
 }
 ```
+
+For complete examples including:
+
+- Built-in interceptors (RequireAuthenticated, RequireRole)
+- Multiple interceptors on a single route
+- Interceptors with parameters
+- Real-world use cases
+
+See the [Route Interceptors section](routes-using-php-attributes.md#route-interceptors) in the PHP Attributes
+documentation.
 
 ## Combining Middleware and Request Intercepting
 

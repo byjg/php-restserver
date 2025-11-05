@@ -78,18 +78,21 @@ function ($response, $request) {
 
 ## HttpResponse
 
-| Method                                            | Description                                       |
-|---------------------------------------------------|---------------------------------------------------|
-| setSession($var, $value)                          | Set a value in the session;                       |
-| removeSession($var)                               | Remove a value from the session;                  |
-| addCookie($name, $value, $expire, $path, $domain) | Add a cookie;                                     |
-| removeCookie($var)                                | Remove a value from the cookies;                  |
-| getResponseBag()                                  | Returns the ResponseBag object;                   |
-| write($object)                                    | See below;                                        |
-| writeDebug($object)                               | Add information to be displayed in case of error; |
-| emptyResponse()                                   | Empty all previously write responses;             |
-| addHeader($header, $value)                        | Add an header entry;                              |
-| setResponseCode($value)                           | Set the HTTP response code (eg. 200, 401, etc);   |
+| Method                                            | Description                                             |
+|---------------------------------------------------|---------------------------------------------------------|
+| setSession($var, $value)                          | Set a value in the session;                             |
+| removeSession($var)                               | Remove a value from the session;                        |
+| addCookie($name, $value, $expire, $path, $domain) | Add a cookie;                                           |
+| removeCookie($var)                                | Remove a value from the cookies;                        |
+| getResponseBag()                                  | Returns the ResponseBag object;                         |
+| write($object)                                    | See below;                                              |
+| writeDebug($object)                               | Add information to be displayed in case of error;       |
+| emptyResponse()                                   | Empty all previously write responses;                   |
+| addHeader($header, $value)                        | Add an header entry;                                    |
+| getHeaders()                                      | Get all headers that have been set;                     |
+| setResponseCode($code, $description = null)       | Set the HTTP response code (eg. 200, 401, etc);         |
+| getResponseCode()                                 | Get the current HTTP response code;                     |
+| getResponseCodeDescription()                      | Get the response reason phrase (eg. "OK", "Not Found"); |
 
 ### Output your data
 
