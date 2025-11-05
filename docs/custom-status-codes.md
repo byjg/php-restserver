@@ -1,5 +1,6 @@
 ---
-sidebar_position: 9.5
+sidebar_position: 16
+sidebar_label: Custom Status Codes
 ---
 
 # Custom HTTP Status Codes

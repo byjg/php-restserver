@@ -1,5 +1,6 @@
 ---
 sidebar_position: 1
+sidebar_label: Setup
 ---
 
 # Running the rest server
@@ -33,7 +34,7 @@ $restServer
 ;
 
 // Handle the request
-// Parameters: routeDefinition, outputBuffer (default: true), session (default: true)
+// Parameters: routeDefinition, outputBuffer (default: true), session (default: false)
 $restServer->handle($routeDefinition);
 ```
 

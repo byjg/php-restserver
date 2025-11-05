@@ -1,3 +1,8 @@
+---
+sidebar_position: 17
+sidebar_label: CSV Endpoint Example
+---
+
 # Creating CSV File Download Endpoints
 
 This guide shows how to create endpoints that return CSV files for download using PHP RestServer.
@@ -52,14 +57,14 @@ class CsvOutputProcessor extends BaseOutputProcessor
                 if (!is_array($data)) {
                     return false;
                 }
-                
+
                 // Create CSV output
                 $output = fopen('php://temp', 'r+');
-                
+
                 // Add headers if we have an associative array
                 if (isset($data[0]) && is_array($data[0])) {
                     fputcsv($output, array_keys($data[0]));
-                    
+
                     // Add data rows
                     foreach ($data as $row) {
                         fputcsv($output, $row);
@@ -69,11 +74,11 @@ class CsvOutputProcessor extends BaseOutputProcessor
                     fputcsv($output, array_keys($data));
                     fputcsv($output, array_values($data));
                 }
-                
+
                 rewind($output);
                 $csvContent = stream_get_contents($output);
                 fclose($output);
-                
+
                 return $csvContent;
             }
         };
@@ -112,7 +117,7 @@ class YourController
         // Set headers for file download
         $filename = 'data-export-' . date('Y-m-d') . '.csv';
         $response->addHeader('Content-Disposition', 'attachment; filename="' . $filename . '"');
-        
+
         // Sample data for CSV
         $data = [
             [
@@ -126,7 +131,7 @@ class YourController
                 'email' => 'jane@example.com'
             ]
         ];
-        
+
         // Write the data to the response
         $response->write($data);
     }

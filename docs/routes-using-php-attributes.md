@@ -1,5 +1,6 @@
 ---
 sidebar_position: 5
+sidebar_label: Routes using PHP Attributes
 ---
 # Create Routes Using PHP Attributes
 
@@ -253,3 +254,114 @@ public function performSensitiveOperation(HttpResponse $response, HttpRequest $r
 
 Interceptors help keep your route handler methods focused on business logic by moving cross-cutting concerns into
 reusable attributes.
+
+## Built-in Route Attributes
+
+RestServer provides built-in attributes for common authentication and authorization scenarios.
+
+### RequireAuthenticated
+
+The `RequireAuthenticated` attribute ensures that a route can only be accessed by authenticated users. It works in
+conjunction with the JWT middleware.
+
+```php
+<?php
+namespace My\Controllers;
+
+use ByJG\RestServer\Attributes\RouteDefinition;
+use ByJG\RestServer\Attributes\RequireAuthenticated;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
+
+class SecureController
+{
+    #[RouteDefinition('GET', '/profile')]
+    #[RequireAuthenticated]
+    public function getProfile(HttpResponse $response, HttpRequest $request)
+    {
+        // Only authenticated users can access this endpoint
+        $userId = $request->param('jwt.sub');
+        $response->write(['user_id' => $userId]);
+    }
+}
+```
+
+If the user is not authenticated (JWT token is missing or invalid), the attribute will throw a `Error401Exception` with
+the message from the JWT middleware.
+
+### RequireRole
+
+The `RequireRole` attribute ensures that a route can only be accessed by users with a specific role. It also checks for
+authentication first.
+
+```php
+<?php
+namespace My\Controllers;
+
+use ByJG\RestServer\Attributes\RouteDefinition;
+use ByJG\RestServer\Attributes\RequireRole;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
+
+class AdminController
+{
+    #[RouteDefinition('GET', '/admin/users')]
+    #[RequireRole('admin')]
+    public function listUsers(HttpResponse $response, HttpRequest $request)
+    {
+        // Only users with 'admin' role can access this endpoint
+        $response->write(['users' => $this->getAllUsers()]);
+    }
+
+    #[RouteDefinition('GET', '/moderator/reports')]
+    #[RequireRole('moderator', 'jwt.role')]
+    public function viewReports(HttpResponse $response, HttpRequest $request)
+    {
+        // Check the role from a custom JWT parameter
+        $response->write(['reports' => $this->getReports()]);
+    }
+}
+```
+
+**Constructor parameters:**
+
+- `$role` (string, required): The required role value
+- `$roleParam` (string, optional, default: 'role'): The parameter path where the role is stored
+- `$roleKey` (string|null, optional): Optional key to extract from the parameter if it's an array or object
+
+**Examples:**
+
+```php
+// Basic usage - checks if $request->param('role') === 'admin'
+#[RequireRole('admin')]
+
+// Custom parameter - checks if $request->param('jwt.role') === 'moderator'
+#[RequireRole('moderator', 'jwt.role')]
+
+// Extract from array - if $request->param('user') returns ['role' => 'admin'],
+// checks if $user['role'] === 'admin'
+#[RequireRole('admin', 'user', 'role')]
+
+// Extract from object - if $request->param('user') returns object with role property,
+// checks if $user->role === 'editor'
+#[RequireRole('editor', 'user', 'role')]
+```
+
+**Exceptions:**
+
+- Throws `Error401Exception` if the user is not authenticated
+- Throws `Error403Exception` if the user doesn't have the required role
+
+### Combining Authentication Attributes
+
+You can use both attributes together, though `RequireRole` already checks authentication:
+
+```php
+#[RouteDefinition('POST', '/admin/settings')]
+#[RequireAuthenticated]  // Optional - RequireRole already checks this
+#[RequireRole('admin')]
+public function updateSettings(HttpResponse $response, HttpRequest $request)
+{
+    // Implementation...
+}
+```

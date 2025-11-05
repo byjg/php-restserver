@@ -1,5 +1,6 @@
 ---
 sidebar_position: 3
+sidebar_label: Routes using Closures
 ---
 # Creating Routes Using Closures
 

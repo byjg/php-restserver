@@ -26,10 +26,21 @@ Processing the request and output the response:
 
 Advanced:
 - [Middleware](docs/middleware.md)
+    - [CORS Support](docs/middleware-cors.md)
+    - [Static Server Files](docs/middleware-staticserver.md)
+    - [JWT Authentication](docs/middleware-jwt.md)
 - [Error Handler](docs/error-handler.md)
 - [Intercepting the Request](docs/intercepting-request.md)
 - [Output Processors](docs/outprocessor.md)
 - [Caching Routes](docs/caching-routes.md)
+
+Additional topics:
+
+- [Mock Testing](docs/mock-testing.md)
+- [Route Metadata](docs/route-metadata.md)
+- [Content Negotiation](docs/content-negotiation.md)
+- [Custom HTTP Status Codes](docs/custom-status-codes.md)
+- [CSV Endpoint Example](docs/csv-endpoint-example.md)
 
 ## Installation
 

@@ -1,5 +1,6 @@
 ---
-sidebar_position: 8.5
+sidebar_position: 15
+sidebar_label: Content Negotiation
 ---
 
 # Content Negotiation

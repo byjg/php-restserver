@@ -1,5 +1,6 @@
 ---
 sidebar_position: 7
+sidebar_label: HttpRequest and HttpResponse
 ---
 
 # Processing the Request and Response

@@ -1,5 +1,6 @@
 ---
 sidebar_position: 6
+sidebar_label: Auto-Generate from OpenApi
 ---
 # Auto-Generate from an OpenApi definition
 

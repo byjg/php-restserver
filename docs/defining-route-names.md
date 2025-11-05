@@ -1,5 +1,6 @@
 ---
 sidebar_position: 2
+sidebar_label: Defining Route Names
 ---
 
 # Defining a Route Name
