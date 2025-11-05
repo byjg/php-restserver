@@ -4,13 +4,14 @@ sidebar_label: Static Server Files
 ---
 # Server Static Files
 
+> **Note:** For general middleware usage patterns, see [Middleware](middleware.md).
+
 By default, Http Server Handler will only process the defined routes. Using this middleware, if a route is not found,
 the middleware will try to find a file that matches with the request path and output it.
 
 ```php
 <?php
 $serverStatic = new ServerStaticMiddleware();
-$restServer->withMiddleware($serverStatic);
 ```
 
 ## Features

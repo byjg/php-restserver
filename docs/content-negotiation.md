@@ -39,33 +39,11 @@ public function getResource(HttpRequest $request, HttpResponse $response)
 
 ## Output Processors
 
-Output processors are responsible for converting your data into the appropriate format:
+RestServer uses output processors to transform your data into different formats (JSON, XML, CSV, etc.). For complete
+documentation on available output processors and how to create custom ones, see [Output Processors](outprocessor.md).
 
-1. **JsonOutputProcessor** - Formats data as JSON (default)
-2. **XmlOutputProcessor** - Formats data as XML
-3. **JsonTwirpOutputProcessor** - Formats data as Twirp-compatible JSON
-4. **Custom processors** - Create your own by implementing the OutputProcessorInterface
-
-### Setting the Output Processor
-
-You can set the output processor per route:
-
-```php
-<?php
-use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
-
-// Using closures
-$routeList->addRoute('GET', '/api/xml-data', function ($response) {
-    $response->write(['data' => 'value']);
-}, XmlOutputProcessor::class);
-
-// Using PHP 8 attributes
-#[RouteDefinition('GET', '/api/xml-data', XmlOutputProcessor::class)]
-public function getXmlData(HttpResponse $response)
-{
-    $response->write(['data' => 'value']);
-}
-```
+This section focuses specifically on how content negotiation works with Accept headers and determines which output
+processor to use.
 
 ## Content Type Header
 

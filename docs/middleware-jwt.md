@@ -4,6 +4,8 @@ sidebar_label: JWT Authentication
 ---
 # Jwt Middleware
 
+> **Note:** For general middleware usage patterns, see [Middleware](middleware.md).
+
 The JWT Middleware is a middleware that will validate the JWT token in the Authorization header.
 If the token is valid, it will add the `jwt` attribute to the request with the decoded token.
 
@@ -20,11 +22,10 @@ $jwtKey = new JwtKeySecret("password", false);
 $jwtWrapper = new JwtWrapper("localhost", $jwtKey);
 ```
 
-### Create the JwtMiddleware and add to the HttpHandler
+### Create the JwtMiddleware
 
 ```php
 $jwtMiddleware = new JwtMiddleware($jwtWrapper);
-$server->withMiddleware($jwtMiddleware);
 ```
 
 ### Getting the Parsed Token    
@@ -70,7 +71,6 @@ $ignorePaths = [
 
 // Create the middleware with ignore paths
 $jwtMiddleware = new JwtMiddleware($jwtWrapper, $ignorePaths);
-$server->withMiddleware($jwtMiddleware);
 ```
 
 ### How Path Ignoring Works

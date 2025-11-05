@@ -330,53 +330,8 @@ class CachedJsonOutputProcessor extends JsonOutputProcessor
 
 Extend your output processor to handle additional MIME types:
 
-```php
-<?php
-namespace MyApp\OutputProcessor;
-
-use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
-use ByJG\Serializer\Formatter\FormatterInterface;
-
-class CsvOutputProcessor extends BaseOutputProcessor
-{
-    protected string $contentType = "text/csv";
-    
-    public function getFormatter(): FormatterInterface
-    {
-        return new class implements FormatterInterface {
-            public function process($data): string|false
-            {
-                if (!is_array($data)) {
-                    return false;
-                }
-                
-                // Create CSV output
-                $output = fopen('php://temp', 'r+');
-                
-                // Add headers if we have an associative array
-                if (isset($data[0]) && is_array($data[0])) {
-                    fputcsv($output, array_keys($data[0]));
-                    
-                    // Add data rows
-                    foreach ($data as $row) {
-                        fputcsv($output, $row);
-                    }
-                } else {
-                    // It's a single record
-                    fputcsv($output, array_keys($data));
-                    fputcsv($output, array_values($data));
-                }
-                
-                rewind($output);
-                $csvContent = stream_get_contents($output);
-                fclose($output);
-                
-                return $csvContent;
-            }
-        };
-    }
-}
-```
+For a complete example of creating a custom CSV OutputProcessor with file download capabilities,
+see [CSV Endpoint Example](csv-endpoint-example.md).
 
 ## Writer Interface
 
