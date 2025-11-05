@@ -101,6 +101,13 @@ class MockRequestHandler extends HttpRequestHandler
     #[Override]
     public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = false): bool
     {
-        return parent::handle($routeDefinition, false, false);
+        try {
+            return parent::handle($routeDefinition, false, false);
+        } finally {
+            // Cleanup: unregister error handler after mock request processing completes
+            // This prevents global state pollution and "risky test" warnings in PHPUnit
+            // For MockRequestHandler, we always want to clean up since it's only used in testing
+            ErrorHandler::getInstance()->unregister();
+        }
     }
 }
