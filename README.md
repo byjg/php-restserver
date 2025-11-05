@@ -23,6 +23,7 @@ Creating and customizing routes:
 
 Processing the request and output the response:
 - [HttpRequest and HttpResponse object](docs/httprequest-httpresponse.md)
+- [File Uploads](docs/file-uploads.md)
 
 Advanced:
 - [Middleware](docs/middleware.md)
@@ -35,12 +36,12 @@ Advanced:
 - [Caching Routes](docs/caching-routes.md)
 
 Additional topics:
-
 - [Mock Testing](docs/mock-testing.md)
 - [Route Metadata](docs/route-metadata.md)
 - [Content Negotiation](docs/content-negotiation.md)
 - [Custom HTTP Status Codes](docs/custom-status-codes.md)
 - [CSV Endpoint Example](docs/csv-endpoint-example.md)
+- [PSR-7 Adapters](docs/psr7-adapters.md)
 
 ## Installation
 
