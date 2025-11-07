@@ -82,6 +82,51 @@ See how to change the OutputProcessor [here](outprocessor.md).
 
 ## Exception Types
 
+### HttpResponseException Base Class
+
+All HTTP exception classes in RestServer extend from `HttpResponseException`, which provides common functionality for
+handling HTTP error responses.
+
+**Base Class Methods:**
+
+| Method                                      | Description                                                             |
+|---------------------------------------------|-------------------------------------------------------------------------|
+| `getStatusCode(): int`                      | Returns the HTTP status code (e.g., 404, 500)                           |
+| `getStatusMessage(): string`                | Returns the status message (e.g., "Not Found", "Internal Server Error") |
+| `getMeta(): array`                          | Returns additional metadata associated with the exception               |
+| `setResponse(HttpResponse $response): void` | Associates an HttpResponse object with the exception                    |
+| `sendHeader(): void`                        | Sends the appropriate HTTP status code header                           |
+
+**Constructor:**
+
+```php
+public function __construct(
+    int $statusCode,
+    string $message = "",
+    int $code = 0,
+    ?\Throwable $previous = null,
+    array $meta = []
+)
+```
+
+**Example using base class methods:**
+
+```php
+<?php
+use ByJG\RestServer\Exception\Error404Exception;
+
+try {
+    throw new Error404Exception("User not found", 0, null, ['user_id' => 123]);
+} catch (HttpResponseException $e) {
+    $statusCode = $e->getStatusCode();      // 404
+    $statusMsg = $e->getStatusMessage();    // "Not Found"
+    $meta = $e->getMeta();                  // ['user_id' => 123]
+    $message = $e->getMessage();            // "User not found"
+}
+```
+
+### Built-in Exception Classes
+
 RestServer provides several exception types that map to different HTTP status codes:
 
 | Exception Class   | HTTP Status Code | Description            |
