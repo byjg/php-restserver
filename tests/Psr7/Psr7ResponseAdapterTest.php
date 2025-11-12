@@ -38,14 +38,14 @@ class Psr7ResponseAdapterTest extends TestCase
     public function testFromHttpResponseHeaders(): void
     {
         $httpResponse = new HttpResponse();
-        $httpResponse->addHeader('X-Custom-Header', 'custom-value');
+        $httpResponse->addHeader('x-custom-Header', 'custom-value');
         $httpResponse->addHeader('X-Rate-Limit', '100');
         $httpResponse->write(['data' => 'test']);
 
         $psr7Response = Psr7ResponseAdapter::fromHttpResponse($httpResponse);
 
-        $this->assertEquals(['custom-value'], $psr7Response->getHeader('X-Custom-Header'));
-        $this->assertEquals(['100'], $psr7Response->getHeader('X-Rate-Limit'));
+        $this->assertEquals(['custom-value'], $psr7Response->getHeader('x-custom-Header'));
+        $this->assertEquals(['100'], $psr7Response->getHeader('x-rate-limit'));
     }
 
     public function testFromHttpResponseContentType(): void
@@ -134,15 +134,15 @@ class Psr7ResponseAdapterTest extends TestCase
     public function testToHttpResponseHeaders(): void
     {
         $psr7Response = new Response(200);
-        $psr7Response = $psr7Response->withHeader('X-Custom', 'value1');
+        $psr7Response = $psr7Response->withHeader('x-custom', 'value1');
         $psr7Response = $psr7Response->withHeader('X-Another', ['value2', 'value3']);
 
         $httpResponse = Psr7ResponseAdapter::toHttpResponse($psr7Response);
 
         $headers = $httpResponse->getHeaders();
-        $this->assertArrayHasKey('X-Custom', $headers);
-        $this->assertEquals(['value1'], $headers['X-Custom']);
-        $this->assertArrayHasKey('X-Another', $headers);
+        $this->assertArrayHasKey('x-custom', $headers);
+        $this->assertEquals(['value1'], $headers['x-custom']);
+        $this->assertArrayHasKey('x-another', $headers);
     }
 
     public function testToHttpResponseJsonBody(): void
@@ -198,7 +198,7 @@ class Psr7ResponseAdapterTest extends TestCase
         $this->assertEquals(201, $httpResponse->getResponseCode());
 
         $headers = $httpResponse->getHeaders();
-        $this->assertArrayHasKey('X-New', $headers);
+        $this->assertArrayHasKey('x-new', $headers);
     }
 
     public function testRoundTripConversion(): void
@@ -220,7 +220,7 @@ class Psr7ResponseAdapterTest extends TestCase
         $this->assertEquals('OK', $convertedResponse->getResponseCodeDescription());
 
         $headers = $convertedResponse->getHeaders();
-        $this->assertArrayHasKey('X-Test', $headers);
+        $this->assertArrayHasKey('x-test', $headers);
 
         $collection = $convertedResponse->getResponseBag()->getCollection();
         $this->assertEquals(['message' => 'Hello World'], $collection[0]);

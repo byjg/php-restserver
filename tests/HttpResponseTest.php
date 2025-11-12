@@ -40,37 +40,37 @@ class HttpResponseTest extends TestCase
 
         $this->assertEquals(
             [
-                'X-Test' => 'OK',
+                'x-test' => 'OK',
             ],
             $this->object->getHeaders()
         );
 
-        $this->object->addHeader('X-Test2', 'OK2');
+        $this->object->addHeader('x-test2', 'OK2');
 
         $this->assertEquals(
             [
-                'X-Test' => 'OK',
-                'X-Test2' => 'OK2',
+                'x-test' => 'OK',
+                'x-test2' => 'OK2',
             ],
             $this->object->getHeaders()
         );
 
-        $this->object->addHeader('X-Test', 'OK3');
+        $this->object->addHeader('x-test', 'OK3');
 
         $this->assertEquals(
             [
-                'X-Test' => 'OK3',
-                'X-Test2' => 'OK2',
+                'x-test' => 'OK3',
+                'x-test2' => 'OK2',
             ],
             $this->object->getHeaders()
         );
 
-        $this->object->addHeader('X-Test2', ['value1', 'value2']);
+        $this->object->addHeader('x-test2', ['value1', 'value2']);
 
         $this->assertEquals(
             [
-                'X-Test' => 'OK3',
-                'X-Test2' => ['value1', 'value2'],
+                'x-test' => 'OK3',
+                'x-test2' => ['value1', 'value2'],
             ],
             $this->object->getHeaders()
         );

@@ -28,7 +28,7 @@ class ServerStaticMiddlewareTest extends TestCase
     {
         $expectedHeader = [
             "HTTP/1.1 200 OK",
-            "Content-Type: application/json",
+            "content-type: application/json",
         ];
         $expectedData =
             "{\n" .

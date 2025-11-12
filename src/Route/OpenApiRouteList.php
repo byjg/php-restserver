@@ -203,9 +203,10 @@ class OpenApiRouteList extends RouteList
                 return $this->overrideOutputProcessor[$produce];
             }
 
-            $returnOutputProcessor[] = BaseOutputProcessor::getFromContentType($produce);
+            $returnOutputProcessor[$produce] = BaseOutputProcessor::getFromContentType($produce);
         }
 
+        $returnOutputProcessor = array_values($returnOutputProcessor);
         return (count($returnOutputProcessor) === 1) ? $returnOutputProcessor[0] : $returnOutputProcessor;
     }
 

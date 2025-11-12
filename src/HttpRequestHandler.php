@@ -245,7 +245,7 @@ class HttpRequestHandler implements RequestHandler
         }
 
         $headers = $this->getHttpResponse()->getHeaders();
-        $expectedOutput = $headers["content-type"] ?? [$outputProcessor->getContentType()];
+        $expectedOutput = (array)($headers["content-type"] ?? $outputProcessor->getContentType());
         if ($expectedOutput[0] !== $outputProcessor->getContentType()) {
             $outputProcessor = $this->initializeProcessor($expectedOutput[0]);
         }

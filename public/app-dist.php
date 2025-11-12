@@ -2,9 +2,11 @@
 
 namespace My;
 
+use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\Middleware\ServerStaticMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
+use ByJG\RestServer\Route\Route;
 use ByJG\RestServer\Route\RouteList;
 
 /**
@@ -17,23 +19,23 @@ require_once __DIR__ . '/../vendor/autoload.php';
 // Defining Routes
 $routeDefinition = new RouteList();
 
-$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testjson")
-    ->withClass(\My\ClassName::class, "someMethod")
+$routeDefinition->addRoute(Route::get("/testjson")
+    ->withClass(ClassName::class, "someMethod")
 );
 
-$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testxml")
+$routeDefinition->addRoute(Route::get("/testxml")
     ->withOutputProcessor(XmlOutputProcessor::class)
-    ->withClass(\My\ClassName::class, "someMethod")
+    ->withClass(ClassName::class, "someMethod")
 );
 
-$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testclosure")
+$routeDefinition->addRoute(Route::get("/testclosure")
     ->withClosure(function ($response, $request) {
         // throw new Error501Exception("Teste");
         $response->write('OK');
     })
 );
 
-$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testerror/{code}")
+$routeDefinition->addRoute(Route::get("/testerror/{code}")
     ->withClosure(function ($response, $request) {
         $code = $request->param('code');
         $class = "ByJG\RestServer\Exception\Error" . $code . "Exception";
@@ -41,8 +43,26 @@ $routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testerror/{code}"
     })
 );
 
+// Test content-type override: XML processor configured, but override to JSON at runtime
+$routeDefinition->addRoute(Route::get("/testoverride/xml-to-json")
+    ->withOutputProcessor(XmlOutputProcessor::class)
+    ->withClosure(function ($response, $request) {
+        $response->addHeader('Content-Type', 'application/json');
+        $response->write(["override" => "xml-to-json"]);
+    })
+);
+
+// Test content-type override: JSON processor configured, but override to XML at runtime
+$routeDefinition->addRoute(Route::get("/testoverride/json-to-xml")
+    ->withOutputProcessor(JsonOutputProcessor::class)
+    ->withClosure(function ($response, $request) {
+        $response->addHeader('Content-Type', 'application/xml');
+        $response->write(["override" => "json-to-xml"]);
+    })
+);
+
 // Handle Request
-$restServer = new \ByJG\RestServer\HttpRequestHandler();
+$restServer = new HttpRequestHandler();
 $restServer->withDefaultOutputProcessor(JsonOutputProcessor::class);
 // $restServer->withDetailedErrorHandler();
 // $restServer->withCorsOrigins('localhost.*');

@@ -3,6 +3,7 @@
 namespace ByJG\RestServer;
 
 use ByJG\RestServer\Exception\OperationIdInvalidException;
+use Override;
 use Psr\Http\Message\RequestInterface;
 
 class MockHttpRequest extends HttpRequest
@@ -30,7 +31,7 @@ class MockHttpRequest extends HttpRequest
      *
      * @return string
      */
-    #[\Override]
+    #[Override]
     public function payload(): string
     {
         if (is_null($this->payload)) {
@@ -129,13 +130,13 @@ class MockHttpRequest extends HttpRequest
                 continue;
 
             $name = [];
-            preg_match('/\bname=\"([^\"]*)\"\s*;/s', $block, $name);
+            preg_match('/\bname=\"([^\"]*)\"\s*;/is', $block, $name);
 
             $filename = [];
-            preg_match('/\bfilename=\"([^\"]*)\"\s*;/s', $block, $filename);
+            preg_match('/\bfilename=\"([^\"]*)\"\s*;/is', $block, $filename);
 
             $contentType = [];
-            preg_match('/Content-Type\s*:([^\r\n]*)/s', $block, $contentType);
+            preg_match('/Content-Type\s*:([^\r\n]*)/is', $block, $contentType);
 
             $content = [];
             preg_match('/\r?\n\r?\n(.*)$/s', $block, $content);

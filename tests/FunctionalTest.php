@@ -38,6 +38,8 @@ class FunctionalTest extends TestCase
             ['http://localhost:8090/testjson', 200, 'application/json', '{"name":"It worked"}'],
             ['http://localhost:8090/testxml', 200, 'application/xml', '<?xml version="1.0"?>' . "\n" . '<root><name>It worked</name></root>' . "\n"],
             ['http://localhost:8090/testclosure', 200, 'application/json', '["OK"]'],
+            ['http://localhost:8090/testoverride/xml-to-json', 200, 'application/json', '{"override":"xml-to-json"}'],
+            ['http://localhost:8090/testoverride/json-to-xml', 200, 'application/xml', '<?xml version="1.0"?>' . "\n" . '<root><override>json-to-xml</override></root>' . "\n"],
             ['http://localhost:8090/testerror/400', 400, 'application/json', '{"error":{"type":"Error 400","message":"Teste"}}'],
             ['http://localhost:8090/testerror/401', 401, 'application/json', '{"error":{"type":"Error 401","message":"Teste"}}'],
             ['http://localhost:8090/testerror/402', 402, 'application/json', '{"error":{"type":"Error 402","message":"Teste"}}'],

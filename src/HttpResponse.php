@@ -133,7 +133,7 @@ class HttpResponse
      */
     public function addHeader(string $header, array|string $value): void
     {
-        $this->headers[$header] = $value;
+        $this->headers[strtolower($header)] = $value;
     }
 
     public function getHeaders(): array
