@@ -279,9 +279,8 @@ Integrate caching with your output processor:
 <?php
 namespace MyApp\OutputProcessor;
 
-use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\SerializationRuleEnum;
+use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use Psr\Cache\CacheItemPoolInterface;
 
 class CachedJsonOutputProcessor extends JsonOutputProcessor
@@ -296,34 +295,43 @@ class CachedJsonOutputProcessor extends JsonOutputProcessor
         $this->defaultTtl = $defaultTtl;
     }
     
-    public function process(HttpResponse $response, mixed $object, int $intSerialization = SerializationRuleEnum::Serial_StopOnObject): void
+    public function processResponse(HttpResponse $response): void
     {
-        // Generate cache key based on response data
-        $cacheKey = $this->generateCacheKey($object);
-        
-        // Try to get from cache
+        $cacheKey = $this->generateCacheKey($response);
         $cacheItem = $this->cache->getItem($cacheKey);
-        
+    
         if ($cacheItem->isHit()) {
-            // Use cached output
-            $output = $cacheItem->get();
-            $response->setContentType($this->contentType);
-            $response->write($output, false);
-        } else {
-            // Process normally
-            parent::process($response, $object, $intSerialization);
-            
-            // Cache the output for future requests
-            $cacheItem->set($response->getBody());
-            $cacheItem->expiresAfter($this->defaultTtl);
-            $this->cache->save($cacheItem);
+            $payload = $cacheItem->get();        // Already formatted JSON string
+            $response->addHeader('Content-Type', $this->contentType);
+            $this->writeHeader($response);
+            $this->writeData($payload);
+            $this->writer->flush();
+            return;
         }
+    
+        // Build the payload the same way JsonOutputProcessor does, so we can store it
+        $serialized = $response->getResponseBag()->process($this->buildNull, $this->onlyString);
+        $payload = $this->getFormatter()->process($serialized);
+    
+        $cacheItem->set($payload);
+        $cacheItem->expiresAfter($this->defaultTtl);
+        $this->cache->save($cacheItem);
+    
+        // Ensure headers contain the exact Content-Type we'll emit
+        $response->addHeader('Content-Type', $this->contentType);
+        $this->writeHeader($response);
+        $this->writeData($payload);
+        $this->writer->flush();
     }
     
-    private function generateCacheKey($data): string
+    private function generateCacheKey(HttpResponse $response): string
     {
-        // Create a unique key based on the data and other factors
-        return 'api_response_' . md5(serialize($data));
+        // Create a unique key based on the serialized data and response code
+        return sprintf(
+            'api_response_%d_%s',
+            $response->getResponseCode(),
+            md5(serialize($response->getResponseBag()->getCollection()))
+        );
     }
 }
 ```

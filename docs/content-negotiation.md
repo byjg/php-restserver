@@ -53,16 +53,23 @@ RestServer automatically sets the appropriate `Content-Type` header based on the
 - `application/xml` for XML responses
 - Custom content types as defined by your output processors
 
-You can also manually set the content type:
+You can override this at runtime by adding your own `Content-Type` header. When you do so, `HttpRequestHandler`
+will detect the header (`HttpResponse::addHeader('Content-Type', ...)`) and automatically re-initialize the matching
+output processor before the response is serialized. This makes it possible to start with an XML route and switch to JSON
+for a particular response (or vice-versa).
 
 ```php
 <?php
 public function getCustomData(HttpResponse $response)
 {
-    $response->setContentType('application/custom+json');
+    // Forces the handler to serialize using the JSON processor, even if the route default differs
+    $response->addHeader('Content-Type', 'application/custom+json');
     $response->write(['data' => 'value']);
 }
 ```
+
+> **Tip:** The sample application in `public/app-dist.php` includes `/testoverride/*` routes that demonstrate switching
+> between JSON and XML by setting the header inside the route closure.
 
 ## File Extensions
 
