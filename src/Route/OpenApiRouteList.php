@@ -133,7 +133,7 @@ class OpenApiRouteList extends RouteList
 
                 $outputProcessor = $this->getMethodOutputProcessor($method, $basePath. $path, $properties);
 
-                $routes[] = (new Route(strtoupper($method), $basePath . $path))
+                $routes[] = new Route(strtoupper($method), $basePath . $path)
                     ->withOutputProcessor($outputProcessor)
                     ->withClass($parts[count($parts) - 2], $parts[count($parts) - 1])
                     ->withMetadata([
@@ -175,9 +175,10 @@ class OpenApiRouteList extends RouteList
      * @param string $method
      * @param string $path
      * @param array $properties
-     * @return string|null
+     * @return array|string|null
+     * @throws OperationIdInvalidException
      */
-    protected function getMethodOutputProcessor(string $method, string $path, array $properties): string|null
+    protected function getMethodOutputProcessor(string $method, string $path, array $properties): array|string|null
     {
         $key = strtoupper($method) . " " . $path;
         if (isset($this->overrideOutputProcessor[$key])) {
@@ -196,13 +197,16 @@ class OpenApiRouteList extends RouteList
             return $this->defaultProcessor;
         }
 
-        $produces = $produces[0];
+        $returnOutputProcessor = [];
+        foreach ($produces as $produce) {
+            if (isset($this->overrideOutputProcessor[$produce])) {
+                return $this->overrideOutputProcessor[$produce];
+            }
 
-        if (isset($this->overrideOutputProcessor[$produces])) {
-            return $this->overrideOutputProcessor[$produces];
+            $returnOutputProcessor[] = BaseOutputProcessor::getFromContentType($produce);
         }
 
-        return BaseOutputProcessor::getFromContentType($produces);
+        return (count($returnOutputProcessor) === 1) ? $returnOutputProcessor[0] : $returnOutputProcessor;
     }
 
     public function getSchema(): array
