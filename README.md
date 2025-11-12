@@ -53,16 +53,12 @@ composer require "byjg/restserver"
 
 ```mermaid
 flowchart TD
-   byjg/restserver --> byjg/serializer
-   byjg/restserver --> byjg/singleton-pattern
-   byjg/restserver --> nikikc/fast-route
-   byjg/restserver --> filp/whoops
-   byjg/restserver --> byjg/cache-engine
-   byjg/restserver --> byjg/webrequest
-   byjg/restserver --> byjg/jwt-wrapper
-   byjg/restserver --> ext-json
+    byjg/restserver --> byjg/serializer
+    byjg/restserver --> byjg/singleton-pattern
+    byjg/restserver --> byjg/cache-engine
+    byjg/restserver --> byjg/webrequest
+    byjg/restserver --> byjg/jwt-wrapper
 ```
 
 ----
 [Open source ByJG](http://opensource.byjg.com)
-

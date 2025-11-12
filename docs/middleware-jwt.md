@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9.3
+sidebar_position: 12
 sidebar_label: JWT Authentication
 ---
 # Jwt Middleware

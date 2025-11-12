@@ -1,5 +1,5 @@
 ---
-sidebar_position: 16
+sidebar_position: 19
 sidebar_label: Content Negotiation
 ---
 
@@ -68,8 +68,10 @@ public function getCustomData(HttpResponse $response)
 }
 ```
 
-> **Tip:** The sample application in `public/app-dist.php` includes `/testoverride/*` routes that demonstrate switching
-> between JSON and XML by setting the header inside the route closure.
+:::tip Runtime overrides
+The sample application in `public/app-dist.php` includes `/testoverride/*` routes that demonstrate switching between
+JSON and XML by setting the header inside the route closure.
+:::
 
 ## File Extensions
 
@@ -110,12 +112,13 @@ public function processRequest(HttpRequest $request, HttpResponse $response)
     $format = $request->param('format');
     
     if ($format === 'csv') {
-        $response->setContentType('text/csv');
+        $response->addHeader('Content-Type', 'text/csv');
         $response->write($this->convertToCsv($data));
-    } else {
-        // Use default format
-        $response->write($data);
+        return;
     }
+
+    // Use default format
+    $response->write($data);
 }
 ```
 

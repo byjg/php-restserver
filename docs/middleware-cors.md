@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9.1
+sidebar_position: 10
 sidebar_label: CORS Support
 ---
 # CORS support

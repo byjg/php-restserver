@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9.2
+sidebar_position: 11
 sidebar_label: Static Server Files
 ---
 # Server Static Files

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 14
+sidebar_position: 17
 sidebar_label: Mock Testing
 ---
 
@@ -89,50 +89,83 @@ try {
         '/api/resource'
     );
     
-    // Examine the result
-    $this->assertEquals('{"error": "Not Found"}', $result->getBody());
+    // Examine the raw JSON returned by the Whoops handler
+    $this->assertJsonStringEqualsJsonString('{"error": "Not Found"}', $result);
 }
 ```
 
-## Testing with MockServerTrait
+## Building reusable test harnesses
 
-RestServer provides the `MockServerTrait` that simplifies testing:
+Larger test suites benefit from a reusable helper that hides the boilerplate of instantiating `MockRequestHandler` and
+creating PSR-7 requests. The following trait shows one way to structure that helper:
 
 ```php
 <?php
-use ByJG\RestServer\MockServerTrait;
-use PHPUnit\Framework\TestCase;
+namespace Tests\Support;
 
-class MyApiTest extends TestCase
+use ByJG\RestServer\MockRequestHandler;
+use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
+use ByJG\RestServer\Route\Route;
+use ByJG\RestServer\Route\RouteList;
+use Nyholm\Psr7\Request;
+use Psr\Http\Message\ResponseInterface;
+
+trait ApiTestTrait
 {
-    use MockServerTrait;
-    
-    public function setUp(): void
+    protected RouteList $routes;
+
+    protected function bootRoutes(): void
     {
-        // Setup routes for testing
-        $this->setupRoutes();
+        $this->routes = new RouteList();
+        $this->routes->addRoute(
+            Route::get('/api/resource')
+                ->withClosure(function ($response, $request) {
+                    $response->write(['status' => 'success']);
+                })
+        );
     }
-    
-    public function testGetEndpoint()
+
+    protected function request(string $method, string $path, array $headers = [], ?string $body = null): ResponseInterface
     {
-        // Process a mock request
-        $response = $this->process(
-            'GET',
-            '/api/resource',
-            [],  // Query parameters
-            [],  // Headers
-            null  // Body
-        );
-        
-        // Make assertions
-        $this->assertEquals(200, $response->getResponseCode());
-        $this->assertJsonStringEqualsJsonString(
-            '{"status": "success"}',
-            $response->getBody()
-        );
+        $psr7Request = new Request($method, $path, $headers, $body);
+        $handler = new MockRequestHandler();
+        $handler
+            ->withDefaultOutputProcessor(JsonOutputProcessor::class)
+            ->withRequestObject($psr7Request)
+            ->handle($this->routes);
+        return $handler->getPsr7Response();
     }
 }
 ```
+
+```php
+<?php
+use PHPUnit\Framework\TestCase;
+use Tests\Support\ApiTestTrait;
+
+class MyApiTest extends TestCase
+{
+    use ApiTestTrait;
+
+    protected function setUp(): void
+    {
+        $this->bootRoutes();
+    }
+
+    public function testGetEndpoint(): void
+    {
+        $response = $this->request('GET', '/api/resource');
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertJsonStringEqualsJsonString('{"status":"success"}', (string) $response->getBody());
+    }
+}
+```
+
+:::note Reference implementation
+The repository’s own test suite includes `tests/MockServerTrait.php`, demonstrating a more elaborate setup with
+pre-registered routes, middlewares, and error handling hooks. Feel free to adapt that trait inside your project if you
+need heavier integration fixtures.
+:::
 
 ## Benefits of Mock Testing
 
