@@ -11,6 +11,7 @@ use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\Serializer\Serialize;
 use ByJG\Util\Uri;
+use ByJG\WebRequest\HttpMethod;
 use Override;
 use Psr\SimpleCache\CacheInterface;
 
@@ -133,7 +134,7 @@ class OpenApiRouteList extends RouteList
 
                 $outputProcessor = $this->getMethodOutputProcessor($method, $basePath. $path, $properties);
 
-                $routes[] = new Route(strtoupper($method), $basePath . $path)
+                $routes[] = Route::create(HttpMethod::from(strtoupper($method)), $basePath . $path)
                     ->withOutputProcessor($outputProcessor)
                     ->withClass($parts[count($parts) - 2], $parts[count($parts) - 1])
                     ->withMetadata([

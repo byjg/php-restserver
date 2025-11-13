@@ -2,6 +2,7 @@
 
 namespace ByJG\RestServer\Route;
 
+use ByJG\WebRequest\HttpMethod;
 use Closure;
 
 class Route
@@ -16,13 +17,18 @@ class Route
     /**
      * Route constructor.
      *
-     * @param array|string $method
+     * @param HttpMethod|array|string $method
      * @param string $path
      */
-    public function __construct(array|string $method, string $path)
+    public function __construct(HttpMethod|array|string $method, string $path)
     {
         $this->setMethod($method);
         $this->setPath($path);
+    }
+
+    public static function create(HttpMethod|array|string $method, string $path): static
+    {
+        return new Route($method, $path);
     }
 
     public function withOutputProcessor(string|array $outputProcessor, bool $strict = false): static
@@ -71,8 +77,11 @@ class Route
      * @param mixed $method
      * @return static
      */
-    protected function setMethod(array|string $method): static
+    protected function setMethod(HttpMethod|array|string $method): static
     {
+        if ($method instanceof HttpMethod) {
+            $method = $method->value;
+        }
         $this->method = $method;
         return $this;
     }
