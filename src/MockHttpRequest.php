@@ -74,7 +74,7 @@ class MockHttpRequest extends HttpRequest
             $this->server["HTTP_" . str_replace('-', '_', strtoupper($key))] = $this->psrRequest->getHeaderLine($key);
 
             if ($key == "Cookie") {
-                parse_str(preg_replace("/;\s*/", "&", $this->psrRequest->getHeaderLine($key)), $this->cookie);
+                parse_str(preg_replace("/;\s*/", "&", $this->psrRequest->getHeaderLine($key)) ?? '', $this->cookie);
             }
         }
 
@@ -122,6 +122,9 @@ class MockHttpRequest extends HttpRequest
 
         // split content by boundary and get rid of last -- element
         $blocks = preg_split("/-+$boundary/", $body);
+        if ($blocks === false) {
+            return;
+        }
         array_pop($blocks);
 
         // loop data blocks

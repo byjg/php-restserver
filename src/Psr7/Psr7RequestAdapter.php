@@ -38,13 +38,20 @@ class Psr7RequestAdapter
     {
         // Build URI from server parameters
         $serverParams = $request->server();
+        if (!is_array($serverParams)) {
+            $serverParams = [];
+        }
         $uri = self::buildUriFromServer($serverParams);
 
         // Create PSR-7 ServerRequest
+        $cookieParams = $request->cookie();
+        if (!is_array($cookieParams)) {
+            $cookieParams = [];
+        }
         $psr7Request = new ServerRequest(
             $uri,
             $serverParams,
-            $request->cookie() ?? []
+            $cookieParams
         );
 
         // Set HTTP method
@@ -60,9 +67,14 @@ class Psr7RequestAdapter
 
         // Parse headers from server params
         foreach ($serverParams as $name => $value) {
+            if (!is_string($name)) {
+                continue;
+            }
             if (str_starts_with($name, 'HTTP_')) {
                 $headerName = str_replace('_', '-', substr($name, 5));
-                $psr7Request = $psr7Request->withHeader($headerName, $value);
+                if (is_string($headerName)) {
+                    $psr7Request = $psr7Request->withHeader($headerName, $value);
+                }
             } elseif (in_array($name, ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'])) {
                 $headerName = str_replace('_', '-', $name);
                 $psr7Request = $psr7Request->withHeader($headerName, $value);
@@ -71,14 +83,14 @@ class Psr7RequestAdapter
 
         // Set query params
         $getData = $request->get();
-        if (!empty($getData)) {
+        if (is_array($getData) && !empty($getData)) {
             $psr7Request = $psr7Request->withQueryParams($getData);
         }
 
         // Set parsed body (POST data)
         // Note: withParsedBody also updates the body stream, so we need to set Content-Type first
         $postData = $request->post();
-        if (!empty($postData)) {
+        if (is_array($postData) && !empty($postData)) {
             // Ensure Content-Type header is set for proper encoding
             if (!$psr7Request->hasHeader('Content-Type')) {
                 $psr7Request = $psr7Request->withHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -132,8 +144,9 @@ class Psr7RequestAdapter
         // Extract port from host if present
         $port = null;
         if (str_contains($host, ':')) {
-            list($host, $port) = explode(':', $host, 2);
-            $port = (int)$port;
+            $parts = explode(':', $host, 2);
+            $host = $parts[0];
+            $port = isset($parts[1]) ? (int)$parts[1] : null;
         } elseif (isset($server['SERVER_PORT'])) {
             $port = (int)$server['SERVER_PORT'];
         }
@@ -149,7 +162,9 @@ class Psr7RequestAdapter
         if (isset($server['REQUEST_URI'])) {
             $requestUri = $server['REQUEST_URI'];
             if (str_contains($requestUri, '?')) {
-                list($path, $query) = explode('?', $requestUri, 2);
+                $parts = explode('?', $requestUri, 2);
+                $path = $parts[0];
+                $query = $parts[1] ?? '';
             } else {
                 $path = $requestUri;
             }

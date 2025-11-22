@@ -39,6 +39,9 @@ class OpenApiRouteList extends RouteList
         }
 
         $contents = file_get_contents($openApiDefinition);
+        if ($contents === false) {
+            throw new SchemaNotFoundException("Failed to read schema '$openApiDefinition'");
+        }
 
         if ($ext == "json") {
             $this->schema = Serialize::fromJson($contents)->toArray();
@@ -135,8 +138,11 @@ class OpenApiRouteList extends RouteList
 
                 $outputProcessor = $this->getMethodOutputProcessor($method, $basePath. $path, $properties);
 
-                $routes[] = Route::create(HttpMethod::from(strtoupper($method)), $basePath . $path)
-                    ->withOutputProcessor($outputProcessor)
+                $route = Route::create(HttpMethod::from(strtoupper($method)), $basePath . $path);
+                if ($outputProcessor !== null) {
+                    $route = $route->withOutputProcessor($outputProcessor);
+                }
+                $routes[] = $route
                     ->withClass($parts[count($parts) - 2], $parts[count($parts) - 1])
                     ->withMetadata([
                         self::OPENAPI_BASE_PATH => $basePath,

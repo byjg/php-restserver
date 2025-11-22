@@ -64,6 +64,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
             return null;
 
         }
+        /** @var class-string<OutputProcessorInterface> $className */
         return new $className();
     }
 
@@ -115,10 +116,10 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
             ->process($this->buildNull, $this->onlyString);
 
         if ($response->getResponseBag()->getSerializationRule() === SerializationRuleEnum::Raw) {
-            $this->writeData($serialized);
+            $this->writeData(is_array($serialized) ? json_encode($serialized) : $serialized);
         } else {
             $this->writeData(
-                $this->getFormatter()->process($serialized)
+                is_string($serialized) ? $serialized : $this->getFormatter()->process($serialized)
             );
         }
 
@@ -134,11 +135,13 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
             $outputProcessor = BaseOutputProcessor::getFromHttpAccept();
         } elseif (is_array($class)) {
             $currentContentType = BaseOutputProcessor::getFromHttpAccept();
-            foreach ($class as $className) {
-                $validProcessor = BaseOutputProcessor::factory($className);
-                if ($validProcessor->getContentType() === $currentContentType->getContentType()) {
-                    $outputProcessor = $validProcessor;
-                    break;
+            if ($currentContentType !== null) {
+                foreach ($class as $className) {
+                    $validProcessor = BaseOutputProcessor::factory($className);
+                    if ($validProcessor !== null && $validProcessor->getContentType() === $currentContentType->getContentType()) {
+                        $outputProcessor = $validProcessor;
+                        break;
+                    }
                 }
             }
         } else {

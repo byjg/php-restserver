@@ -14,6 +14,9 @@ class MockResponse
 {
     public static function errorHandlerFromRequest(Throwable|string $exception, OutputProcessorInterface $defaultProcessor, RouteListInterface $routeList, ?RequestInterface $request = null): bool|string
     {
+        if ($request === null) {
+            return self::errorHandlerFromRoute($exception, $defaultProcessor, null);
+        }
         return self::errorHandlerFromEndpoint($exception, $defaultProcessor, $routeList, $request->getMethod(), $request->getUri()->getPath());
     }
 
@@ -29,7 +32,9 @@ class MockResponse
         $handler = $outputProcessor->getErrorHandler();
 
         if (is_string($exception)) {
-            $exception = new $exception;
+            /** @var class-string<Throwable> $exceptionClass */
+            $exceptionClass = $exception;
+            $exception = new $exceptionClass();
         }
 
         ob_start();

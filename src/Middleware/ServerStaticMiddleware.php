@@ -1024,7 +1024,7 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
             return MiddlewareResult::continue;
         }
 
-        $requestUri = new Uri($_SERVER['REQUEST_URI']);
+        $requestUri = new Uri($_SERVER['REQUEST_URI'] ?? '/');
         if ($requestUri->getScheme() === "file") {
             $file = $requestUri->getPath();
         } else {
