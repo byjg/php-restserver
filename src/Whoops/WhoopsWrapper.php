@@ -63,7 +63,6 @@ class WhoopsWrapper extends Handler
     public function handle()
     {
         $r = new ReflectionMethod($this->effectiveHandler, 'getException');
-        $r->setAccessible(true); // That's necessary because error handler doesn't expose `getException`
         $exception = $r->invoke($this->effectiveHandler);
         if ($exception instanceof HttpResponseException) {
             $exception->setResponse($this->response);

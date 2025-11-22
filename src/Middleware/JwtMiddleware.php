@@ -12,11 +12,11 @@ use Override;
 
 class JwtMiddleware implements BeforeMiddlewareInterface
 {
-    const JWT_PARAM_PREFIX = 'jwt';
-    const JWT_PARAM_PARSE_STATUS = 'jwt.parse.status';
-    const JWT_PARAM_PARSE_MESSAGE = 'jwt.parse.message';
-    const JWT_SUCCESS = 'success';
-    const JWT_FAILED = 'failed';
+    const string JWT_PARAM_PREFIX = 'jwt';
+    const string JWT_PARAM_PARSE_STATUS = 'jwt.parse.status';
+    const string JWT_PARAM_PARSE_MESSAGE = 'jwt.parse.message';
+    const string JWT_SUCCESS = 'success';
+    const string JWT_FAILED = 'failed';
 
     protected array $ignorePath = [];
     protected JwtWrapper $jwtWrapper;

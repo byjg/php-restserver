@@ -176,7 +176,7 @@ class HttpRequest
 
     /**
      * Use this method to get the CLIENT REQUEST IP.
-     * Note that if you behing a Proxy, the variable REMOTE_ADDR will always have the same IP
+     * Note that if you are behind a Proxy, the variable REMOTE_ADDR will always have the same IP
      * @return string|null
      */
     public function getRequestIp(): ?string

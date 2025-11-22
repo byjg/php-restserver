@@ -114,6 +114,7 @@ class Route
 
     /**
      * @param mixed $outputProcessor
+     * @param bool $strict
      * @return static
      */
     protected function setOutputProcessor(string|array $outputProcessor, bool $strict): static

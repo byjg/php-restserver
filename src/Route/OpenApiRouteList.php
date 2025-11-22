@@ -14,12 +14,15 @@ use ByJG\Serializer\Serialize;
 use ByJG\Util\Uri;
 use ByJG\WebRequest\HttpMethod;
 use Override;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class OpenApiRouteList extends RouteList
 {
-    const OPENAPI_BASE_PATH = 'openapi_base_path';
-    const OPENAPI_PATH = 'openapi_path';
+    const string OPENAPI_BASE_PATH = 'openapi_base_path';
+    const string OPENAPI_PATH = 'openapi_path';
 
     protected CacheInterface $cache;
     protected array $schema;
@@ -49,7 +52,7 @@ class OpenApiRouteList extends RouteList
             $this->schema = Serialize::fromYaml($contents)->toArray();
         } else {
             throw new SchemaInvalidException(
-                "Cannot determine file type. Valids extensions are 'json', 'yaml' or 'yml'"
+                "Cannot determine file type. Valid extensions are 'json', 'yaml' or 'yml'"
             );
         }
 
@@ -92,6 +95,13 @@ class OpenApiRouteList extends RouteList
         return $this;
     }
 
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws \ByJG\Cache\Exception\InvalidArgumentException
+     * @throws OperationIdInvalidException
+     */
     #[Override]
     public function getRoutes(): array
     {
@@ -223,6 +233,13 @@ class OpenApiRouteList extends RouteList
         return $this->schema;
     }
 
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws \ByJG\Cache\Exception\InvalidArgumentException
+     * @throws OperationIdInvalidException
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     */
     #[Override]
     public function getRoute(string $method, string $path): ?Route
     {

@@ -5,6 +5,7 @@ namespace ByJG\RestServer\OutputProcessor;
 use ByJG\RestServer\Whoops\JsonLimitedResponseHandler;
 use ByJG\Serializer\Formatter\FormatterInterface;
 use ByJG\Serializer\Formatter\JsonFormatter;
+use Override;
 use Whoops\Handler\Handler;
 use Whoops\Handler\JsonResponseHandler;
 
@@ -18,7 +19,7 @@ class JsonOutputProcessor extends BaseOutputProcessor
     /**
      * @return JsonResponseHandler
      */
-    #[\Override]
+    #[Override]
     public function getDetailedErrorHandler(): Handler
     {
         $jsonHandler = new JsonResponseHandler();
@@ -29,7 +30,7 @@ class JsonOutputProcessor extends BaseOutputProcessor
     /**
      * @return JsonLimitedResponseHandler
      */
-    #[\Override]
+    #[Override]
     public function getErrorHandler(): Handler
     {
         return new JsonLimitedResponseHandler();
@@ -38,7 +39,7 @@ class JsonOutputProcessor extends BaseOutputProcessor
     /**
      * @return JsonFormatter
      */
-    #[\Override]
+    #[Override]
     public function getFormatter(): FormatterInterface
     {
         return new JsonFormatter();

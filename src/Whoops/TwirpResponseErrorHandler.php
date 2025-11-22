@@ -7,6 +7,7 @@
 namespace ByJG\RestServer\Whoops;
 
 use ByJG\RestServer\Exception\HttpResponseException;
+use Override;
 use Whoops\Exception\Formatter;
 use Whoops\Handler\Handler;
 
@@ -24,7 +25,7 @@ class TwirpResponseErrorHandler extends JsonLimitedResponseHandler
     /**
      * @return int
      */
-    #[\Override]
+    #[Override]
     public function handle()
     {
         $errorData = Formatter::formatExceptionAsDataArray(

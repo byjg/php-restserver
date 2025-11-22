@@ -2,13 +2,14 @@
 
 namespace ByJG\RestServer;
 
-use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
+use ByJG\RestServer\Exception\Error422Exception;
 use ByJG\RestServer\Exception\Error520Exception;
-use ByJG\RestServer\Exception\InvalidClassException;
+use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\Route\RouteListInterface;
 use ByJG\RestServer\Writer\MemoryWriter;
+use ByJG\WebRequest\Exception\MessageException;
 use ByJG\WebRequest\Psr7\MemoryStream;
 use ByJG\WebRequest\Psr7\Response;
 use Override;
@@ -46,11 +47,11 @@ class MockRequestHandler extends HttpRequestHandler
      * @param RouteListInterface $routes
      * @param RequestInterface $request
      * @return MockRequestHandler
-     * @throws ClassNotFoundException
      * @throws Error404Exception
      * @throws Error405Exception
      * @throws Error520Exception
-     * @throws InvalidClassException
+     * @throws Error422Exception
+     * @throws OperationIdInvalidException
      */
     public static function mock(RouteListInterface $routes, RequestInterface $request)
     {
@@ -62,6 +63,7 @@ class MockRequestHandler extends HttpRequestHandler
 
     /**
      * @return HttpRequest
+     * @throws OperationIdInvalidException
      */
     #[Override]
     protected function getHttpRequest(): HttpRequest
@@ -79,6 +81,9 @@ class MockRequestHandler extends HttpRequestHandler
 
     protected Response|null $psr7Response = null;
 
+    /**
+     * @throws MessageException
+     */
     public function getPsr7Response(): ResponseInterface
     {
         if (is_null($this->psr7Response)) {
@@ -102,7 +107,7 @@ class MockRequestHandler extends HttpRequestHandler
     public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = false): bool
     {
         try {
-            return parent::handle($routeDefinition, false, false);
+            return parent::handle($routeDefinition, false);
         } finally {
             // Cleanup: unregister error handler after mock request processing completes
             // This prevents global state pollution and "risky test" warnings in PHPUnit

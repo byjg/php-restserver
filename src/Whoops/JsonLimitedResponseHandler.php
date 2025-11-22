@@ -7,6 +7,8 @@
 namespace ByJG\RestServer\Whoops;
 
 use ByJG\RestServer\Exception\HttpResponseException;
+use Override;
+use ReflectionException;
 use Whoops\Exception\Formatter;
 use Whoops\Handler\Handler;
 use Whoops\Handler\JsonResponseHandler as ParentJsonErrorHandler;
@@ -24,9 +26,9 @@ class JsonLimitedResponseHandler extends ParentJsonErrorHandler
 
     /**
      * @return int
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    #[\Override]
+    #[Override]
     public function handle()
     {
         $errorData = Formatter::formatExceptionAsDataArray(

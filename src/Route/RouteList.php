@@ -14,9 +14,9 @@ use function FastRoute\simpleDispatcher;
 
 class RouteList implements RouteListInterface
 {
-    const META_OUTPUT_PROCESSOR = 'output_processor';
-    const META_CLASS = 'class';
-    const META_OUTPUT_PROCESSOR_STRICT = 'output_processor_strict';
+    const string META_OUTPUT_PROCESSOR = 'output_processor';
+    const string META_CLASS = 'class';
+    const string META_OUTPUT_PROCESSOR_STRICT = 'output_processor_strict';
 
     protected array $routes = [];
 

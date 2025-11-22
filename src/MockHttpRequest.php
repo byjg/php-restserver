@@ -16,6 +16,8 @@ class MockHttpRequest extends HttpRequest
     /**
      *
      * @param RequestInterface $psrRequest
+     * @param array $param
+     * @throws OperationIdInvalidException
      */
     public function __construct(RequestInterface $psrRequest, $param = [])
     {
@@ -44,7 +46,8 @@ class MockHttpRequest extends HttpRequest
 
 
     /**
-     * Initilize PHP variables based on the request
+     * Initialize PHP variables based on the request
+     * @throws OperationIdInvalidException
      */
     protected function initializePhpVariables(): void
     {
@@ -104,6 +107,7 @@ class MockHttpRequest extends HttpRequest
 
     /**
      * Inicialize the PHP variable $_FILE
+     * @throws OperationIdInvalidException
      */
     protected function initializePhpFileVar(): void
     {

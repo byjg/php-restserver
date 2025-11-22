@@ -2,6 +2,7 @@
 
 namespace ByJG\RestServer;
 
+use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
 use ByJG\RestServer\Route\Route;
@@ -12,6 +13,9 @@ use Whoops\Inspector\InspectorFactory;
 
 class MockResponse
 {
+    /**
+     * @throws OperationIdInvalidException
+     */
     public static function errorHandlerFromRequest(Throwable|string $exception, OutputProcessorInterface $defaultProcessor, RouteListInterface $routeList, ?RequestInterface $request = null): bool|string
     {
         if ($request === null) {
@@ -20,12 +24,18 @@ class MockResponse
         return self::errorHandlerFromEndpoint($exception, $defaultProcessor, $routeList, $request->getMethod(), $request->getUri()->getPath());
     }
 
+    /**
+     * @throws OperationIdInvalidException
+     */
     public static function errorHandlerFromEndpoint(Throwable|string $exception, OutputProcessorInterface $defaultProcessor, RouteListInterface $routeList, string $method, string $path): bool|string
     {
         $route = $routeList->getRoute($method, $path);
         return self::errorHandlerFromRoute($exception, $defaultProcessor, $route);
     }
 
+    /**
+     * @throws OperationIdInvalidException
+     */
     public static function errorHandlerFromRoute(Throwable|string $exception, OutputProcessorInterface $defaultProcessor, ?Route $route): bool|string
     {
         $outputProcessor = BaseOutputProcessor::factory($route?->getOutputProcessor() ?? $defaultProcessor) ?? $defaultProcessor;

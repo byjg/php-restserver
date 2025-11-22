@@ -23,6 +23,9 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         $this->writer = $writer;
     }
 
+    /**
+     * @throws OperationIdInvalidException
+     */
     public static function getFromContentType(string $contentType): string
     {
         $mimeTypeOutputProcessor = [
@@ -44,6 +47,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
 
     /**
      * @return OutputProcessorInterface|null
+     * @throws OperationIdInvalidException
      */
     protected static function getFromHttpAccept(): OutputProcessorInterface|null
     {
@@ -71,7 +75,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
     #[Override]
     public function writeContentType(): void
     {
-        $this->writer->header("Content-Type: $this->contentType", true);
+        $this->writer->header("Content-Type: $this->contentType");
     }
 
     #[Override]
@@ -87,12 +91,12 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
 
         foreach ($response->getHeaders() as $header => $value) {
             if (is_array($value)) {
-                $this->writer->header("$header: " . array_shift($value), true);
+                $this->writer->header("$header: " . array_shift($value));
                 foreach ($value as $headerValue) {
                     $this->writer->header("$header: $headerValue", false);
                 }
             } else {
-                $this->writer->header("$header: $value", true);
+                $this->writer->header("$header: $value");
             }
         }
     }
@@ -126,6 +130,9 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         $this->writer->flush();
     }
 
+    /**
+     * @throws OperationIdInvalidException
+     */
     public static function factory(OutputProcessorInterface|string|array|null $class = null): OutputProcessorInterface|null
     {
         $outputProcessor = null;

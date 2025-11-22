@@ -1089,7 +1089,7 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
     private function getContentType(string $filename): string
     {
         // get the file extension
-        $ext = GeneralUtil::getExtension($filename, requireFileExists: false);
+        $ext = GeneralUtil::getExtension($filename);
 
         // check if the extension is in the list of known extensions else return the generic mime type
         if ($ext !== false && array_key_exists($ext, $this->mimeTypes)) {

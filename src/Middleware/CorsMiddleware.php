@@ -11,9 +11,9 @@ use Override;
 class CorsMiddleware implements BeforeMiddlewareInterface
 {
 
-    const CORS_OK = 'CORS_OK';
-    const CORS_FAILED = 'CORS_FAILED';
-    const CORS_OPTIONS = 'CORS_OPTIONS';
+    const string CORS_OK = 'CORS_OK';
+    const string CORS_FAILED = 'CORS_FAILED';
+    const string CORS_OPTIONS = 'CORS_OPTIONS';
 
     protected array $corsOrigins = ['.*'];
     protected array $corsMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];

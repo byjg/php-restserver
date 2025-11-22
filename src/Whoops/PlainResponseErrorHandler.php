@@ -13,7 +13,7 @@ use Whoops\Handler\Handler;
 
 /**
  * Catches an exception and converts it to a JSON
- * response. Additionally can also return exception
+ * response. Additionally, can also return exception
  * frames for consumption by an API.
  */
 class PlainResponseErrorHandler extends Handler
@@ -55,7 +55,7 @@ class PlainResponseErrorHandler extends Handler
 
         $title = $this->getClassAsTitle($response["type"]) ?? $response["type"];
 
-        echo "<html><h1>{$title}</h1><p>{$response['message']}</p></html>";
+        echo "<html><h1>$title</h1><p>{$response['message']}</p></html>";
 
         return Handler::QUIT;
     }

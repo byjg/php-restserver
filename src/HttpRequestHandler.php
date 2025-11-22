@@ -11,6 +11,7 @@ use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error422Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
+use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\Middleware\AfterMiddlewareInterface;
 use ByJG\RestServer\Middleware\BeforeMiddlewareInterface;
 use ByJG\RestServer\Middleware\MiddlewareManagement;
@@ -31,9 +32,9 @@ use Psr\Log\NullLogger;
 
 class HttpRequestHandler implements RequestHandler
 {
-    const OK = "OK";
-    const METHOD_NOT_ALLOWED = "NOT_ALLOWED";
-    const NOT_FOUND = "NOT FOUND";
+    const string OK = "OK";
+    const string METHOD_NOT_ALLOWED = "NOT_ALLOWED";
+    const string NOT_FOUND = "NOT FOUND";
 
     protected bool $useErrorHandler = true;
     protected bool $detailedErrorHandler = false;
@@ -56,14 +57,15 @@ class HttpRequestHandler implements RequestHandler
     }
 
     /**
-     * @throws ClassNotFoundException
+     * @param RouteListInterface $routeDefinition
+     * @return true
      * @throws Error404Exception
      * @throws Error405Exception
+     * @throws Error422Exception
      * @throws Error520Exception
-     * @throws InvalidClassException
+     * @throws OperationIdInvalidException
      * @throws Exception
-     *
-     * @return true
+     * @throws Exception
      */
     protected function process(RouteListInterface $routeDefinition): bool
     {
@@ -146,8 +148,9 @@ class HttpRequestHandler implements RequestHandler
      * @param bool $strict
      * @return mixed
      * @throws Error422Exception
+     * @throws OperationIdInvalidException
      */
-    protected function initializeProcessor(array|string|null $class = null, bool $strict = false): mixed
+    protected function initializeProcessor(array|string|null $class = null, bool $strict = false): OutputProcessorInterface
     {
         $outputProcessor = BaseOutputProcessor::factory($class);
         if (empty($outputProcessor) && !$strict) {
@@ -265,11 +268,11 @@ class HttpRequestHandler implements RequestHandler
      * @param bool $outputBuffer
      * @param bool $session
      * @return bool
-     * @throws ClassNotFoundException
      * @throws Error404Exception
      * @throws Error405Exception
+     * @throws Error422Exception
      * @throws Error520Exception
-     * @throws InvalidClassException
+     * @throws OperationIdInvalidException
      */
     #[Override]
     public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = false): bool
