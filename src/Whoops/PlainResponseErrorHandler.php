@@ -6,6 +6,7 @@
 
 namespace ByJG\RestServer\Whoops;
 
+use Override;
 use ReflectionException;
 use Whoops\Exception\Formatter;
 use Whoops\Handler\Handler;
@@ -44,7 +45,7 @@ class PlainResponseErrorHandler extends Handler
      * @return int
      * @throws ReflectionException
      */
-    #[\Override]
+    #[Override]
     public function handle()
     {
         $response = Formatter::formatExceptionAsDataArray(
@@ -52,7 +53,7 @@ class PlainResponseErrorHandler extends Handler
             false
         );
 
-        $title = $this->getClassAsTitle($response["type"]);
+        $title = $this->getClassAsTitle($response["type"]) ?? $response["type"];
 
         echo "<html><h1>{$title}</h1><p>{$response['message']}</p></html>";
 

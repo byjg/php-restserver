@@ -14,7 +14,7 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "php": ">=8.1 <8.5",
+    "php": ">=8.3 <8.6",
     "byjg/serializer": "^6.0",
     "byjg/singleton-pattern": "^6.0",
     "nikic/fast-route": "v1.3.*",
@@ -33,11 +33,11 @@
   "require-dev": {
     "monolog/monolog": "^2.9|^3.4",
     "phpunit/phpunit": "^10.5|^11.5",
-    "vimeo/psalm": "^5.9|^6.2"
+    "vimeo/psalm": "^5.9|^6.13"
   },
   "scripts": {
     "test": "vendor/bin/phpunit",
-    "psalm": "vendor/bin/psalm"
+    "psalm": "vendor/bin/psalm --threads=1"
   },
   "license": "MIT"
 }

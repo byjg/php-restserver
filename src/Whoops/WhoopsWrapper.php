@@ -6,8 +6,9 @@ use ByJG\RestServer\ErrorHandler;
 use ByJG\RestServer\Exception\HttpResponseException;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
+use Override;
+use ReflectionException;
 use ReflectionMethod;
 use Throwable;
 use Whoops\Handler\Handler;
@@ -16,14 +17,11 @@ use Whoops\RunInterface;
 
 class WhoopsWrapper extends Handler
 {
-    /** @var Handler */
-    protected $effectiveHandler = null;
+    protected Handler $effectiveHandler;
 
-    /** @var BaseOutputProcessor */
-    protected $outputProcessor;
+    protected ?OutputProcessorInterface $outputProcessor = null;
 
-    /** @var HttpResponse */
-    protected $response;
+    protected HttpResponse $response;
     private HttpRequest $request;
 
     public function __construct()
@@ -59,9 +57,9 @@ class WhoopsWrapper extends Handler
 
     /**
      * @return int|null A handler may return nothing, or a Handler::HANDLE_* constant
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    #[\Override]
+    #[Override]
     public function handle()
     {
         $r = new ReflectionMethod($this->effectiveHandler, 'getException');
@@ -70,7 +68,7 @@ class WhoopsWrapper extends Handler
         if ($exception instanceof HttpResponseException) {
             $exception->setResponse($this->response);
             $exception->sendHeader();
-        } elseif (!empty($this->response)) {
+        } else {
             $this->response->setResponseCode(500, 'Internal Error');
         }
 
@@ -96,7 +94,7 @@ class WhoopsWrapper extends Handler
      * @param  RunInterface  $run
      * @return void|null
      */
-    #[\Override]
+    #[Override]
     public function setRun(RunInterface $run)
     {
         return $this->effectiveHandler->setRun($run);
@@ -106,7 +104,7 @@ class WhoopsWrapper extends Handler
      * @param  Throwable $exception
      * @return void|null
      */
-    #[\Override]
+    #[Override]
     public function setException($exception)
     {
         return $this->effectiveHandler->setException($exception);
@@ -116,7 +114,7 @@ class WhoopsWrapper extends Handler
      * @param  InspectorInterface $inspector
      * @return void|null
      */
-    #[\Override]
+    #[Override]
     public function setInspector(InspectorInterface $inspector)
     {
         return $this->effectiveHandler->setInspector($inspector);

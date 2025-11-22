@@ -327,11 +327,9 @@ class RequireRoleTest extends TestCase
         $reflection = new ReflectionClass($attribute);
 
         $roleProperty = $reflection->getProperty('role');
-        $roleProperty->setAccessible(true);
         $this->assertEquals('superadmin', $roleProperty->getValue($attribute));
 
         $roleParamProperty = $reflection->getProperty('roleParam');
-        $roleParamProperty->setAccessible(true);
         $this->assertEquals('role', $roleParamProperty->getValue($attribute));
     }
 
@@ -551,15 +549,12 @@ class RequireRoleTest extends TestCase
         $reflection = new ReflectionClass($attribute);
 
         $roleProperty = $reflection->getProperty('role');
-        $roleProperty->setAccessible(true);
         $this->assertEquals('superadmin', $roleProperty->getValue($attribute));
 
         $roleParamProperty = $reflection->getProperty('roleParam');
-        $roleParamProperty->setAccessible(true);
         $this->assertEquals('jwt.data', $roleParamProperty->getValue($attribute));
 
         $roleKeyProperty = $reflection->getProperty('roleKey');
-        $roleKeyProperty->setAccessible(true);
         $this->assertEquals('role', $roleKeyProperty->getValue($attribute));
     }
 }

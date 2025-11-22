@@ -16,11 +16,7 @@ class ErrorHandler
 
     use Singleton;
 
-    /**
-     *
-     * @var Run|null
-     */
-    protected ?Run $whoops = null;
+    protected Run $whoops;
 
     /**
      *
@@ -28,11 +24,7 @@ class ErrorHandler
      */
     protected LoggerInterface $logger;
 
-    /**
-     *
-     * @var WhoopsWrapper|null
-     */
-    protected ?WhoopsWrapper $wrapper = null;
+    protected WhoopsWrapper $wrapper;
 
     protected function __construct()
     {

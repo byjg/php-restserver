@@ -19,16 +19,16 @@ trait ClassNameBeautifier
 {
     /**
      * @param string $ex
-     * @return array|string|null
+     * @return string|null
      * @throws ReflectionException
      */
-    public function getClassAsTitle(string $ex): array|string|null
+    public function getClassAsTitle(string $ex): string|null
     {
         $refClass = new ReflectionClass($ex);
 
-        $title = str_replace("Exception", "",  $refClass->getShortName());
-        $title = preg_replace("/([a-z0-9])([A-Z])/", "$1 $2", $title);
-        return preg_replace("/([a-z])(\d)/", "$1 $2", $title);
+        $title = str_replace("Exception", "", $refClass->getShortName()) ?? $refClass->getShortName();
+        $title = preg_replace("/([a-z0-9])([A-Z])/", "$1 $2", $title) ?? $title;
+        return preg_replace("/([a-z])(\d)/", "$1 $2", $title) ?? $title;
     }
 
 }

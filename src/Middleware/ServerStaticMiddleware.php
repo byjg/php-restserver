@@ -9,6 +9,7 @@ use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\Util\Uri;
 use FastRoute\Dispatcher;
+use Override;
 
 class ServerStaticMiddleware implements BeforeMiddlewareInterface
 {
@@ -1011,7 +1012,7 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
      * @throws Error415Exception
      * @throws Error500Exception
      */
-    #[\Override]
+    #[Override]
     public function beforeProcess(
         mixed        $dispatcherStatus,
         HttpResponse $response,
@@ -1026,7 +1027,7 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
         if ($requestUri->getScheme() === "file") {
             $file = $requestUri->getPath();
         } else {
-            $script = explode('/', $_SERVER['SCRIPT_FILENAME']);
+            $script = explode('/', $_SERVER['SCRIPT_FILENAME'] ?? '');
             $script[count($script)-1] = ltrim($requestUri->getPath(), '/');
             $file = implode('/', $script);
         }
