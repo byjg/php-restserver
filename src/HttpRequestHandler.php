@@ -74,9 +74,13 @@ class HttpRequestHandler implements RequestHandler
         }
 
         // Get the URL parameters
-        $httpMethod = $this->getHttpRequest()->server('REQUEST_METHOD');
-        $uri = parse_url($this->getHttpRequest()->server('REQUEST_URI'), PHP_URL_PATH);
-        $query = parse_url($this->getHttpRequest()->server('REQUEST_URI'), PHP_URL_QUERY);
+        $requestMethod = $this->getHttpRequest()->server('REQUEST_METHOD');
+        $httpMethod = is_array($requestMethod) ? 'GET' : (string)$requestMethod;
+
+        $requestUri = $this->getHttpRequest()->server('REQUEST_URI');
+        $requestUriStr = is_array($requestUri) ? '/' : (string)$requestUri;
+        $uri = parse_url($requestUriStr, PHP_URL_PATH) ?: '/';
+        $query = parse_url($requestUriStr, PHP_URL_QUERY);
         $queryStr = [];
         if (!empty($query)) {
             parse_str($query, $queryStr);
@@ -113,7 +117,7 @@ class HttpRequestHandler implements RequestHandler
         }
 
         // Processing
-        switch ($routeInfo[0]) {
+        switch ($routeInfo[0] ?? Dispatcher::NOT_FOUND) {
             case Dispatcher::NOT_FOUND: // 0
                 $outputProcessor->processResponse($this->getHttpResponse());
                 throw new Error404Exception("Route '$uri' not found");
@@ -210,7 +214,8 @@ class HttpRequestHandler implements RequestHandler
             if ($classDefinition instanceof Closure) {
                 // Process Closure
                 $className = 'Closure';
-                $methodName = $this->getHttpRequest()->getRequestPath();
+                $requestPath = $this->getHttpRequest()->getRequestPath();
+                $methodName = is_array($requestPath) ? '/' : (string)$requestPath;
                 $classDefinition($this->getHttpResponse(), $this->getHttpRequest());
             } else {
                 // Process Class::Method()

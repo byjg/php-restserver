@@ -83,7 +83,9 @@ class MiddlewareManagement
             $middleWare = $item['middleware'];
             $routePattern = $item['routePattern'];
 
-            if (!is_null($routePattern) && !preg_match("~$routePattern~", $request->getRequestPath())) {
+            $requestPath = $request->getRequestPath();
+            $requestPathStr = is_array($requestPath) ? '' : (string)$requestPath;
+            if (!is_null($routePattern) && !preg_match("~$routePattern~", $requestPathStr)) {
                 continue;
             }
 

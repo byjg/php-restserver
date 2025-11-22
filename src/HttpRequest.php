@@ -194,8 +194,14 @@ class HttpRequest
         ];
         foreach ($headers as $header) {
             if ($this->server($header, false) !== false) {
-                $list = explode(",", $this->server($header));
-                return reset($list);
+                $value = $this->server($header);
+                if (is_array($value)) {
+                    $result = reset($value);
+                    return $result !== false ? $result : null;
+                }
+                $list = explode(",", (string)$value);
+                $result = reset($list);
+                return $result !== false ? $result : null;
             }
         }
 
@@ -248,13 +254,14 @@ class HttpRequest
         $servername = $this->getServerName();
 
         if ($port && $this->server('SERVER_PORT', false) !== false) {
-            $servername .= ':' . $this->server('SERVER_PORT');
+            $serverPort = $this->server('SERVER_PORT');
+            $servername = (is_array($servername) ? '' : (string)$servername) . ':' . (is_array($serverPort) ? '' : (string)$serverPort);
         }
 
         if ($protocol) {
             $servername = (
                 ($this->server('HTTPS') !== 'off'
-                    || $this->server('SERVER_PORT') == 443) ? "https://" : "http://") . $servername
+                    || $this->server('SERVER_PORT') == 443) ? "https://" : "http://") . (is_array($servername) ? '' : (string)$servername)
             ;
         }
 
@@ -273,7 +280,11 @@ class HttpRequest
      */
     public function getRequestPath(): bool|array|string|null
     {
-        return parse_url($this->server('REQUEST_URI', ""), PHP_URL_PATH);
+        $requestUri = $this->server('REQUEST_URI', "");
+        if (is_array($requestUri)) {
+            return false;
+        }
+        return parse_url((string)$requestUri, PHP_URL_PATH);
     }
 
     private ?UploadedFiles $uploadedFiles = null;

@@ -9,6 +9,7 @@ use ByJG\RestServer\Exception\SchemaInvalidException;
 use ByJG\RestServer\Exception\SchemaNotFoundException;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
+use ByJG\RestServer\Util\GeneralUtil;
 use ByJG\Serializer\Serialize;
 use ByJG\Util\Uri;
 use ByJG\WebRequest\HttpMethod;
@@ -32,11 +33,11 @@ class OpenApiRouteList extends RouteList
      */
     public function __construct(string $openApiDefinition)
     {
-        if (!file_exists($openApiDefinition)) {
+        $ext = GeneralUtil::getExtension($openApiDefinition, requireFileExists: true);
+        if ($ext === false) {
             throw new SchemaNotFoundException("Schema '$openApiDefinition' not found");
         }
 
-        $ext = substr(strrchr($openApiDefinition, "."), 1);
         $contents = file_get_contents($openApiDefinition);
 
         if ($ext == "json") {

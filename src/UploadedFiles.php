@@ -59,7 +59,7 @@ class UploadedFiles
             $newName = $this->getFileName($key);
         }
 
-        move_uploaded_file((string)$this->getFileByKey($key, 'tmp_name'), $destinationPath . '/' . $newName);
+        move_uploaded_file((string)$this->getFileByKey($key, 'tmp_name'), $destinationPath . '/' . (string)$newName);
     }
 
     public function clearTemp(string $key): void

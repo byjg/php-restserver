@@ -28,7 +28,7 @@ class Route
 
     public static function create(HttpMethod|array|string $method, string $path): static
     {
-        return new Route($method, $path);
+        return new static($method, $path);
     }
 
     public function withOutputProcessor(string|array $outputProcessor, bool $strict = false): static
@@ -148,9 +148,9 @@ class Route
      * @param string $path
      * @return static
      */
-    public static function get(string $path): Route
+    public static function get(string $path): static
     {
-        return new Route('GET', $path);
+        return new static('GET', $path);
     }
 
     /**
@@ -159,9 +159,9 @@ class Route
      * @param string $path
      * @return static
      */
-    public static function post(string $path): Route
+    public static function post(string $path): static
     {
-        return new Route('POST', $path);
+        return new static('POST', $path);
     }
 
     /**
@@ -170,9 +170,9 @@ class Route
      * @param string $path
      * @return static
      */
-    public static function put(string $path): Route
+    public static function put(string $path): static
     {
-        return new Route('PUT', $path);
+        return new static('PUT', $path);
     }
 
     /**
@@ -181,8 +181,8 @@ class Route
      * @param string $path
      * @return static
      */
-    public static function delete(string $path): Route
+    public static function delete(string $path): static
     {
-        return new Route('DELETE', $path);
+        return new static('DELETE', $path);
     }
 }

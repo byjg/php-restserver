@@ -49,11 +49,14 @@ class RouteList implements RouteListInterface
     #[Override]
     public function addRoute(Route $route): static
     {
-        $this->routes[strtoupper($route->getMethod()) . " " . strtolower($route->getPath())] = $route;
+        $method = $route->getMethod();
+        $methodStr = is_array($method) ? implode('|', $method) : $method;
+        $this->routes[strtoupper($methodStr) . " " . strtolower($route->getPath())] = $route;
         return $this;
     }
 
     /**
+     * @param class-string $className
      * @throws ReflectionException
      */
     #[Override]
@@ -106,11 +109,12 @@ class RouteList implements RouteListInterface
         }
 
         foreach (array_keys($this->routes) as $pathItem) {
-            if (!str_contains($pathItem, '{')) {
+            if (!is_string($pathItem) || !str_contains($pathItem, '{')) {
                 continue;
             }
 
-            $pathItemPattern = '~^' . preg_replace('~{(.*?)}~', '(?<\1>[^/]+)', $pathItem) . '$~';
+            $replacedPath = preg_replace('~{(.*?)}~', '(?<\1>[^/]+)', $pathItem);
+            $pathItemPattern = '~^' . (is_string($replacedPath) ? $replacedPath : $pathItem) . '$~';
 
             if (preg_match($pathItemPattern, $pathMethod, $matches)) {
                 return $this->routes[$pathItem] ?? null;

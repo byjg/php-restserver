@@ -18,7 +18,7 @@ use ReflectionException;
 trait ClassNameBeautifier
 {
     /**
-     * @param string $ex
+     * @param class-string $ex
      * @return string|null
      * @throws ReflectionException
      */
