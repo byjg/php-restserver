@@ -10,8 +10,8 @@ use PHPUnit\Framework\TestCase;
 
 class XmlOutputProcessorTest extends TestCase
 {
-    protected array $object;
-    protected HttpResponse $httpResponse;
+    protected ?array $object;
+    protected ?HttpResponse $httpResponse;
 
     #[Override]
     public function setup(): void
