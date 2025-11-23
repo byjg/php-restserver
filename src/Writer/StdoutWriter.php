@@ -36,7 +36,6 @@ class StdoutWriter implements WriterInterface
     public function responseCode(int $responseCode, string $description): void
     {
         $this->header("HTTP/1.1 $responseCode $description");
-        http_response_code($responseCode);
         $this->statusCode = $responseCode;
     }
 
