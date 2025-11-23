@@ -8,5 +8,5 @@ services:
       - PHP_CONTROLLER=public/app-dist.php
       - NGINX_ROOT=/srv
     volumes:
-      - ${PWD}:/srv
+      - .:/srv
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Whoops;
+namespace Tests\OutputProcessor;
 
 use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\Error401Exception;
@@ -14,24 +14,29 @@ use ByJG\RestServer\Exception\Error429Exception;
 use ByJG\RestServer\Exception\Error500Exception;
 use ByJG\RestServer\Exception\Error501Exception;
 use ByJG\RestServer\Exception\Error503Exception;
-use ByJG\RestServer\Whoops\TwirpResponseErrorHandler;
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
+use ByJG\RestServer\OutputProcessor\JsonTwirpOutputProcessor;
+use ByJG\RestServer\Writer\MemoryWriter;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use Whoops\Exception\Inspector;
 
-class TwirpResponseErrorHandlerTest extends TestCase
+class JsonTwirpOutputProcessorTest extends TestCase
 {
     #[DataProvider('dataProvider')]
     public function testTwirpResponse(string $class, int $code, string $description): void
     {
-        $handler = new TwirpResponseErrorHandler();
-        ob_start();
+        $processor = new JsonTwirpOutputProcessor();
+        $writer = new MemoryWriter();
+        $processor->setWriter($writer);
+
+        $response = new HttpResponse();
+        $request = new HttpRequest([], [], [], [], []);
+
         $ex = new $class("teste");
-        $handler->setException($ex);
-        $handler->setInspector(new Inspector($ex));
-        $handler->handle();
-        $result = ob_get_contents();
-        ob_end_clean();
+        $processor->handle($ex, $response, $request, false);
+        $result = $writer->getData();
+
         $this->assertEquals('{"code":"' . $description . '","msg":"teste"}', $result);
     }
 
@@ -43,26 +48,31 @@ class TwirpResponseErrorHandlerTest extends TestCase
     public static function dataProvider(): array
     {
         return [
-            [ Error408Exception::class, 408, "canceled" ],
-            [ Error400Exception::class, 400, "invalid_argument" ],
-            [ Error422Exception::class, 422, "invalid_argument" ],
-            [ Error404Exception::class, 404, "not_found" ],
-            [ Error403Exception::class, 403, "permission_denied" ],
-            [ Error401Exception::class, 401, "unauthenticated" ],
-            [ Error429Exception::class, 429, "resource_exhausted" ],
-            [ Error412Exception::class, 412, "failed_precondition" ],
-            [ Error409Exception::class, 409, "aborted" ],
-            [ Error500Exception::class, 500, "internal" ],
-            [ Error501Exception::class, 501, "unimplemented" ],
-            [ Error503Exception::class, 503, "unavailable" ],
+            [Error408Exception::class, 408, "canceled"],
+            [Error400Exception::class, 400, "invalid_argument"],
+            [Error422Exception::class, 422, "invalid_argument"],
+            [Error404Exception::class, 404, "not_found"],
+            [Error403Exception::class, 403, "permission_denied"],
+            [Error401Exception::class, 401, "unauthenticated"],
+            [Error429Exception::class, 429, "resource_exhausted"],
+            [Error412Exception::class, 412, "failed_precondition"],
+            [Error409Exception::class, 409, "aborted"],
+            [Error500Exception::class, 500, "internal"],
+            [Error501Exception::class, 501, "unimplemented"],
+            [Error503Exception::class, 503, "unavailable"],
         ];
     }
 
     #[DataProvider('dataProvider')]
     public function testTwirpResponseMeta(string $class, int $code, string $description): void
     {
-        $handler = new TwirpResponseErrorHandler();
-        ob_start();
+        $processor = new JsonTwirpOutputProcessor();
+        $writer = new MemoryWriter();
+        $processor->setWriter($writer);
+
+        $response = new HttpResponse();
+        $request = new HttpRequest([], [], [], [], []);
+
         if ($code !== 500) {
             $ex = new $class("teste", meta: ['test' => 'ok']);
             $meta = ',"meta":{"test":"ok"}';
@@ -70,11 +80,10 @@ class TwirpResponseErrorHandlerTest extends TestCase
             $ex = new $class("teste");
             $meta = "";
         }
-        $handler->setException($ex);
-        $handler->setInspector(new Inspector($ex));
-        $handler->handle();
-        $result = ob_get_contents();
-        ob_end_clean();
+
+        $processor->handle($ex, $response, $request, false);
+        $result = $writer->getData();
+
         $this->assertEquals('{"code":"' . $description . '","msg":"teste"' . $meta . '}', $result);
     }
 }

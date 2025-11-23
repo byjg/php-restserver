@@ -7,9 +7,9 @@ use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
 use ByJG\RestServer\Route\Route;
 use ByJG\RestServer\Route\RouteListInterface;
+use ByJG\RestServer\Writer\MemoryWriter;
 use Psr\Http\Message\RequestInterface;
 use Throwable;
-use Whoops\Inspector\InspectorFactory;
 
 class MockResponse
 {
@@ -39,7 +39,6 @@ class MockResponse
     public static function errorHandlerFromRoute(Throwable|string $exception, OutputProcessorInterface $defaultProcessor, ?Route $route): bool|string
     {
         $outputProcessor = BaseOutputProcessor::factory($route?->getOutputProcessor() ?? $defaultProcessor) ?? $defaultProcessor;
-        $handler = $outputProcessor->getErrorHandler();
 
         if (is_string($exception)) {
             /** @var class-string<Throwable> $exceptionClass */
@@ -47,14 +46,18 @@ class MockResponse
             $exception = new $exceptionClass();
         }
 
-        ob_start();
-        $inspectorFactory = new InspectorFactory();
-        $handler->setException($exception);
-        $handler->setInspector($inspectorFactory->create($exception));
-        $handler->handle();
-        $result = ob_get_contents();
-        ob_end_clean();
+        // Create mock request and response
+        $request = new HttpRequest([], [], [], [], []);
+        $response = new HttpResponse();
 
-        return $result;
+        // Set up memory writer to capture output
+        $writer = new MemoryWriter();
+        $outputProcessor->setWriter($writer);
+
+        // Handle the exception (detailed=false for production-like behavior)
+        $outputProcessor->handle($exception, $response, $request, false);
+
+        // Get output from writer (consistent with normal response handling)
+        return $writer->getData();
     }
 }

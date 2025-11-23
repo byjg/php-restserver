@@ -162,13 +162,13 @@ class HttpRequestHandler implements RequestHandler
         $outputProcessor->setWriter($this->writer);
         $outputProcessor->writeContentType();
 
-        if ($this->detailedErrorHandler) {
-            ErrorHandler::getInstance()->setHandler($outputProcessor->getDetailedErrorHandler());
-        } else {
-            ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
-        }
-        ErrorHandler::getInstance()->setOutputProcessor($outputProcessor, $this->getHttpResponse(), $this->getHttpRequest());
-        
+        ErrorHandler::getInstance()->setOutputProcessor(
+            $outputProcessor,
+            $this->getHttpResponse(),
+            $this->getHttpRequest(),
+            $this->detailedErrorHandler
+        );
+
         return $outputProcessor;
     }
 

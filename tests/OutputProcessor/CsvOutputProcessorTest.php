@@ -7,7 +7,6 @@ use ByJG\RestServer\OutputProcessor\CsvOutputProcessor;
 use ByJG\RestServer\Writer\MemoryWriter;
 use Override;
 use PHPUnit\Framework\TestCase;
-use Whoops\Handler\PlainTextHandler;
 
 class CsvOutputProcessorTest extends TestCase
 {
@@ -58,21 +57,5 @@ class CsvOutputProcessorTest extends TestCase
 
         $expected = "name,address1,address2,value\nteste,,,0\n";
         $this->assertEquals($expected, $writer->getData());
-    }
-
-    public function testErrorHandler(): void
-    {
-        $processor = new CsvOutputProcessor();
-        $errorHandler = $processor->getErrorHandler();
-
-        $this->assertInstanceOf(PlainTextHandler::class, $errorHandler);
-    }
-
-    public function testDetailedErrorHandler(): void
-    {
-        $processor = new CsvOutputProcessor();
-        $detailedErrorHandler = $processor->getDetailedErrorHandler();
-
-        $this->assertInstanceOf(PlainTextHandler::class, $detailedErrorHandler);
     }
 }

@@ -26,26 +26,12 @@ namespace ByJG\RestServer\OutputProcessor;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\Serializer\Formatter\FormatterInterface;
-use Whoops\Handler\Handler;
-use Whoops\Handler\PlainTextHandler;
 
 class CsvOutputProcessor extends BaseOutputProcessor
 {
     public function __construct()
     {
         $this->contentType = "text/csv";
-    }
-
-    #[\Override]
-    public function getDetailedErrorHandler(): Handler
-    {
-        return new PlainTextHandler();
-    }
-
-    #[\Override]
-    public function getErrorHandler(): Handler
-    {
-        return $this->getDetailedErrorHandler();
     }
 
     #[\Override]

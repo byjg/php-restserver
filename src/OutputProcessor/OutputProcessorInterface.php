@@ -1,25 +1,21 @@
 <?php
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 namespace ByJG\RestServer\OutputProcessor;
 
+use ByJG\RestServer\Handler\ErrorHandlerInterface;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Writer\WriterInterface;
 use ByJG\Serializer\Formatter\FormatterInterface;
-use Whoops\Handler\Handler;
 
 /**
+ * Interface for output processors that format REST responses
  *
  * @author jg
  */
-interface OutputProcessorInterface
+interface OutputProcessorInterface extends ErrorHandlerInterface
 {
     /**
-     * Undocumented function
+     * Set the writer for output
      *
      * @param WriterInterface $writer
      * @return void
@@ -27,37 +23,37 @@ interface OutputProcessorInterface
     public function setWriter(WriterInterface $writer): void;
 
     /**
+     * Write the content-type header
+     *
      * @return void
      */
     public function writeContentType(): void;
 
     /**
+     * Get the content type for this processor
+     *
      * @return string
      */
     public function getContentType(): string;
 
     /**
+     * Process and output the response
+     *
      * @param HttpResponse $response
      * @return void
      */
     public function processResponse(HttpResponse $response): void;
 
     /**
-     * @return Handler
-     */
-    public function getDetailedErrorHandler(): Handler;
-
-        /**
-     * @return Handler
-     */
-    public function getErrorHandler(): Handler;
-
-    /**
+     * Get the formatter for serializing data
+     *
      * @return FormatterInterface
      */
     public function getFormatter(): FormatterInterface;
 
     /**
+     * Write HTTP headers for the response
+     *
      * @param HttpResponse $response
      * @return void
      */

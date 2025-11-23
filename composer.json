@@ -18,7 +18,6 @@
     "byjg/serializer": "^6.0",
     "byjg/singleton-pattern": "^6.0",
     "nikic/fast-route": "v1.3.*",
-    "filp/whoops": "^2.14",
     "byjg/cache-engine": "^6.0",
     "byjg/webrequest": "^6.0",
     "byjg/jwt-wrapper": "^6.0",

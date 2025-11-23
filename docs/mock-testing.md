@@ -89,7 +89,7 @@ try {
         '/api/resource'
     );
     
-    // Examine the raw JSON returned by the Whoops handler
+    // Examine the raw JSON returned by the error handler
     $this->assertJsonStringEqualsJsonString('{"error": "Not Found"}', $result);
 }
 ```

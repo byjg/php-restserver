@@ -4,10 +4,8 @@ sidebar_label: Error Handler
 ---
 # Error Handler
 
-RestServer uses by default the project `flip/whoops` to handle all the errors. 
-
-It will intercept any exception and return a formatted error message according to the 
-OutputProcessor defined in the route.
+RestServer provides a built-in error handling system that intercepts exceptions and returns
+formatted error messages according to the OutputProcessor defined in the route.
 
 ## How it works
 

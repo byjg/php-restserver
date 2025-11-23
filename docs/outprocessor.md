@@ -93,15 +93,17 @@ extending the `BaseOutputProcessor` class.
 
 namespace MyApp\OutputProcessor;
 
+use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
+use ByJG\RestServer\Handler\ExceptionFormatter;
 use ByJG\Serializer\Formatter\FormatterInterface;
-use Whoops\Handler\Handler;
+use Throwable;
 
 class MyCustomOutputProcessor extends BaseOutputProcessor
 {
     protected string $contentType = "application/custom-format";
-    
+
     public function getFormatter(): FormatterInterface
     {
         return new class implements FormatterInterface {
@@ -112,40 +114,31 @@ class MyCustomOutputProcessor extends BaseOutputProcessor
             }
         };
     }
-    
-    public function getErrorHandler(): Handler
+
+    public function handle(Throwable $exception, HttpResponse $response, HttpRequest $request, bool $detailed = false): void
     {
-        return new class extends Handler {
-            public function handle(): int
-            {
-                $exception = $this->getException();
-                $this->getRun()->sendHttpCode($exception->getCode());
-                echo json_encode([
-                    'error' => $exception->getMessage(),
-                    'code' => $exception->getCode()
-                ]);
-                return Handler::QUIT;
-            }
-        };
-    }
-    
-    public function getDetailedErrorHandler(): Handler
-    {
-        return new class extends Handler {
-            public function handle(): int
-            {
-                $exception = $this->getException();
-                $this->getRun()->sendHttpCode($exception->getCode());
-                echo json_encode([
-                    'error' => $exception->getMessage(),
-                    'code' => $exception->getCode(),
-                    'trace' => $exception->getTraceAsString(),
-                    'file' => $exception->getFile(),
-                    'line' => $exception->getLine()
-                ]);
-                return Handler::QUIT;
-            }
-        };
+        // Set HTTP response code and log the error
+        $this->getLogData($exception, $response, $request);
+
+        // Format the exception
+        $errorData = ExceptionFormatter::format($exception, $detailed);
+
+        // Write custom error response
+        $response->write([
+            'error' => $errorData['message'],
+            'type' => ExceptionFormatter::beautifyClassName($errorData['type'])
+        ]);
+
+        if ($detailed) {
+            $response->appendContent([
+                'file' => $errorData['file'],
+                'line' => $errorData['line'],
+                'trace' => $errorData['trace'] ?? []
+            ]);
+        }
+
+        // Process and write the response
+        $this->processResponse($response);
     }
 }
 ```
@@ -214,59 +207,59 @@ Customize error responses based on your application's needs:
 <?php
 namespace MyApp\OutputProcessor;
 
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\Exception\HttpResponseException;
-use Whoops\Handler\Handler;
+use ByJG\RestServer\Handler\ExceptionFormatter;
+use Throwable;
 
 class ApiJsonOutputProcessor extends JsonOutputProcessor
 {
-    public function getErrorHandler(): Handler
+    public function handle(Throwable $exception, HttpResponse $response, HttpRequest $request, bool $detailed = false): void
     {
-        return new class extends Handler {
-            public function handle(): int
-            {
-                $exception = $this->getException();
-                
-                $statusCode = 500;
-                $errorData = [
-                    'status' => 'error',
-                    'message' => $exception->getMessage()
-                ];
-                
-                // If it's our HTTP exception type, use its data
-                if ($exception instanceof HttpResponseException) {
-                    $statusCode = $exception->getStatusCode();
-                    
-                    // Add any metadata from the exception
-                    $meta = $exception->getMeta();
-                    if (!empty($meta)) {
-                        $errorData['details'] = $meta;
-                    }
-                    
-                    // Add standard fields for specific error types
-                    if ($statusCode === 400) {
-                        $errorData['error_type'] = 'validation_error';
-                    } elseif ($statusCode === 404) {
-                        $errorData['error_type'] = 'resource_not_found';
-                    } elseif ($statusCode === 401 || $statusCode === 403) {
-                        $errorData['error_type'] = 'authentication_error';
-                    }
-                }
-                
-                $this->getRun()->sendHttpCode($statusCode);
-                
-                // Add request ID for tracking
-                $errorData['request_id'] = $this->generateRequestId();
-                
-                echo json_encode($errorData, JSON_PRETTY_PRINT);
-                return Handler::QUIT;
+        // Set HTTP response code and log the error
+        $this->getLogData($exception, $response, $request);
+
+        $statusCode = 500;
+        $errorData = [
+            'status' => 'error',
+            'message' => $exception->getMessage()
+        ];
+
+        // If it's our HTTP exception type, use its data
+        if ($exception instanceof HttpResponseException) {
+            $statusCode = $exception->getStatusCode();
+
+            // Add any metadata from the exception
+            $meta = $exception->getMeta();
+            if (!empty($meta)) {
+                $errorData['details'] = $meta;
             }
-            
-            private function generateRequestId(): string
-            {
-                return uniqid('req-', true);
+
+            // Add standard fields for specific error types
+            if ($statusCode === 400) {
+                $errorData['error_type'] = 'validation_error';
+            } elseif ($statusCode === 404) {
+                $errorData['error_type'] = 'resource_not_found';
+            } elseif ($statusCode === 401 || $statusCode === 403) {
+                $errorData['error_type'] = 'authentication_error';
             }
-        };
+        }
+
+        // Add request ID for tracking
+        $errorData['request_id'] = $this->generateRequestId();
+
+        // Write the error response
+        $response->write($errorData);
+
+        // Process and write the response
+        $this->processResponse($response);
+    }
+
+    private function generateRequestId(): string
+    {
+        return uniqid('req-', true);
     }
 }
 ```

@@ -2,11 +2,16 @@
 
 namespace ByJG\RestServer\OutputProcessor;
 
+use ByJG\RestServer\ErrorHandler;
+use ByJG\RestServer\Exception\HttpResponseException;
 use ByJG\RestServer\Exception\OperationIdInvalidException;
+use ByJG\RestServer\Handler\ExceptionFormatter;
+use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\RestServer\Writer\WriterInterface;
 use Override;
+use Throwable;
 
 abstract class BaseOutputProcessor implements OutputProcessorInterface
 {
@@ -99,6 +104,69 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
                 $this->writer->header("$header: $value");
             }
         }
+    }
+
+    protected function getLogData(Throwable $exception, HttpResponse $response, HttpRequest $request)
+    {
+        // Set HTTP response code
+        if ($exception instanceof HttpResponseException) {
+            $exception->setResponse($response);
+            $exception->sendHeader();
+        } else {
+            $response->setResponseCode(500, 'Internal Error');
+        }
+
+        // Empty previous response and write headers
+        $response->emptyResponse();
+        $this->writeHeader($response);
+
+        // Log the error
+        $logData = [
+            'path' => $request->getRequestPath(),
+            'method' => $request->server('REQUEST_METHOD'),
+            'trace' => explode("\n", $exception->getTraceAsString())
+        ];
+        ErrorHandler::getInstance()->getLogger()->error($exception->getMessage(), $logData);
+    }
+
+    /**
+     * Handle an exception and output appropriate error response
+     *
+     * @param Throwable $exception
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @param bool $detailed
+     * @return void
+     */
+    #[Override]
+    public function handle(Throwable $exception, HttpResponse $response, HttpRequest $request, bool $detailed = false): void
+    {
+        // Set HTTP response code
+        $this->getLogData($exception, $response, $request);
+
+        // Format exception data
+        $errorData = ExceptionFormatter::format($exception, $detailed);
+        $title = ExceptionFormatter::beautifyClassName($errorData['type']);
+
+        $error = [
+            'type' => $title,
+            'message' => $errorData['message']
+        ];
+
+        // Add meta if available from HttpResponseException
+        if ($exception instanceof HttpResponseException && !empty($exception->getMeta())) {
+            $error['meta'] = $exception->getMeta();
+        }
+
+        // Add trace if detailed mode
+        if ($detailed && isset($errorData['trace'])) {
+            $error['trace'] = $errorData['trace'];
+            $error['file'] = $errorData['file'];
+            $error['line'] = $errorData['line'];
+        }
+
+        // Output formatted error
+        $this->writeData($this->getFormatter()->process(['error' => $error]));
     }
 
     public function writeData(string|bool $data): void
