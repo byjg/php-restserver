@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use ByJG\RestServer\ErrorHandler;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
@@ -19,6 +20,7 @@ use ByJG\RestServer\Route\Route;
 use ByJG\RestServer\Route\RouteList;
 use ByJG\RestServer\Writer\MemoryWriter;
 use ByJG\Util\Uri;
+use Exception;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
@@ -53,6 +55,17 @@ trait MockServerTrait
 
         $this->definition->addRoute(
             Route::get('/test')
+                ->withClosure(function ($response, $request) {
+                    $this->assertInstanceOf(HttpResponse::class, $response);
+                    $this->assertInstanceOf(HttpRequest::class, $request);
+                    $response->write(["key" => "value"]);
+                    $this->reach = true;
+                })
+        );
+
+        $this->definition->addRoute(
+            Route::get('/test/strict')
+                ->withOutputProcessor(['application/json', 'application/xml'], strict: true)
                 ->withClosure(function ($response, $request) {
                     $this->assertInstanceOf(HttpResponse::class, $response);
                     $this->assertInstanceOf(HttpRequest::class, $request);
@@ -111,6 +124,9 @@ trait MockServerTrait
         $_REQUEST = [];
         $_COOKIE = [];
         $_FILES = [];
+
+        // Unregister error handler to prevent overlap between tests
+        ErrorHandler::getInstance()->unregister();
     }
 
     /**
@@ -125,7 +141,7 @@ trait MockServerTrait
      * @throws Error520Exception
      * @throws InvalidClassException
      */
-    public function processAndGetContent(HttpRequestHandler $handler, ?array $expectedHeader, mixed $expectedData, AfterMiddlewareInterface|BeforeMiddlewareInterface $middleWare = null, array $expectedParams = []): void
+    public function processAndGetContent(HttpRequestHandler $handler, ?array $expectedHeader, mixed $expectedData, AfterMiddlewareInterface|BeforeMiddlewareInterface|null $middleWare = null, array $expectedParams = []): void
     {
         $writer = new MemoryWriter();
 
@@ -139,12 +155,7 @@ trait MockServerTrait
             }
 
             $handler->handle($this->definition, true, false);
-
-            if (!is_null($expectedHeader)) {
-                $this->assertEquals($expectedHeader, $writer->getHeaders());
-            }
-            $this->assertEquals($expectedData, $writer->getData());
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             $uri = new Uri($_SERVER['REQUEST_URI']);
             $result = MockResponse::errorHandlerFromEndpoint($ex, new JsonOutputProcessor(), $this->definition, $_SERVER['REQUEST_METHOD'], $uri->getPath());
             $this->assertEquals($expectedData, $result);
@@ -153,5 +164,11 @@ trait MockServerTrait
             ob_clean();
             ob_end_flush();
         }
+
+        if (!is_null($expectedHeader)) {
+            $this->assertEquals($expectedHeader, $writer->getHeaders());
+        }
+        $this->assertEquals($expectedData, $writer->getData());
+
     }
 }

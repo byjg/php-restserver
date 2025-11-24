@@ -1,3 +1,7 @@
+---
+sidebar_position: 9
+sidebar_label: Middleware
+---
 # Middleware
 
 HttpServerHandler has the ability to inject processing Before and After process the request. Using this you can inject code, change headers
@@ -37,9 +41,45 @@ Some examples:
 All middleware needs to implement the `BeforeMiddlewareInterface` or `AfterMiddlewareInterface`. When added to Http Server, the handler
 will determine if it will be processed before or after the request. If the same class implements both interface, then it will run before and after.
 
-The middleware is required to return a `MiddlewareResult` class. The possible values are:
+The middleware is required to return a `MiddlewareResult` enum value. The possible values are:
 
-- Middleware::continue() - It will continue to process the next middleware and process the request.
-- Middleware::stopProcessingOthers() - It will stop processing the next middleware and it will abort gracefully processing the request.
-- Middleware::stopProcessing() - It will allow to process the next middleware, however it will abort gracefully processing the request.
+- MiddlewareResult::continue - It will continue to process the next middleware and process the request.
+- MiddlewareResult::stopProcessingOthers - It will stop processing the next middleware and it will abort gracefully
+  processing the request.
+- MiddlewareResult::stopProcessing - It will allow to process the next middleware, however it will abort gracefully
+  processing the request.
+
+The key difference between stopProcessingOthers and stopProcessing is whether other middleware in the chain gets a
+chance to run.
+Both will prevent the actual route handler from being executed.
+
+### Example of a middleware implementation
+
+```php
+<?php
+
+namespace MyApp\Middleware;
+
+use ByJG\RestServer\HttpRequest;
+use ByJG\RestServer\HttpResponse;
+use ByJG\RestServer\Middleware\BeforeMiddlewareInterface;
+use ByJG\RestServer\Middleware\MiddlewareResult;
+
+class MyCustomMiddleware implements BeforeMiddlewareInterface
+{
+    public function handleBefore(
+        int $dispatcherResult,
+        HttpResponse $response,
+        HttpRequest $request
+    ): MiddlewareResult {
+        // Do something with the request
+        
+        if ($someCondition) {
+            return MiddlewareResult::stopProcessing;
+        }
+        
+        return MiddlewareResult::continue;
+    }
+}
+```
 

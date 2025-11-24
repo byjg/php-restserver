@@ -11,6 +11,7 @@ use ByJG\RestServer\HttpResponse;
 class AfterProcess implements AfterRouteInterface
 {
 
+    #[\Override]
     public function processAfter(HttpResponse $response, HttpRequest $request): void
     {
         $response->write(["x" => 'After Process']);

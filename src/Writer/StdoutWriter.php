@@ -2,12 +2,15 @@
 
 namespace ByJG\RestServer\Writer;
 
+use Override;
+
 class StdoutWriter implements WriterInterface
 {
     protected array $headerList = [];
     protected string $data = '';
     protected int $statusCode = 0;
 
+    #[Override]
     public function header(string $header, $replace = true): void
     {
         if (preg_match("~^HTTP/~", $header) === 1) {
@@ -18,7 +21,8 @@ class StdoutWriter implements WriterInterface
         if ($replace) {
             $headerParts = explode(':', $header);
             for ($i=0; $i<count($this->headerList); $i++) {
-                if (preg_match("~^" . $headerParts[0] . "~", $this->headerList[$i]) === 1) {
+                $headerParts[0] = strtolower($headerParts[0]);
+                if (preg_match("~^" . $headerParts[0] . "~i", $this->headerList[$i]) === 1) {
                     $this->headerList[$i] = $header;
                     return;
                 }
@@ -28,18 +32,20 @@ class StdoutWriter implements WriterInterface
         $this->headerList[] = $header;
     }
 
+    #[Override]
     public function responseCode(int $responseCode, string $description): void
     {
         $this->header("HTTP/1.1 $responseCode $description");
-        http_response_code($responseCode);
         $this->statusCode = $responseCode;
     }
 
+    #[Override]
     public function echo(string $data): void
     {
         $this->data .= $data;
     }
 
+    #[Override]
     public function flush(): void
     {
         echo implode("\r\n", $this->headerList);

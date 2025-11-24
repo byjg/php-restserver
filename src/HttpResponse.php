@@ -61,12 +61,12 @@ class HttpResponse
      * @param string|null $path (directory into domain in which the cookie will be available on )
      * @param string|null $domain
      */
-    public function addCookie(string $name, string $value, int $expire = null, string $path = null, string $domain = null): void
+    public function addCookie(string $name, string $value, ?int $expire = null, ?string $path = null, ?string $domain = null): void
     {
         if (!is_null($expire)) {
             $expire = time() + $expire;
         }
-        setcookie($name, $value, $expire, $path, $domain);
+        setcookie($name, $value, $expire ?? 0, $path ?? "", $domain ?? "");
     }
 
     /**
@@ -133,7 +133,7 @@ class HttpResponse
      */
     public function addHeader(string $header, array|string $value): void
     {
-        $this->headers[$header] = $value;
+        $this->headers[strtolower($header)] = $value;
     }
 
     public function getHeaders(): array

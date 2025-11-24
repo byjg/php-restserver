@@ -10,6 +10,7 @@ use ByJG\RestServer\HttpResponse;
 #[Attribute(Attribute::TARGET_METHOD)]
 class BeforeProcess implements BeforeRouteInterface
 {
+    #[\Override]
     public function processBefore(HttpResponse $response, HttpRequest $request): void
     {
         $response->write(["x" => 'Before Process']);

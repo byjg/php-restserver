@@ -1,3 +1,7 @@
+---
+sidebar_position: 6
+sidebar_label: Auto-Generate from OpenApi
+---
 # Auto-Generate from an OpenApi definition
 
 [OpenApi](https://www.openapis.org/) is the world's largest framework of API developer tools for the
@@ -78,3 +82,13 @@ $routeDefinition->withOutputProcessorForRoute(
     \ByJG\RestServer\OutputProcessor\JsonOutputProcessor::class
 );
 ```
+
+### Content negotiation from OpenAPI metadata
+
+Starting with the recent `OpenApiRouteList` changes, the generator inspects either the legacy `produces` array **or**
+the OpenAPI 3 `responses[200].content` map to determine which output processors a route should use. When a single
+content type is declared, the corresponding processor is wired automatically. When multiple content types are listed,
+the route stores an array of processors and the runtime picks the best one according to the incoming `Accept` header.
+
+You can still call `withOutputProcessorForRoute()` or `withOutputProcessorForMimeType()` to override the defaults, but
+most use cases can now be described solely in the OpenAPI document.

@@ -9,14 +9,20 @@ use ByJG\RestServer\Exception\SchemaInvalidException;
 use ByJG\RestServer\Exception\SchemaNotFoundException;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
+use ByJG\RestServer\Util\GeneralUtil;
 use ByJG\Serializer\Serialize;
 use ByJG\Util\Uri;
+use ByJG\WebRequest\HttpMethod;
+use Override;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 
 class OpenApiRouteList extends RouteList
 {
-    const OPENAPI_BASE_PATH = 'openapi_base_path';
-    const OPENAPI_PATH = 'openapi_path';
+    const string OPENAPI_BASE_PATH = 'openapi_base_path';
+    const string OPENAPI_PATH = 'openapi_path';
 
     protected CacheInterface $cache;
     protected array $schema;
@@ -30,12 +36,15 @@ class OpenApiRouteList extends RouteList
      */
     public function __construct(string $openApiDefinition)
     {
-        if (!file_exists($openApiDefinition)) {
+        $ext = GeneralUtil::getExtension($openApiDefinition, requireFileExists: true);
+        if ($ext === false) {
             throw new SchemaNotFoundException("Schema '$openApiDefinition' not found");
         }
 
-        $ext = substr(strrchr($openApiDefinition, "."), 1);
         $contents = file_get_contents($openApiDefinition);
+        if ($contents === false) {
+            throw new SchemaNotFoundException("Failed to read schema '$openApiDefinition'");
+        }
 
         if ($ext == "json") {
             $this->schema = Serialize::fromJson($contents)->toArray();
@@ -43,7 +52,7 @@ class OpenApiRouteList extends RouteList
             $this->schema = Serialize::fromYaml($contents)->toArray();
         } else {
             throw new SchemaInvalidException(
-                "Cannot determine file type. Valids extensions are 'json', 'yaml' or 'yml'"
+                "Cannot determine file type. Valid extensions are 'json', 'yaml' or 'yml'"
             );
         }
 
@@ -86,6 +95,14 @@ class OpenApiRouteList extends RouteList
         return $this;
     }
 
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     * @throws \ByJG\Cache\Exception\InvalidArgumentException
+     * @throws OperationIdInvalidException
+     */
+    #[Override]
     public function getRoutes(): array
     {
         if (empty($this->routes)) {
@@ -131,8 +148,11 @@ class OpenApiRouteList extends RouteList
 
                 $outputProcessor = $this->getMethodOutputProcessor($method, $basePath. $path, $properties);
 
-                $routes[] = (new Route(strtoupper($method), $basePath . $path))
-                    ->withOutputProcessor($outputProcessor)
+                $route = Route::create(HttpMethod::from(strtoupper($method)), $basePath . $path);
+                if ($outputProcessor !== null) {
+                    $route = $route->withOutputProcessor($outputProcessor);
+                }
+                $routes[] = $route
                     ->withClass($parts[count($parts) - 2], $parts[count($parts) - 1])
                     ->withMetadata([
                         self::OPENAPI_BASE_PATH => $basePath,
@@ -173,10 +193,10 @@ class OpenApiRouteList extends RouteList
      * @param string $method
      * @param string $path
      * @param array $properties
-     * @return string
+     * @return array|string|null
      * @throws OperationIdInvalidException
      */
-    protected function getMethodOutputProcessor(string $method, string $path, array $properties): string
+    protected function getMethodOutputProcessor(string $method, string $path, array $properties): array|string|null
     {
         $key = strtoupper($method) . " " . $path;
         if (isset($this->overrideOutputProcessor[$key])) {
@@ -195,13 +215,17 @@ class OpenApiRouteList extends RouteList
             return $this->defaultProcessor;
         }
 
-        $produces = $produces[0];
+        $returnOutputProcessor = [];
+        foreach ($produces as $produce) {
+            if (isset($this->overrideOutputProcessor[$produce])) {
+                return $this->overrideOutputProcessor[$produce];
+            }
 
-        if (isset($this->overrideOutputProcessor[$produces])) {
-            return $this->overrideOutputProcessor[$produces];
+            $returnOutputProcessor[$produce] = BaseOutputProcessor::getFromContentType($produce);
         }
 
-        return BaseOutputProcessor::getFromContentType($produces);
+        $returnOutputProcessor = array_values($returnOutputProcessor);
+        return (count($returnOutputProcessor) === 1) ? $returnOutputProcessor[0] : $returnOutputProcessor;
     }
 
     public function getSchema(): array
@@ -209,7 +233,14 @@ class OpenApiRouteList extends RouteList
         return $this->schema;
     }
 
-    #[\Override]
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws \ByJG\Cache\Exception\InvalidArgumentException
+     * @throws OperationIdInvalidException
+     * @throws ContainerExceptionInterface
+     * @throws InvalidArgumentException
+     */
+    #[Override]
     public function getRoute(string $method, string $path): ?Route
     {
         if (empty($this->routes)) {

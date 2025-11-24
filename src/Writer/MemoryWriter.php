@@ -2,9 +2,12 @@
 
 namespace ByJG\RestServer\Writer;
 
+use Override;
+
 class MemoryWriter extends StdoutWriter
 {
 
+    #[Override]
     public function flush(): void
     {
         // Do nothing
@@ -15,6 +18,7 @@ class MemoryWriter extends StdoutWriter
         return $this->data;
     }
 
+    #[Override]
     public function responseCode(int $responseCode, string $description): void
     {
         $this->header("HTTP/1.1 $responseCode $description");

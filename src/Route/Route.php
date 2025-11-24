@@ -2,31 +2,38 @@
 
 namespace ByJG\RestServer\Route;
 
+use ByJG\WebRequest\HttpMethod;
 use Closure;
 
 class Route
 {
     protected array|string $method;
     protected string $path;
-    protected ?string $outputProcessor = null;
+    protected string|array|null $outputProcessor = null;
+    protected bool $strict = false;
     protected array|string|Closure|null $class = null;
     protected array $metadata = [];
 
     /**
      * Route constructor.
      *
-     * @param array|string $method
+     * @param HttpMethod|array|string $method
      * @param string $path
      */
-    public function __construct(array|string $method, string $path)
+    public function __construct(HttpMethod|array|string $method, string $path)
     {
         $this->setMethod($method);
         $this->setPath($path);
     }
 
-    public function withOutputProcessor(string $outputProcessor): static
+    public static function create(HttpMethod|array|string $method, string $path): static
     {
-        $this->setOutputProcessor($outputProcessor);
+        return new static($method, $path);
+    }
+
+    public function withOutputProcessor(string|array $outputProcessor, bool $strict = false): static
+    {
+        $this->setOutputProcessor($outputProcessor, $strict);
         return $this;
     }
 
@@ -61,12 +68,20 @@ class Route
         return $this->method;
     }
 
+    public function isOutputContentTypeStrict(): bool
+    {
+        return $this->strict;
+    }
+
     /**
      * @param mixed $method
      * @return static
      */
-    protected function setMethod(array|string $method): static
+    protected function setMethod(HttpMethod|array|string $method): static
     {
+        if ($method instanceof HttpMethod) {
+            $method = $method->value;
+        }
         $this->method = $method;
         return $this;
     }
@@ -90,20 +105,22 @@ class Route
     }
 
     /**
-     * @return string
+     * @return string|array|null
      */
-    public function getOutputProcessor(): ?string
+    public function getOutputProcessor(): string|array|null
     {
         return $this->outputProcessor;
     }
 
     /**
      * @param mixed $outputProcessor
+     * @param bool $strict
      * @return static
      */
-    protected function setOutputProcessor(string $outputProcessor): static
+    protected function setOutputProcessor(string|array $outputProcessor, bool $strict): static
     {
         $this->outputProcessor = $outputProcessor;
+        $this->strict = $strict;
         return $this;
     }
 
@@ -132,9 +149,9 @@ class Route
      * @param string $path
      * @return static
      */
-    public static function get(string $path): Route
+    public static function get(string $path): static
     {
-        return new Route('GET', $path);
+        return new static('GET', $path);
     }
 
     /**
@@ -143,9 +160,9 @@ class Route
      * @param string $path
      * @return static
      */
-    public static function post(string $path): Route
+    public static function post(string $path): static
     {
-        return new Route('POST', $path);
+        return new static('POST', $path);
     }
 
     /**
@@ -154,9 +171,9 @@ class Route
      * @param string $path
      * @return static
      */
-    public static function put(string $path): Route
+    public static function put(string $path): static
     {
-        return new Route('PUT', $path);
+        return new static('PUT', $path);
     }
 
     /**
@@ -165,8 +182,8 @@ class Route
      * @param string $path
      * @return static
      */
-    public static function delete(string $path): Route
+    public static function delete(string $path): static
     {
-        return new Route('DELETE', $path);
+        return new static('DELETE', $path);
     }
 }

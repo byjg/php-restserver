@@ -1,4 +1,10 @@
+---
+sidebar_position: 10
+sidebar_label: CORS Support
+---
 # CORS support
+
+> **Note:** For general middleware usage patterns, see [Middleware](middleware.md).
 
 Enable the Server Handler process the CORS headers and block the access if the origin doesn't match.
 

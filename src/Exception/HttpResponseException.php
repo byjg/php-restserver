@@ -4,6 +4,7 @@ namespace ByJG\RestServer\Exception;
 
 use ByJG\RestServer\HttpResponse;
 use Exception;
+use Throwable;
 
 abstract class HttpResponseException extends Exception
 {
@@ -14,7 +15,7 @@ abstract class HttpResponseException extends Exception
 
     protected array $meta;
 
-    public function __construct(int $statusCode, string $message = "", int $code = 0, ?\Throwable $previous = null, array $meta = [])
+    public function __construct(int $statusCode, string $message = "", int $code = 0, ?Throwable $previous = null, array $meta = [])
     {
         $this->statusCode = $statusCode;
         $this->meta = $meta;

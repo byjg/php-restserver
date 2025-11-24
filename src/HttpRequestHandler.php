@@ -8,6 +8,7 @@ use ByJG\RestServer\Attributes\BeforeRouteInterface;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
+use ByJG\RestServer\Exception\Error422Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\Exception\OperationIdInvalidException;
@@ -25,19 +26,20 @@ use Closure;
 use Exception;
 use FastRoute\Dispatcher;
 use InvalidArgumentException;
+use Override;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
 class HttpRequestHandler implements RequestHandler
 {
-    const OK = "OK";
-    const METHOD_NOT_ALLOWED = "NOT_ALLOWED";
-    const NOT_FOUND = "NOT FOUND";
+    const string OK = "OK";
+    const string METHOD_NOT_ALLOWED = "NOT_ALLOWED";
+    const string NOT_FOUND = "NOT FOUND";
 
     protected bool $useErrorHandler = true;
     protected bool $detailedErrorHandler = false;
 
-    protected Closure|string|null $defaultOutputProcessor = null;
+    protected string|null $defaultOutputProcessor = null;
 
     protected array $afterMiddlewareList = [];
     protected array $beforeMiddlewareList = [];
@@ -48,21 +50,22 @@ class HttpRequestHandler implements RequestHandler
     /** @var WriterInterface */
     protected WriterInterface $writer;
 
-    public function __construct(LoggerInterface $logger = null)
+    public function __construct(?LoggerInterface $logger = null)
     {
         $this->writer = new HttpWriter();
         ErrorHandler::getInstance()->setLogger($logger ?? new NullLogger());
     }
 
     /**
-     * @throws ClassNotFoundException
+     * @param RouteListInterface $routeDefinition
+     * @return true
      * @throws Error404Exception
      * @throws Error405Exception
+     * @throws Error422Exception
      * @throws Error520Exception
-     * @throws InvalidClassException
+     * @throws OperationIdInvalidException
      * @throws Exception
-     *
-     * @return true
+     * @throws Exception
      */
     protected function process(RouteListInterface $routeDefinition): bool
     {
@@ -73,9 +76,13 @@ class HttpRequestHandler implements RequestHandler
         }
 
         // Get the URL parameters
-        $httpMethod = $this->getHttpRequest()->server('REQUEST_METHOD');
-        $uri = parse_url($this->getHttpRequest()->server('REQUEST_URI'), PHP_URL_PATH);
-        $query = parse_url($this->getHttpRequest()->server('REQUEST_URI'), PHP_URL_QUERY);
+        $requestMethod = $this->getHttpRequest()->server('REQUEST_METHOD');
+        $httpMethod = is_array($requestMethod) ? 'GET' : (string)$requestMethod;
+
+        $requestUri = $this->getHttpRequest()->server('REQUEST_URI');
+        $requestUriStr = is_array($requestUri) ? '/' : (string)$requestUri;
+        $uri = parse_url($requestUriStr, PHP_URL_PATH) ?: '/';
+        $query = parse_url($requestUriStr, PHP_URL_QUERY);
         $queryStr = [];
         if (!empty($query)) {
             parse_str($query, $queryStr);
@@ -89,7 +96,8 @@ class HttpRequestHandler implements RequestHandler
 
         // Get OutputProcessor
         $outputProcessor = $this->initializeProcessor(
-            $this->getHttpRequest()->getRouteMetadata(RouteList::META_OUTPUT_PROCESSOR)
+            $this->getHttpRequest()->getRouteMetadata(RouteList::META_OUTPUT_PROCESSOR),
+            $this->getHttpRequest()->getRouteMetadata(RouteList::META_OUTPUT_PROCESSOR_STRICT) ?? false,
         );
         
         // Process Before Middleware
@@ -111,7 +119,7 @@ class HttpRequestHandler implements RequestHandler
         }
 
         // Processing
-        switch ($routeInfo[0]) {
+        switch ($routeInfo[0] ?? Dispatcher::NOT_FOUND) {
             case Dispatcher::NOT_FOUND: // 0
                 $outputProcessor->processResponse($this->getHttpResponse());
                 throw new Error404Exception("Route '$uri' not found");
@@ -136,28 +144,31 @@ class HttpRequestHandler implements RequestHandler
 
     /**
      * Initialize the OutputProcessor
-     * @param null $class
+     * @param array|string|null $class
+     * @param bool $strict
      * @return mixed
+     * @throws Error422Exception
      * @throws OperationIdInvalidException
      */
-    protected function initializeProcessor($class = null): mixed
+    protected function initializeProcessor(array|string|null $class = null, bool $strict = false): OutputProcessorInterface
     {
-        $class = $class ?? $this->defaultOutputProcessor;
-        if (!empty($class)) {
-            $outputProcessor = BaseOutputProcessor::getFromClassName($class);
-        } else {
-            $outputProcessor = BaseOutputProcessor::getFromHttpAccept();
+        $outputProcessor = BaseOutputProcessor::factory($class);
+        if (empty($outputProcessor) && !$strict) {
+            $outputProcessor = BaseOutputProcessor::factory($this->defaultOutputProcessor);
+        }
+        if (empty($outputProcessor)) {
+            throw new Error422Exception('Accept content not allowed');
         }
         $outputProcessor->setWriter($this->writer);
         $outputProcessor->writeContentType();
 
-        if ($this->detailedErrorHandler) {
-            ErrorHandler::getInstance()->setHandler($outputProcessor->getDetailedErrorHandler());
-        } else {
-            ErrorHandler::getInstance()->setHandler($outputProcessor->getErrorHandler());
-        }
-        ErrorHandler::getInstance()->setOutputProcessor($outputProcessor, $this->getHttpResponse(), $this->getHttpRequest());
-        
+        ErrorHandler::getInstance()->setOutputProcessor(
+            $outputProcessor,
+            $this->getHttpResponse(),
+            $this->getHttpRequest(),
+            $this->detailedErrorHandler
+        );
+
         return $outputProcessor;
     }
 
@@ -206,7 +217,8 @@ class HttpRequestHandler implements RequestHandler
             if ($classDefinition instanceof Closure) {
                 // Process Closure
                 $className = 'Closure';
-                $methodName = $this->getHttpRequest()->getRequestPath();
+                $requestPath = $this->getHttpRequest()->getRequestPath();
+                $methodName = is_array($requestPath) ? '/' : (string)$requestPath;
                 $classDefinition($this->getHttpResponse(), $this->getHttpRequest());
             } else {
                 // Process Class::Method()
@@ -240,6 +252,11 @@ class HttpRequestHandler implements RequestHandler
             }
         }
 
+        $headers = $this->getHttpResponse()->getHeaders();
+        $expectedOutput = (array)($headers["content-type"] ?? $outputProcessor->getContentType());
+        if ($expectedOutput[0] !== $outputProcessor->getContentType()) {
+            $outputProcessor = $this->initializeProcessor($expectedOutput[0]);
+        }
 
         $outputProcessor->processResponse($this->getHttpResponse());
     }
@@ -251,12 +268,13 @@ class HttpRequestHandler implements RequestHandler
      * @param bool $outputBuffer
      * @param bool $session
      * @return bool
-     * @throws ClassNotFoundException
      * @throws Error404Exception
      * @throws Error405Exception
+     * @throws Error422Exception
      * @throws Error520Exception
-     * @throws InvalidClassException
+     * @throws OperationIdInvalidException
      */
+    #[Override]
     public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = false): bool
     {
         if ($outputBuffer) {
@@ -272,19 +290,22 @@ class HttpRequestHandler implements RequestHandler
         return $this->process($routeDefinition);
     }
 
+    #[Override]
     public function withErrorHandlerDisabled(): static
     {
         $this->useErrorHandler = false;
         return $this;
     }
 
+    #[Override]
     public function withDetailedErrorHandler(): static
     {
         $this->detailedErrorHandler = true;
         return $this;
     }
 
-    public function withMiddleware(AfterMiddlewareInterface|BeforeMiddlewareInterface $middleware, string $routePattern = null): static
+    #[Override]
+    public function withMiddleware(AfterMiddlewareInterface|BeforeMiddlewareInterface $middleware, ?string $routePattern = null): static
     {
         $item = [
             'middleware' => $middleware,
@@ -301,12 +322,11 @@ class HttpRequestHandler implements RequestHandler
         return $this;
     }
 
-    public function withDefaultOutputProcessor(string|\Closure $processor, array $args = []): static
+    #[Override]
+    public function withDefaultOutputProcessor(string $processor): static
     {
-        if (!($processor instanceof Closure)) {
-            if (!is_subclass_of($processor, BaseOutputProcessor::class)) {
-                throw new InvalidArgumentException("Needs to be a class of " . BaseOutputProcessor::class);
-            }
+        if (!is_subclass_of($processor, BaseOutputProcessor::class)) {
+            throw new InvalidArgumentException("Needs to be a class of " . BaseOutputProcessor::class);
         }
 
         $this->defaultOutputProcessor = $processor;

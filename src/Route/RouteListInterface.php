@@ -30,6 +30,9 @@ interface RouteListInterface
      */
     public function addRoute(Route $route): static;
 
+    /**
+     * @param class-string $className
+     */
     public function addClass(string $className): static;
 
     /**

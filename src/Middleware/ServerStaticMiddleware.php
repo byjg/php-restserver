@@ -7,8 +7,10 @@ use ByJG\RestServer\Exception\Error500Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\SerializationRuleEnum;
+use ByJG\RestServer\Util\GeneralUtil;
 use ByJG\Util\Uri;
 use FastRoute\Dispatcher;
+use Override;
 
 class ServerStaticMiddleware implements BeforeMiddlewareInterface
 {
@@ -1011,6 +1013,7 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
      * @throws Error415Exception
      * @throws Error500Exception
      */
+    #[Override]
     public function beforeProcess(
         mixed        $dispatcherStatus,
         HttpResponse $response,
@@ -1021,11 +1024,11 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
             return MiddlewareResult::continue;
         }
 
-        $requestUri = new Uri($_SERVER['REQUEST_URI']);
+        $requestUri = new Uri($_SERVER['REQUEST_URI'] ?? '/');
         if ($requestUri->getScheme() === "file") {
             $file = $requestUri->getPath();
         } else {
-            $script = explode('/', $_SERVER['SCRIPT_FILENAME']);
+            $script = explode('/', $_SERVER['SCRIPT_FILENAME'] ?? '');
             $script[count($script)-1] = ltrim($requestUri->getPath(), '/');
             $file = implode('/', $script);
         }
@@ -1057,7 +1060,8 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
      */
     public function mimeContentType(string $filename): ?string
     {
-        if (!file_exists($filename)) {
+        $ext = GeneralUtil::getExtension($filename, requireFileExists: true);
+        if (empty($ext)) {
             return null;
         }
 
@@ -1071,7 +1075,6 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
             "lua"
         ];
 
-        $ext = substr(strrchr($filename, "."), 1);
         if (in_array($ext, $prohibitedTypes)) {
             throw new Error415Exception("File type not supported");
         }
@@ -1086,14 +1089,13 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
     private function getContentType(string $filename): string
     {
         // get the file extension
-        $ext = substr(strrchr($filename, "."), 1);
+        $ext = GeneralUtil::getExtension($filename);
 
         // check if the extension is in the list of known extensions else return the generic mime type
-        if (array_key_exists($ext, $this->mimeTypes)) {
+        if ($ext !== false && array_key_exists($ext, $this->mimeTypes)) {
             return $this->mimeTypes[$ext];
         } else {
             return 'application/octet-stream';
         }
     }
-
 }

@@ -167,7 +167,8 @@ class HttpRequest
     public function payload(): string
     {
         if (is_null($this->payload)) {
-            $this->payload = file_get_contents("php://input");
+            $content = file_get_contents("php://input");
+            $this->payload = $content !== false ? $content : '';
         }
 
         return $this->payload;
@@ -175,7 +176,7 @@ class HttpRequest
 
     /**
      * Use this method to get the CLIENT REQUEST IP.
-     * Note that if you behing a Proxy, the variable REMOTE_ADDR will always have the same IP
+     * Note that if you are behind a Proxy, the variable REMOTE_ADDR will always have the same IP
      * @return string|null
      */
     public function getRequestIp(): ?string
@@ -193,8 +194,14 @@ class HttpRequest
         ];
         foreach ($headers as $header) {
             if ($this->server($header, false) !== false) {
-                $list = explode(",", $this->server($header));
-                return reset($list);
+                $value = $this->server($header);
+                if (is_array($value)) {
+                    $result = reset($value);
+                    return $result !== false ? $result : null;
+                }
+                $list = explode(",", (string)$value);
+                $result = reset($list);
+                return $result !== false ? $result : null;
             }
         }
 
@@ -247,13 +254,14 @@ class HttpRequest
         $servername = $this->getServerName();
 
         if ($port && $this->server('SERVER_PORT', false) !== false) {
-            $servername .= ':' . $this->server('SERVER_PORT');
+            $serverPort = $this->server('SERVER_PORT');
+            $servername = (is_array($servername) ? '' : (string)$servername) . ':' . (is_array($serverPort) ? '' : (string)$serverPort);
         }
 
         if ($protocol) {
             $servername = (
                 ($this->server('HTTPS') !== 'off'
-                    || $this->server('SERVER_PORT') == 443) ? "https://" : "http://") . $servername
+                    || $this->server('SERVER_PORT') == 443) ? "https://" : "http://") . (is_array($servername) ? '' : (string)$servername)
             ;
         }
 
@@ -272,7 +280,11 @@ class HttpRequest
      */
     public function getRequestPath(): bool|array|string|null
     {
-        return parse_url($this->server('REQUEST_URI', ""), PHP_URL_PATH);
+        $requestUri = $this->server('REQUEST_URI', "");
+        if (is_array($requestUri)) {
+            return false;
+        }
+        return parse_url((string)$requestUri, PHP_URL_PATH);
     }
 
     private ?UploadedFiles $uploadedFiles = null;
@@ -305,7 +317,7 @@ class HttpRequest
         return $value;
     }
 
-    public function getRouteMetadata(string $key = null): mixed
+    public function getRouteMetadata(?string $key = null): mixed
     {
         if (empty($key)) {
             return $this->routeMetadata;

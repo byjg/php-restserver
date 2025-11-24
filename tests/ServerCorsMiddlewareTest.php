@@ -15,9 +15,9 @@ class ServerCorsMiddlewareTest extends TestCase
         $expectedHeader = [
             "HTTP/1.1 200 OK",
             "Content-Type: application/json",
-            "Access-Control-Allow-Origin: http://localhost",
-            "Access-Control-Allow-Credentials: true",
-            "Access-Control-Max-Age: 86400"
+            "access-control-allow-origin: http://localhost",
+            "access-control-allow-credentials: true",
+            "access-control-max-age: 86400"
         ];
         $expectedData = "[\"Success!\"]";
 
@@ -29,8 +29,6 @@ class ServerCorsMiddlewareTest extends TestCase
         $this->processAndGetContent($this->object, $expectedHeader, $expectedData, new CorsMiddleware());
 
         $this->assertEquals('tCors', $this->reach);
-
-
     }
 
     public function testHandleCorsOptions(): void
@@ -38,11 +36,11 @@ class ServerCorsMiddlewareTest extends TestCase
         $expectedHeader = [
             "HTTP/1.1 204 No Content",
             "Content-Type: application/json",
-            "Access-Control-Allow-Origin: http://localhost",
-            "Access-Control-Allow-Credentials: true",
-            "Access-Control-Max-Age: 86400",
-            "Access-Control-Allow-Methods: OPTIONS,GET,POST,PUT,DELETE,PATCH",
-            "Access-Control-Allow-Headers: Authorization,Content-Type,Accept,Origin,User-Agent,Cache-Control,Keep-Alive,X-Requested-With,If-Modified-Since",
+            "access-control-allow-origin: http://localhost",
+            "access-control-allow-credentials: true",
+            "access-control-max-age: 86400",
+            "access-control-allow-methods: OPTIONS,GET,POST,PUT,DELETE,PATCH",
+            "access-control-allow-headers: Authorization,Content-Type,Accept,Origin,User-Agent,Cache-Control,Keep-Alive,X-Requested-With,If-Modified-Since",
         ];
         $expectedData = "";
 
@@ -77,9 +75,9 @@ class ServerCorsMiddlewareTest extends TestCase
         $expectedHeader = [
             "HTTP/1.1 200 OK",
             "Content-Type: application/json",
-            "Access-Control-Allow-Origin: http://anyhostisallowed",
-            "Access-Control-Allow-Credentials: true",
-            "Access-Control-Max-Age: 86400"
+            "access-control-allow-origin: http://anyhostisallowed",
+            "access-control-allow-credentials: true",
+            "access-control-max-age: 86400"
         ];
         $expectedData = "[\"Success!\"]";
 

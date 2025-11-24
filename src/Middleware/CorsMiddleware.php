@@ -6,13 +6,14 @@ use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\SerializationRuleEnum;
+use Override;
 
 class CorsMiddleware implements BeforeMiddlewareInterface
 {
 
-    const CORS_OK = 'CORS_OK';
-    const CORS_FAILED = 'CORS_FAILED';
-    const CORS_OPTIONS = 'CORS_OPTIONS';
+    const string CORS_OK = 'CORS_OK';
+    const string CORS_FAILED = 'CORS_FAILED';
+    const string CORS_OPTIONS = 'CORS_OPTIONS';
 
     protected array $corsOrigins = ['.*'];
     protected array $corsMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
@@ -37,6 +38,7 @@ class CorsMiddleware implements BeforeMiddlewareInterface
      * @return MiddlewareResult
      * @throws Error401Exception
      */
+    #[Override]
     public function beforeProcess(
         mixed        $dispatcherStatus,
         HttpResponse $response,
@@ -75,8 +77,10 @@ class CorsMiddleware implements BeforeMiddlewareInterface
             $corsStatus = self::CORS_FAILED;
 
             foreach ($this->corsOrigins as $origin) {
-                if (preg_match("~^.*//$origin$~", $request->server('HTTP_ORIGIN'))) {
-                    $response->addHeader("Access-Control-Allow-Origin", (string)$request->server('HTTP_ORIGIN'));
+                $httpOrigin = $request->server('HTTP_ORIGIN');
+                $httpOriginStr = is_array($httpOrigin) ? '' : (string)$httpOrigin;
+                if (preg_match("~^.*//$origin$~", $httpOriginStr)) {
+                    $response->addHeader("Access-Control-Allow-Origin", $httpOriginStr);
                     $response->addHeader('Access-Control-Allow-Credentials', 'true');
                     $response->addHeader('Access-Control-Max-Age', '86400');    // cache for 1 day
 

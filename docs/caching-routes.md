@@ -1,3 +1,7 @@
+---
+sidebar_position: 16
+sidebar_label: Caching Routes
+---
 # Caching the Routes
 
 It is possible to cache the route by adding any PSR-16 instance on the second parameter of the constructor:

@@ -2,11 +2,9 @@
 
 namespace ByJG\RestServer\OutputProcessor;
 
-use ByJG\RestServer\Whoops\PlainResponseErrorHandler;
 use ByJG\Serializer\Formatter\FormatterInterface;
 use ByJG\Serializer\Formatter\PlainTextFormatter;
-use Whoops\Handler\Handler;
-use Whoops\Handler\PrettyPageHandler;
+use Override;
 
 class HtmlOutputProcessor extends BaseOutputProcessor
 {
@@ -16,24 +14,9 @@ class HtmlOutputProcessor extends BaseOutputProcessor
     }
 
     /**
-     * @return PrettyPageHandler
-     */
-    public function getDetailedErrorHandler(): Handler
-    {
-        return new PrettyPageHandler();
-    }
-
-    /**
-     * @return PlainResponseErrorHandler
-     */
-    public function getErrorHandler(): Handler
-    {
-        return new PlainResponseErrorHandler();
-    }
-
-    /**
      * @return PlainTextFormatter
      */
+    #[Override]
     public function getFormatter(): FormatterInterface
     {
         return new PlainTextFormatter();

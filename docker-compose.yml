@@ -1,0 +1,12 @@
+services:
+  restserver-test:
+    image: byjg/php:8.4-fpm-nginx
+    working_dir: /srv
+    ports:
+      - "8090:80"
+    environment:
+      - PHP_CONTROLLER=public/app-dist.php
+      - NGINX_ROOT=/srv
+    volumes:
+      - .:/srv
+

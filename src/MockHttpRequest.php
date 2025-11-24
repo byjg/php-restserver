@@ -3,6 +3,7 @@
 namespace ByJG\RestServer;
 
 use ByJG\RestServer\Exception\OperationIdInvalidException;
+use Override;
 use Psr\Http\Message\RequestInterface;
 
 class MockHttpRequest extends HttpRequest
@@ -15,6 +16,8 @@ class MockHttpRequest extends HttpRequest
     /**
      *
      * @param RequestInterface $psrRequest
+     * @param array $param
+     * @throws OperationIdInvalidException
      */
     public function __construct(RequestInterface $psrRequest, $param = [])
     {
@@ -30,6 +33,7 @@ class MockHttpRequest extends HttpRequest
      *
      * @return string
      */
+    #[Override]
     public function payload(): string
     {
         if (is_null($this->payload)) {
@@ -42,7 +46,8 @@ class MockHttpRequest extends HttpRequest
 
 
     /**
-     * Initilize PHP variables based on the request
+     * Initialize PHP variables based on the request
+     * @throws OperationIdInvalidException
      */
     protected function initializePhpVariables(): void
     {
@@ -72,7 +77,7 @@ class MockHttpRequest extends HttpRequest
             $this->server["HTTP_" . str_replace('-', '_', strtoupper($key))] = $this->psrRequest->getHeaderLine($key);
 
             if ($key == "Cookie") {
-                parse_str(preg_replace("/;\s*/", "&", $this->psrRequest->getHeaderLine($key)), $this->cookie);
+                parse_str(preg_replace("/;\s*/", "&", $this->psrRequest->getHeaderLine($key)) ?? '', $this->cookie);
             }
         }
 
@@ -102,6 +107,7 @@ class MockHttpRequest extends HttpRequest
 
     /**
      * Inicialize the PHP variable $_FILE
+     * @throws OperationIdInvalidException
      */
     protected function initializePhpFileVar(): void
     {
@@ -120,6 +126,9 @@ class MockHttpRequest extends HttpRequest
 
         // split content by boundary and get rid of last -- element
         $blocks = preg_split("/-+$boundary/", $body);
+        if ($blocks === false) {
+            return;
+        }
         array_pop($blocks);
 
         // loop data blocks
@@ -128,13 +137,13 @@ class MockHttpRequest extends HttpRequest
                 continue;
 
             $name = [];
-            preg_match('/\bname=\"([^\"]*)\"\s*;/s', $block, $name);
+            preg_match('/\bname=\"([^\"]*)\"\s*;/is', $block, $name);
 
             $filename = [];
-            preg_match('/\bfilename=\"([^\"]*)\"\s*;/s', $block, $filename);
+            preg_match('/\bfilename=\"([^\"]*)\"\s*;/is', $block, $filename);
 
             $contentType = [];
-            preg_match('/Content-Type\s*:([^\r\n]*)/s', $block, $contentType);
+            preg_match('/Content-Type\s*:([^\r\n]*)/is', $block, $contentType);
 
             $content = [];
             preg_match('/\r?\n\r?\n(.*)$/s', $block, $content);

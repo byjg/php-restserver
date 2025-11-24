@@ -10,6 +10,7 @@ use ByJG\RestServer\Exception\Error500Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\Middleware\ServerStaticMiddleware;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class ServerStaticMiddlewareTest extends TestCase
@@ -27,7 +28,7 @@ class ServerStaticMiddlewareTest extends TestCase
     {
         $expectedHeader = [
             "HTTP/1.1 200 OK",
-            "Content-Type: application/json",
+            "content-type: application/json",
         ];
         $expectedData =
             "{\n" .
@@ -64,7 +65,7 @@ class ServerStaticMiddlewareTest extends TestCase
     /**
      * @return string[][]
      */
-    public function mimeDataProvider(): array
+    public static function mimeDataProvider(): array
     {
         return [
             [ __DIR__ . "/mimefiles/test.json", "application/json"],
@@ -74,9 +75,8 @@ class ServerStaticMiddlewareTest extends TestCase
 
     }
 
+    #[DataProvider('mimeDataProvider')]
     /**
-     * @dataProvider mimeDataProvider
-     *
      * @param $entry
      * @param $expected
      *

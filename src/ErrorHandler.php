@@ -4,77 +4,121 @@ namespace ByJG\RestServer;
 
 use ByJG\DesignPattern\Singleton;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
-use ByJG\RestServer\Whoops\LoggerErrorHandler;
-use ByJG\RestServer\Whoops\WhoopsWrapper;
+use ErrorException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Whoops\Handler\Handler;
-use Whoops\Run;
+use Throwable;
 
 class ErrorHandler
 {
-
     use Singleton;
 
-    /**
-     *
-     * @var Run|null
-     */
-    protected ?Run $whoops = null;
-
-    /**
-     *
-     * @var LoggerInterface
-     */
     protected LoggerInterface $logger;
 
-    /**
-     *
-     * @var WhoopsWrapper|null
-     */
-    protected ?WhoopsWrapper $wrapper = null;
+    protected ?OutputProcessorInterface $outputProcessor = null;
+
+    protected ?HttpResponse $response = null;
+
+    protected ?HttpRequest $request = null;
+
+    protected bool $detailed = false;
+
+    protected bool $registered = false;
 
     protected function __construct()
     {
-        $this->whoops = new Run();
-        $this->wrapper = new WhoopsWrapper();
-
         $this->logger = new NullLogger();
-
-        $this->whoops->popHandler();
-        $this->whoops->pushHandler(new LoggerErrorHandler());
-        $this->whoops->pushHandler($this->wrapper);
     }
 
     /**
-     * Set the proper Error Handler based on the Output of the page
+     * Set the output processor and context for error handling
      *
-     * @param Handler $handler
+     * @param OutputProcessorInterface $processor
+     * @param HttpResponse $response
+     * @param HttpRequest $request
+     * @param bool $detailed
      */
-    public function setHandler(Handler $handler): void
+    public function setOutputProcessor(
+        OutputProcessorInterface $processor,
+        HttpResponse             $response,
+        HttpRequest              $request,
+        bool                     $detailed = false
+    ): void
     {
-        $this->wrapper->setHandler($handler);
+        $this->outputProcessor = $processor;
+        $this->response = $response;
+        $this->request = $request;
+        $this->detailed = $detailed;
     }
 
     /**
-     * Set Whoops as the default error and exception handler used by PHP:
+     * Register as the default error and exception handler
      */
     public function register(): void
     {
-        $this->whoops->register();
+        if ($this->registered) {
+            return;
+        }
+
+        set_error_handler([$this, 'handleError']);
+        set_exception_handler([$this, 'handleException']);
+        $this->registered = true;
     }
 
     /**
-     * Disable Whoops as the default error and exception handler used by PHP:
+     * Unregister as the default error and exception handler
      */
     public function unregister(): void
     {
-        $this->whoops->unregister();
+        if (!$this->registered) {
+            return;
+        }
+
+        restore_error_handler();
+        restore_exception_handler();
+        $this->registered = false;
     }
 
-    public function setOutputProcessor(OutputProcessorInterface $processor, HttpResponse $response, HttpRequest $request): void
+    /**
+     * Handle PHP errors by converting them to ErrorExceptions
+     */
+    public function handleError(int $level, string $message, string $file = '', int $line = 0): bool
     {
-        $this->wrapper->setOutputProcessor($processor, $response, $request);
+        if (!(error_reporting() & $level)) {
+            // This error code is not included in error_reporting
+            return false;
+        }
+
+        throw new ErrorException($message, 0, $level, $file, $line);
+    }
+
+    /**
+     * Handle exceptions
+     */
+    public function handleException(Throwable $exception): void
+    {
+        if ($this->outputProcessor && $this->response && $this->request) {
+            $this->outputProcessor->handle($exception, $this->response, $this->request, $this->detailed);
+        } else {
+            // Fallback if no output processor is set
+            $this->logger->error($exception->getMessage(), [
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'trace' => explode("\n", $exception->getTraceAsString())
+            ]);
+
+            if (!headers_sent()) {
+                http_response_code(500);
+                header('Content-Type: application/json');
+            }
+
+            echo json_encode([
+                'error' => [
+                    'type' => 'Internal Error',
+                    'message' => $exception->getMessage()
+                ]
+            ]);
+        }
     }
 
     public function setLogger(LoggerInterface $logger): void
@@ -86,19 +130,4 @@ class ErrorHandler
     {
         return $this->logger;
     }
-
-    // @todo Review
-    // /**
-    //  * Added extra information for debug purposes on the error handler screen
-    //  *
-    //  * @param string $name
-    //  * @param string $value
-    //  */
-    // public function addExtraInfo($name, $value)
-    // {
-    //     if (method_exists($this->handler, 'addDataTable')) {
-    //         $data = $this->handler->getDataTable();
-    //         $this->handler->addDataTable('Info #' . (count($data) + 1), array($name => $value));
-    //     }
-    // }
 }

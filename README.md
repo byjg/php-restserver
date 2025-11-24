@@ -1,5 +1,6 @@
-# PHP Rest Server
+# Rest Server
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-%23ea4aaa?logo=githubsponsors&logoColor=white&labelColor=0d1117)](https://github.com/sponsors/byjg)
 [![Build Status](https://github.com/byjg/php-restserver/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-restserver/actions/workflows/phpunit.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-restserver/)
@@ -23,12 +24,25 @@ Creating and customizing routes:
 
 Processing the request and output the response:
 - [HttpRequest and HttpResponse object](docs/httprequest-httpresponse.md)
+- [File Uploads](docs/file-uploads.md)
 
 Advanced:
 - [Middleware](docs/middleware.md)
+    - [CORS Support](docs/middleware-cors.md)
+    - [Static Server Files](docs/middleware-staticserver.md)
+    - [JWT Authentication](docs/middleware-jwt.md)
 - [Error Handler](docs/error-handler.md)
 - [Intercepting the Request](docs/intercepting-request.md)
+- [Output Processors](docs/outprocessor.md)
 - [Caching Routes](docs/caching-routes.md)
+
+Additional topics:
+- [Mock Testing](docs/mock-testing.md)
+- [Route Metadata](docs/route-metadata.md)
+- [Content Negotiation](docs/content-negotiation.md)
+- [Custom HTTP Status Codes](docs/custom-status-codes.md)
+- [CSV Endpoint Example](docs/csv-endpoint-example.md)
+- [PSR-7 Adapters](docs/psr7-adapters.md)
 
 ## Installation
 
@@ -40,16 +54,12 @@ composer require "byjg/restserver"
 
 ```mermaid
 flowchart TD
-   byjg/restserver --> byjg/serializer
-   byjg/restserver --> byjg/singleton-pattern
-   byjg/restserver --> nikikc/fast-route
-   byjg/restserver --> filp/whoops
-   byjg/restserver --> byjg/cache-engine
-   byjg/restserver --> byjg/webrequest
-   byjg/restserver --> byjg/jwt-wrapper
-   byjg/restserver --> ext-json
+    byjg/restserver --> byjg/serializer
+    byjg/restserver --> byjg/singleton-pattern
+    byjg/restserver --> byjg/cache-engine
+    byjg/restserver --> byjg/webrequest
+    byjg/restserver --> byjg/jwt-wrapper
 ```
 
 ----
 [Open source ByJG](http://opensource.byjg.com)
-

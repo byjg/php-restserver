@@ -10,6 +10,8 @@ use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\OutputProcessor\PlainTextOutputProcessor;
 use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
 use ByJG\RestServer\Writer\MemoryWriter;
+use Override;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class OutputProcessorTest extends TestCase
@@ -23,6 +25,7 @@ class OutputProcessorTest extends TestCase
 
     protected $result;
 
+    #[Override]
     public function setup(): void
     {
         $this->object = [
@@ -36,6 +39,7 @@ class OutputProcessorTest extends TestCase
         $this->httpResponse->write($this->object);
     }
 
+    #[Override]
     public function tearDown(): void
     {
         $this->object = null;
@@ -45,9 +49,8 @@ class OutputProcessorTest extends TestCase
 
     /**
      * @return string[][]
-     *
      */
-    public function dataProvider(): array
+    public static function dataProvider(): array
     {
         return [
             [
@@ -64,7 +67,7 @@ class OutputProcessorTest extends TestCase
             ],
             [
                 XmlOutputProcessor::class,
-                "text/xml",
+                "application/xml",
                 "<?xml version=\"1.0\"?>\n<root><name>teste</name><address1/><address2/><value>0</value></root>\n",
                 "<?xml version=\"1.0\"?>\n<root><name>teste</name><address1/><address2/><value>0</value></root>\n",
             ],
@@ -83,9 +86,7 @@ class OutputProcessorTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider dataProvider
-     */
+    #[DataProvider('dataProvider')]
     public function testOutputProcessor($class, $contentType, $expectedProcess, $expectedResponse): void
     {
         $writer = new MemoryWriter();
@@ -106,5 +107,4 @@ class OutputProcessorTest extends TestCase
 
         $this->assertEquals($expectedResponse, $writer->getData());
     }
-
 }

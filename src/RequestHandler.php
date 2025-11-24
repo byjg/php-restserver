@@ -15,7 +15,7 @@ interface RequestHandler
 
     public function withDetailedErrorHandler();
 
-    public function withMiddleware(AfterMiddlewareInterface|BeforeMiddlewareInterface $middleware, string $routePattern = null): static;
+    public function withMiddleware(AfterMiddlewareInterface|BeforeMiddlewareInterface $middleware, ?string $routePattern = null): static;
 
-    public function withDefaultOutputProcessor(string|\Closure $processor, array $args = []): static;
+    public function withDefaultOutputProcessor(string $processor): static;
 }

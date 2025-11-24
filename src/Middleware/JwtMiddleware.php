@@ -7,14 +7,16 @@ use ByJG\JwtWrapper\JwtWrapperException;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
+use Exception;
+use Override;
 
 class JwtMiddleware implements BeforeMiddlewareInterface
 {
-    const JWT_PARAM_PREFIX = 'jwt';
-    const JWT_PARAM_PARSE_STATUS = 'jwt.parse.status';
-    const JWT_PARAM_PARSE_MESSAGE = 'jwt.parse.message';
-    const JWT_SUCCESS = 'success';
-    const JWT_FAILED = 'failed';
+    const string JWT_PARAM_PREFIX = 'jwt';
+    const string JWT_PARAM_PARSE_STATUS = 'jwt.parse.status';
+    const string JWT_PARAM_PARSE_MESSAGE = 'jwt.parse.message';
+    const string JWT_SUCCESS = 'success';
+    const string JWT_FAILED = 'failed';
 
     protected array $ignorePath = [];
     protected JwtWrapper $jwtWrapper;
@@ -34,6 +36,7 @@ class JwtMiddleware implements BeforeMiddlewareInterface
      * @return MiddlewareResult
      * @throws Error401Exception
      */
+    #[Override]
     public function beforeProcess(
         mixed        $dispatcherStatus,
         HttpResponse $response,
@@ -41,7 +44,9 @@ class JwtMiddleware implements BeforeMiddlewareInterface
     ): MiddlewareResult
     {
         foreach ($this->ignorePath as $path) {
-            if (preg_match("~$path~", $request->getRequestPath())) {
+            $requestPath = $request->getRequestPath();
+            $requestPathStr = is_array($requestPath) ? '' : (string)$requestPath;
+            if (preg_match("~$path~", $requestPathStr)) {
                 return MiddlewareResult::continue;
             }
         }
@@ -55,7 +60,7 @@ class JwtMiddleware implements BeforeMiddlewareInterface
         } catch (JwtWrapperException $ex) {
             $vars[self::JWT_PARAM_PARSE_STATUS] = self::JWT_FAILED;
             $vars[self::JWT_PARAM_PARSE_MESSAGE] = $ex->getMessage();
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             throw new Error401Exception($ex->getMessage());
         }
         $request->appendVars($vars);
