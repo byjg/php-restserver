@@ -14,7 +14,7 @@ class ServerJwtMiddlewareTest extends TestCase
 
     public function testJwtMiddlewareWithToken(): void
     {
-        $jwtKey = new JwtHashHmacSecret("password", decode: false);
+        $jwtKey = new JwtHashHmacSecret("password-that-is-long-enough-for-hs256", decode: false, algorithm: 'HS256');
         $jwtWrapper = new JwtWrapper("localhost", $jwtKey);
         $token = $jwtWrapper->generateToken(["userid" => "123"]);
 
@@ -35,7 +35,7 @@ class ServerJwtMiddlewareTest extends TestCase
 
     public function testJwtMiddlewareEmptyToken(): void
     {
-        $jwtKey = new JwtHashHmacSecret("password", decode: false);
+        $jwtKey = new JwtHashHmacSecret("password-that-is-long-enough-for-hs256", decode: false, algorithm: 'HS256');
         $jwtWrapper = new JwtWrapper("localhost", $jwtKey);
 
         $expectedHeader = [
@@ -57,7 +57,7 @@ class ServerJwtMiddlewareTest extends TestCase
     {
         $this->expectException(Error401Exception::class);
 
-        $jwtKey = new JwtHashHmacSecret("wrong", decode: false);
+        $jwtKey = new JwtHashHmacSecret("wrong-key-that-is-long-enough-for-hs256", decode: false, algorithm: 'HS256');
         $jwtWrapper = new JwtWrapper("other", $jwtKey);
         $token = $jwtWrapper->generateToken(["userid" => "150"]);
 
@@ -66,7 +66,7 @@ class ServerJwtMiddlewareTest extends TestCase
         $_SERVER['HTTP_AUTHORIZATION'] = "Bearer $token";
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 
-        $jwtKey2 = new JwtHashHmacSecret("password", decode: false);
+        $jwtKey2 = new JwtHashHmacSecret("password-that-is-long-enough-for-hs256", decode: false, algorithm: 'HS256');
         $jwtWrapper2 = new JwtWrapper("localhost", $jwtKey2);
 
         $this->processAndGetContent(
