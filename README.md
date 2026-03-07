@@ -1,4 +1,11 @@
+---
+tags: [php, http]
+---
+
 # Rest Server
+
+Create RESTFull services with different and customizable output handlers (JSON, XML, Html, etc.).
+Auto-Generate routes from swagger.json definition.
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-%23ea4aaa?logo=githubsponsors&logoColor=white&labelColor=0d1117)](https://github.com/sponsors/byjg)
 [![Build Status](https://github.com/byjg/php-restserver/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-restserver/actions/workflows/phpunit.yml)
@@ -7,42 +14,39 @@
 [![GitHub license](https://img.shields.io/github/license/byjg/php-restserver.svg)](https://opensource.byjg.com/opensource/licensing.html)
 [![GitHub release](https://img.shields.io/github/release/byjg/php-restserver.svg)](https://github.com/byjg/php-restserver/releases/)
 
-Create RESTFull services with different and customizable output handlers (JSON, XML, Html, etc.).
-Auto-Generate routes from swagger.json definition.
-
 ## Documentation
 
 Setup:
-- [Set up the RestServer](docs/setup.md)
+- [Set up the RestServer](setup)
 
 Creating and customizing routes:
-- [Defining Route Names](docs/defining-route-names.md)
-- [Create Routes using Closures](docs/routes-using-closures.md)
-- [Create Routes Manually](docs/routes-manually.md)
-- [Create Routes using PHP Attributes](docs/routes-using-php-attributes.md)
-- [Auto-Generate from an OpenApi definition](docs/autogenerator-routes-openapi.md) (**hot**)
+- [Defining Route Names](defining-route-names)
+- [Create Routes using Closures](routes-using-closures)
+- [Create Routes Manually](routes-manually)
+- [Create Routes using PHP Attributes](routes-using-php-attributes)
+- [Auto-Generate from an OpenApi definition](autogenerator-routes-openapi) (**hot**)
 
 Processing the request and output the response:
-- [HttpRequest and HttpResponse object](docs/httprequest-httpresponse.md)
-- [File Uploads](docs/file-uploads.md)
+- [HttpRequest and HttpResponse object](httprequest-httpresponse)
+- [File Uploads](file-uploads)
 
 Advanced:
-- [Middleware](docs/middleware.md)
-    - [CORS Support](docs/middleware-cors.md)
-    - [Static Server Files](docs/middleware-staticserver.md)
-    - [JWT Authentication](docs/middleware-jwt.md)
-- [Error Handler](docs/error-handler.md)
-- [Intercepting the Request](docs/intercepting-request.md)
-- [Output Processors](docs/outprocessor.md)
-- [Caching Routes](docs/caching-routes.md)
+- [Middleware](middleware)
+    - [CORS Support](middleware-cors)
+    - [Static Server Files](middleware-staticserver)
+    - [JWT Authentication](middleware-jwt)
+- [Error Handler](error-handler)
+- [Intercepting the Request](intercepting-request)
+- [Output Processors](outprocessor)
+- [Caching Routes](caching-routes)
 
 Additional topics:
-- [Mock Testing](docs/mock-testing.md)
-- [Route Metadata](docs/route-metadata.md)
-- [Content Negotiation](docs/content-negotiation.md)
-- [Custom HTTP Status Codes](docs/custom-status-codes.md)
-- [CSV Endpoint Example](docs/csv-endpoint-example.md)
-- [PSR-7 Adapters](docs/psr7-adapters.md)
+- [Mock Testing](mock-testing)
+- [Route Metadata](route-metadata)
+- [Content Negotiation](content-negotiation)
+- [Custom HTTP Status Codes](custom-status-codes)
+- [CSV Endpoint Example](csv-endpoint-example)
+- [PSR-7 Adapters](psr7-adapters)
 
 ## Installation
 
