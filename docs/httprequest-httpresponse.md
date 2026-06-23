@@ -16,60 +16,80 @@ informations to the requester.
 
 ## HttpRequest
 
-| Method                             | Description                                                            |
-|------------------------------------|------------------------------------------------------------------------|
-| get($var, $default)                | Get a value passed in the query string or all values if $var is null   |
-| post($var, $default)               | Get a value passed by the POST Form or all values if $var is null      |
-| server($var, $default)             | Get a value passed in the Request Header or all values if $var is null |
-| session($var, $default)            | Get a value from session or all values if $var is null                 |
-| cookie($var, $default)             | Get a value from a cookie or all values if $var is null                |
-| request($var, $default)            | Get a value from the get() OR post() or all values if $var is null     |
-| param($var, $default)              | Get a parameter from URL routing or all values if $var is null         |
-| payload()                          | Get the raw data passed in the request body                            |
-| getRequestIp()                     | Get the request IP (even if behind a proxy)                            |
-| ip()                               | Static method to get the request IP                                    |
-| getUserAgent()                     | Get the user agent                                                     |
-| userAgent()                        | Static method to get the user agent                                    |
-| getServerName()                    | Get the server name                                                    |
-| getRequestServer($port, $protocol) | Get the request server name with optional port and protocol            |
-| getHeader($header)                 | Get a specific header value                                            |
-| getRequestPath()                   | Get the request path                                                   |
-| uploadedFiles()                    | Return an instance of the UploadedFiles class                          |
-| appendVars($array)                 | Append variables to the request                                        |
-| routeMethod()                      | Get the HTTP method used for the current route                         |
-| getRouteMetadata($key)             | Get route metadata by key or all metadata if no key is provided        |
-| setRouteMetadata($routeMetadata)   | Set route metadata                                                     |
+| Method                             | Description                                                                 |
+|------------------------------------|-----------------------------------------------------------------------------|
+| query($var, $default)              | Get a value from the query string ($_GET) or all values if $var is null     |
+| body($var, $default)               | Get a value from the request body ($_POST) or all values if $var is null    |
+| server($var, $default)             | Get a value from $_SERVER or all values if $var is null                     |
+| session($var, $default)            | Get a value from the session ($_SESSION) or all values if $var is null      |
+| cookie($var, $default)             | Get a value from the cookies ($_COOKIE) or all values if $var is null       |
+| input($var, $default)              | Get a value from any source (query, body, server, session, cookie merged)   |
+| attribute($var, $default)          | Get a value injected by middleware or the framework (not URL or HTTP input) |
+| payload()                          | Get the raw request body (php://input)                                      |
+| getRequestIp()                     | Get the client IP address (checks proxy headers before REMOTE_ADDR)         |
+| ip()                               | Static method to get the client IP                                          |
+| getUserAgent()                     | Get the user agent                                                          |
+| userAgent()                        | Static method to get the user agent                                         |
+| getServerName()                    | Get the server name                                                         |
+| getRequestServer($port, $protocol) | Get the server name, optionally with port and/or protocol                   |
+| getHeader($header)                 | Get a specific request header value                                         |
+| getRequestPath()                   | Get the request path                                                        |
+| uploadedFiles()                    | Return an instance of the UploadedFiles class                               |
+| addAttributes($array)              | Bulk-add values to the attribute bag (middleware/framework use)             |
+| routeMethod()                      | Get the HTTP method used for the current route                              |
+| getRouteMetadata($key)             | Get route metadata by key or all metadata if no key is provided             |
+| setRouteMetadata($routeMetadata)   | Set route metadata                                                          |
+
+### Typed getters
+
+Each source also has typed variants that always return `?string` or `?array`:
+
+| Method                          | Source                                           |
+|---------------------------------|--------------------------------------------------|
+| queryString($key, $default)     | $_GET                                            |
+| queryArray($key, $default)      | $_GET                                            |
+| bodyString($key, $default)      | $_POST                                           |
+| bodyArray($key, $default)       | $_POST                                           |
+| serverString($key, $default)    | $_SERVER                                         |
+| cookieString($key, $default)    | $_COOKIE                                         |
+| sessionString($key, $default)   | $_SESSION                                        |
+| attributeString($key, $default) | attribute bag (route params + middleware values) |
+| inputString($key, $default)     | any source                                       |
 
 Example:
 
 ```php
 function ($response, $request) {
 
-    // Get a value passed in the query string
+    // Get a value from the query string
     // http://localhost/?myvar=123
-    $request->get('myvar');
-    
-    // Get a value passed by the POST Form
+    $request->query('myvar');
+
+    // Typed variant — guaranteed string or null
+    $myvar = $request->queryString('myvar');
+
+    // Get a value from the POST body
     // <form method="post"><input type="text" name="myvar" value="123" /></form>
-    $request->post('myvar');
-    
-    // Get a value passed in the Request Header (eg. HTTP_REFERER)
-    // http://localhost/?myvar=123
+    $request->body('myvar');
+
+    // Get a value from $_SERVER (eg. HTTP_REFERER)
     $request->server('HTTP_REFERER');
-    
-    // Get a payload passed in the request body
+
+    // Get the raw request body
     // {"myvar": 123}
-    $json = json_decode($request->payload('myvar'));
-    
-    // Get a route parameter (from URL)
-    // Route: /user/{id} -> URL: /user/123
-    $userId = $request->param('id');
-    
+    $json = json_decode($request->payload());
+
+    // Get a URL route placeholder (Route: /user/{id} -> URL: /user/123)
+    $userId = $request->attributeString('id');
+
+    // Get a middleware-injected attribute value
+    $jwtSub = $request->attributeString('jwt.sub');
+
     // Get information about the request
     $ip = $request->getRequestIp();
     $server = $request->getRequestServer();
     $userAgent = $request->getUserAgent();
-    
+
     // Get uploaded files
     $files = $request->uploadedFiles();
     $uploadedFile = $files->get('myfile');
@@ -84,7 +104,7 @@ function ($response, $request) {
 | removeSession($var)                               | Remove a value from the session;                        |
 | addCookie($name, $value, $expire, $path, $domain) | Add a cookie;                                           |
 | removeCookie($var)                                | Remove a value from the cookies;                        |
-| getResponseBag()                                  | Returns the ResponseBag object;                         |
+| getResponseBody()                                 | Returns the ResponseBody object;                        |
 | write($object)                                    | See below;                                              |
 | writeDebug($object)                               | Add information to be displayed in case of error;       |
 | emptyResponse()                                   | Empty all previously write responses;                   |
@@ -104,7 +124,7 @@ Example:
 
 ```php
 function ($response, $request) {
-    $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
+    $response->getResponseBody()->serializeAs(OutputMode::SingleObject);
 
     $myDto = new MyDto();
     
@@ -122,7 +142,7 @@ For example:
 
 ```php
 function ($response, $request) {
-    // Default behavior is SerializationRuleEnum::Automatic
+    // Default behavior is OutputMode::Automatic
     $response->write(['status' => 1]);
     $response->write(['result' => 'ok']);
 }
@@ -140,7 +160,7 @@ Will produce the following output:
 ### Chainning multiple outputs as a single object
 
 We can change the behavior of the output to be a single object
-using the method `getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject)`
+using the method `getResponseBody()->serializeAs(OutputMode::SingleObject)`
 
 ```php
 <?php
@@ -150,7 +170,7 @@ using the method `getResponseBag()->setSerializationRule(SerializationRuleEnum::
  * @param \ByJG\RestServer\HttpRequest $request
  */
 function ($response, $request) {
-    $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::SingleObject);
+    $response->getResponseBody()->serializeAs(OutputMode::SingleObject);
     
     // Output an array
     $array = ["field" => "value"];
@@ -191,14 +211,14 @@ The result will be something like:
 }
 ```
 
-### Available serialization rules
+### Available output modes
 
-The ResponseBag supports the following serialization rules:
+The ResponseBody supports the following output modes:
 
-| Enum Value                          | Description                                             |
-|-------------------------------------|---------------------------------------------------------|
-| SerializationRuleEnum::Automatic    | Auto-detect the best format based on inputs             |
-| SerializationRuleEnum::SingleObject | Merge all outputs into a single object                  |
-| SerializationRuleEnum::ObjectList   | Always return the outputs as a list of objects          |
-| SerializationRuleEnum::Raw          | Return the outputs as a raw string (no JSON formatting) |
+| Enum Value               | Description                                             |
+|--------------------------|---------------------------------------------------------|
+| OutputMode::Automatic    | Auto-detect the best format based on inputs             |
+| OutputMode::SingleObject | Merge all outputs into a single object                  |
+| OutputMode::ObjectList   | Always return the outputs as a list of objects          |
+| OutputMode::Plain        | Return the outputs as a plain string (no serialization) |
 

@@ -10,7 +10,7 @@ formatted error messages according to the OutputProcessor defined in the route.
 ## How it works
 
 1. Each route has an OutputProcessor that will handle the output of the route. (See [OutputProcessor](outprocessor.md))
-2. Initialize the HttpRequestHandler (it will handle the request and call the route)
+2. Initialize the `Server` (it will handle the request and call the route)
 3. Once an exception is thrown, the OutputProcessor will call the ErrorHandler 
 to handle the exception and return a detailed message (debug, dev, etc) or a simple one suitable
 for production.
@@ -19,11 +19,11 @@ for production.
 
 ### Setting a Logger
 
-You can provide a PSR-3 compatible logger to the HttpRequestHandler when initializing it:
+You can provide a PSR-3 compatible logger to the `Server` when initializing it:
 
 ```php
 <?php
-use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Server;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
@@ -32,7 +32,7 @@ $logger = new Logger('app');
 $logger->pushHandler(new StreamHandler('path/to/your.log', Logger::WARNING));
 
 // Initialize with logger
-$server = new HttpRequestHandler($logger);
+$server = new Server($logger);
 $server->handle($routeList);
 ```
 
@@ -44,9 +44,9 @@ You can disable the error handler completely and handle the exceptions by yourse
 
 ```php
 <?php
-use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Server;
 
-$server = new HttpRequestHandler();
+$server = new Server();
 $server->withErrorHandlerDisabled(); // Disable the error handler completely
 try {
     $server->handle($routeList);
@@ -62,9 +62,9 @@ stack trace, etc.
 
 ```php
 <?php
-use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Server;
 
-$server = new HttpRequestHandler();
+$server = new Server();
 $server->withDetailedErrorHandler(); // Enable the detailed error handler, for debug purposes
 $server->handle($routeList);
 ```

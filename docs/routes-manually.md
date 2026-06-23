@@ -4,7 +4,7 @@ sidebar_label: Routes Manually
 ---
 # Create Routes Using Classes
 
-> **Note:** For complete setup instructions including HttpRequestHandler configuration, see [Setup](setup.md).
+> **Note:** For complete setup instructions including Server configuration, see [Setup](setup.md).
 
 Creating routes with classes provides better organization, testability, and reusability compared to closures. This
 approach is recommended for production applications with complex business logic.
@@ -93,7 +93,7 @@ class UserController
 {
     public function getUser(HttpResponse $response, HttpRequest $request)
     {
-        $userId = $request->param('id');
+        $userId = $request->attribute('id');
         // Fetch user data...
         $response->write(['user_id' => $userId]);
     }

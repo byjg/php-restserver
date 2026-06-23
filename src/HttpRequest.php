@@ -14,15 +14,6 @@ class HttpRequest
     protected array $phpRequest;
     protected array $routeMetadata = [];
 
-    /**
-     *
-     * @param array $get
-     * @param array $post
-     * @param array $server
-     * @param array $session
-     * @param array $cookie
-     * @param array $param
-     */
     public function __construct(array $get, array $post, array $server, array $session, array $cookie, array $param = [])
     {
         $this->get = $get;
@@ -36,10 +27,10 @@ class HttpRequest
     }
 
     /**
-     * Get a parameter passed by GET (the same as $_GET). If not found return false.
-     *
+     * Get a value from the query string ($_GET). Returns all values if $value is null.
+     * Returns $default if the key is not found.
      */
-    public function get(?string $value = null, mixed $default = null): string|array|bool|null
+    public function query(?string $value = null, mixed $default = null): string|array|bool|null
     {
         if (is_null($value)) {
             return $this->get;
@@ -53,10 +44,10 @@ class HttpRequest
     }
 
     /**
-     * Get a parameter passed by POST (the same as $_POST). If not found return false.
-     *
+     * Get a value from the request body ($_POST). Returns all values if $value is null.
+     * Returns $default if the key is not found.
      */
-    public function post(?string $value = null, mixed $default = null): string|array|bool|null
+    public function body(?string $value = null, mixed $default = null): string|array|bool|null
     {
         if (is_null($value)) {
             return $this->post;
@@ -70,8 +61,8 @@ class HttpRequest
     }
 
     /**
-     * Get the parameters sent by server (the same as $_SERVER). If not found return false.
-     *
+     * Get a value from the server parameters ($_SERVER). Returns all values if $value is null.
+     * Returns $default if the key is not found.
      */
     public function server(?string $value = null, mixed $default = null): string|array|bool|null
     {
@@ -87,8 +78,8 @@ class HttpRequest
     }
 
     /**
-     * Get a server session value(the same as $_SESSION). If not found return false.
-     *
+     * Get a value from the session ($_SESSION). Returns all values if $value is null.
+     * Returns $default if the key is not found.
      */
     public function session(?string $value = null, mixed $default = null): string|array|bool|null
     {
@@ -104,8 +95,8 @@ class HttpRequest
     }
 
     /**
-     * Get the cookie sent by the client (the same as $_COOKIE). If not found return false.
-     *
+     * Get a value from the cookies ($_COOKIE). Returns all values if $value is null.
+     * Returns $default if the key is not found.
      */
     public function cookie(?string $value = null, mixed $default = null): string|array|bool|null
     {
@@ -121,10 +112,10 @@ class HttpRequest
     }
 
     /**
-     * Get a value from any of get, post, server, cookie or session. If not found return false.
-     *
+     * Get a value from any source (query, body, server, session, cookie merged).
+     * Returns all values if $value is null. Returns $default if the key is not found.
      */
-    public function request(?string $value = null, mixed $default = null): string|array|bool|null
+    public function input(?string $value = null, mixed $default = null): string|array|bool|null
     {
         if (is_null($value)) {
             return $this->phpRequest;
@@ -138,13 +129,10 @@ class HttpRequest
     }
 
     /**
-     * Get a value from the params found in the URL
-     *
-     * @param ?string $value
-     * @param mixed $default
-     * @return mixed
+     * Get a value injected by middleware or the framework (not URL or HTTP input).
+     * Returns all values if $value is null. Returns $default if the key is not found.
      */
-    public function param(?string $value = null, mixed $default = null): mixed
+    public function attribute(?string $value = null, mixed $default = null): mixed
     {
         if (is_null($value)) {
             return $this->param;
@@ -160,9 +148,7 @@ class HttpRequest
     protected ?string $payload = null;
 
     /**
-     * Get the payload passed during the request(the same as php://input). If not found return empty.
-     *
-     * @return string
+     * Get the raw request body (php://input). Returns an empty string if there is no body.
      */
     public function payload(): string
     {
@@ -175,9 +161,7 @@ class HttpRequest
     }
 
     /**
-     * Use this method to get the CLIENT REQUEST IP.
-     * Note that if you are behind a Proxy, the variable REMOTE_ADDR will always have the same IP
-     * @return string|null
+     * Returns the client IP address, checking common proxy headers before REMOTE_ADDR.
      */
     public function getRequestIp(): ?string
     {
@@ -214,9 +198,6 @@ class HttpRequest
         return $request->getRequestIp();
     }
 
-    /**
-     * @return array|null|string|true
-     */
     public function getUserAgent(): bool|array|string|null
     {
         $userAgent = $this->server('HTTP_USER_AGENT');
@@ -244,10 +225,7 @@ class HttpRequest
     }
 
     /**
-     * Use this method to get the SERVER NAME.
-     * @param bool $port
-     * @param bool $protocol
-     * @return bool|array<array-key, mixed>|string|null
+     * Returns the server name, optionally with port and/or protocol.
      */
     public function getRequestServer(bool $port = false, bool $protocol = false): bool|array|string|null
     {
@@ -275,9 +253,6 @@ class HttpRequest
         return $this->server($header);
     }
 
-    /**
-     * @return bool|array|string|null
-     */
     public function getRequestPath(): bool|array|string|null
     {
         $requestUri = $this->server('REQUEST_URI', "");
@@ -289,9 +264,6 @@ class HttpRequest
 
     private ?UploadedFiles $uploadedFiles = null;
 
-    /**
-     * @return UploadedFiles
-     */
     public function uploadedFiles(): UploadedFiles
     {
         if (is_null($this->uploadedFiles)) {
@@ -300,9 +272,100 @@ class HttpRequest
         return $this->uploadedFiles;
     }
 
-    public function appendVars(array $array): void
+    /** Bulk-add values to the context bag (middleware/framework use). */
+    public function addAttributes(array $array): void
     {
         $this->param = array_merge($this->param, $array);
+    }
+
+    /** Returns the query string value for $key as a string, or $default if not found. */
+    public function queryString(string $key, ?string $default = null): ?string
+    {
+        $value = $this->query($key);
+        if ($value === null || $value === false) {
+            return $default;
+        }
+        return is_array($value) ? implode(',', $value) : (string)$value;
+    }
+
+    /** Returns the query string value for $key as an array, or $default if not found. */
+    public function queryArray(string $key, ?array $default = null): ?array
+    {
+        $value = $this->query($key);
+        if ($value === null || $value === false) {
+            return $default;
+        }
+        return is_array($value) ? $value : [$value];
+    }
+
+    /** Returns the body value for $key as a string, or $default if not found. */
+    public function bodyString(string $key, ?string $default = null): ?string
+    {
+        $value = $this->body($key);
+        if ($value === null || $value === false) {
+            return $default;
+        }
+        return is_array($value) ? implode(',', $value) : (string)$value;
+    }
+
+    /** Returns the body value for $key as an array, or $default if not found. */
+    public function bodyArray(string $key, ?array $default = null): ?array
+    {
+        $value = $this->body($key);
+        if ($value === null || $value === false) {
+            return $default;
+        }
+        return is_array($value) ? $value : [$value];
+    }
+
+    /** Returns the $_SERVER value for $key as a string, or $default if not found. */
+    public function serverString(string $key, ?string $default = null): ?string
+    {
+        $value = $this->server($key);
+        if ($value === null || $value === false) {
+            return $default;
+        }
+        return is_array($value) ? implode(',', $value) : (string)$value;
+    }
+
+    /** Returns the cookie value for $key as a string, or $default if not found. */
+    public function cookieString(string $key, ?string $default = null): ?string
+    {
+        $value = $this->cookie($key);
+        if ($value === null || $value === false) {
+            return $default;
+        }
+        return is_array($value) ? implode(',', $value) : (string)$value;
+    }
+
+    /** Returns the session value for $key as a string, or $default if not found. */
+    public function sessionString(string $key, ?string $default = null): ?string
+    {
+        $value = $this->session($key);
+        if ($value === null || $value === false) {
+            return $default;
+        }
+        return is_array($value) ? implode(',', $value) : (string)$value;
+    }
+
+    /** Returns the context value for $key as a string, or $default if not found. */
+    public function attributeString(string $key, ?string $default = null): ?string
+    {
+        $value = $this->attribute($key);
+        if ($value === null || $value === false) {
+            return $default;
+        }
+        return is_array($value) ? implode(',', $value) : (string)$value;
+    }
+
+    /** Returns the merged input value for $key as a string, or $default if not found. */
+    public function inputString(string $key, ?string $default = null): ?string
+    {
+        $value = $this->input($key);
+        if ($value === null || $value === false) {
+            return $default;
+        }
+        return is_array($value) ? implode(',', $value) : (string)$value;
     }
 
     public function routeMethod(): ?string

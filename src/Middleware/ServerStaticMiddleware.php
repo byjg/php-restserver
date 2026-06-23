@@ -2,11 +2,11 @@
 
 namespace ByJG\RestServer\Middleware;
 
+use ByJG\RestServer\Enum\OutputMode;
 use ByJG\RestServer\Exception\Error415Exception;
 use ByJG\RestServer\Exception\Error500Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\RestServer\Util\GeneralUtil;
 use ByJG\Util\Uri;
 use FastRoute\Dispatcher;
@@ -1042,7 +1042,7 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
 
             $response->addHeader("Content-Type", $mime);
             $response->emptyResponse();
-            $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::Raw);
+            $response->getResponseBody()->serializeAs(OutputMode::Plain);
             $response->write(file_get_contents($file));
             return MiddlewareResult::stopProcessingOthers;
         }

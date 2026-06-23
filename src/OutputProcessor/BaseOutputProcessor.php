@@ -2,13 +2,13 @@
 
 namespace ByJG\RestServer\OutputProcessor;
 
+use ByJG\RestServer\Enum\OutputMode;
 use ByJG\RestServer\ErrorHandler;
 use ByJG\RestServer\Exception\HttpResponseException;
 use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\Handler\ExceptionFormatter;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\RestServer\Writer\WriterInterface;
 use Override;
 use Throwable;
@@ -184,10 +184,10 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         $this->writeHeader($response);
 
         $serialized = $response
-            ->getResponseBag()
+            ->getResponseBody()
             ->process($this->buildNull, $this->onlyString);
 
-        if ($response->getResponseBag()->getSerializationRule() === SerializationRuleEnum::Raw) {
+        if ($response->getResponseBody()->getOutputMode() === OutputMode::Plain) {
             $this->writeData(is_array($serialized) ? json_encode($serialized) : $serialized);
         } else {
             $this->writeData(

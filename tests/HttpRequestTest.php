@@ -64,22 +64,22 @@ class HttpRequestTest extends TestCase
     public function testCookie(): void
     {
         $this->assertEquals(5, $this->request->cookie('cookiep'));
-        $this->assertEquals(5, $this->request->request('cookiep'));
+        $this->assertEquals(5, $this->request->input('cookiep'));
         $this->assertEquals(['cookiep' => 5], $this->request->cookie());
     }
 
     public function testSession(): void
     {
         $this->assertEquals(4, $this->request->session('sessionp'));
-        $this->assertEquals(4, $this->request->request('sessionp'));
+        $this->assertEquals(4, $this->request->input('sessionp'));
         $this->assertEquals(['sessionp' => 4], $this->request->session());
     }
 
     public function testParam(): void
     {
-        $this->assertEquals(6, $this->request->param('paramp'));
-        $this->assertEmpty($this->request->request('paramp'));
-        $this->assertEquals(['paramp' => 6], $this->request->param());
+        $this->assertEquals(6, $this->request->attribute('paramp'));
+        $this->assertEmpty($this->request->input('paramp'));
+        $this->assertEquals(['paramp' => 6], $this->request->attribute());
     }
 
     public function testGetHeader(): void
@@ -94,22 +94,22 @@ class HttpRequestTest extends TestCase
 
     public function testGet(): void
     {
-        $this->assertEquals(1, $this->request->get('getp'));
-        $this->assertEquals(1, $this->request->request('getp'));
-        $this->assertEquals(['getp' => 1], $this->request->get());
+        $this->assertEquals(1, $this->request->query('getp'));
+        $this->assertEquals(1, $this->request->input('getp'));
+        $this->assertEquals(['getp' => 1], $this->request->query());
     }
 
     public function testPost(): void
     {
-        $this->assertEquals(2, $this->request->post('postp'));
-        $this->assertEquals(2, $this->request->request('postp'));
-        $this->assertEquals(['postp' => 2], $this->request->post());
+        $this->assertEquals(2, $this->request->body('postp'));
+        $this->assertEquals(2, $this->request->input('postp'));
+        $this->assertEquals(['postp' => 2], $this->request->body());
     }
 
     public function testAppendVars(): void
     {
-        $this->request->appendVars(['newp' => 7]);
-        $this->assertEquals(7, $this->request->param('newp'));
+        $this->request->addAttributes(['newp' => 7]);
+        $this->assertEquals(7, $this->request->attribute('newp'));
     }
 
     public function testEmptyRequest(): void

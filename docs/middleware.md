@@ -4,14 +4,15 @@ sidebar_label: Middleware
 ---
 # Middleware
 
-HttpServerHandler has the ability to inject processing Before and After process the request. Using this you can inject code, change headers
+The `Server` class has the ability to inject processing Before and After the request. Using this you can inject code,
+change headers
 or even block the processing.
 
 You need to implement the class `BeforeMiddlewareInterface` and `AfterMiddlewareInterface` and then add to the handler:
 
 ```php
 <?php
-$httpHandler = new \ByJG\RestServer\HttpRequestHandler();
+$httpHandler = new \ByJG\RestServer\Server();
 $httpHandler
     ->withMiddleware(/*... instance of BeforeMiddlewareInterface or AfterMiddlewareInterface ...*/, /* routing pattern */);
 ```

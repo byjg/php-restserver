@@ -21,7 +21,7 @@ class MockHttpRequestTest extends TestCase
         $psr7Request = RequestMultiPart::build(new Uri("/2?foo=bar"), "POST", $multiPartItems);
         $mockHttpRequest = new MockHttpRequest($psr7Request, ["id" => 2]);
 
-        $this->assertEquals(2, $mockHttpRequest->param("id"));
+        $this->assertEquals(2, $mockHttpRequest->attribute("id"));
 
         $this->assertEquals(
             [

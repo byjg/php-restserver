@@ -63,7 +63,7 @@ class JwtMiddleware implements BeforeMiddlewareInterface
         } catch (Exception $ex) {
             throw new Error401Exception($ex->getMessage());
         }
-        $request->appendVars($vars);
+        $request->addAttributes($vars);
 
         return MiddlewareResult::continue;
     }

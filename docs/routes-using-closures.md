@@ -4,7 +4,7 @@ sidebar_label: Routes using Closures
 ---
 # Creating Routes Using Closures
 
-> **Note:** For complete setup instructions including HttpRequestHandler configuration, see [Setup](setup.md).
+> **Note:** For complete setup instructions including Server configuration, see [Setup](setup.md).
 
 Closures provide a quick and simple way to define routes inline without creating separate classes. They are ideal for
 prototyping, testing, or simple endpoints that don't require complex logic.
@@ -52,7 +52,7 @@ Access route parameters in closures:
 $routeDefinition->addRoute(
     Route::get("/api/user/{id}")
         ->withClosure(function (HttpResponse $response, HttpRequest $request) {
-            $userId = $request->param('id');
+            $userId = $request->attributeString('id');
             $response->write(['user_id' => $userId]);
         })
 );
