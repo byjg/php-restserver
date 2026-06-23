@@ -1,11 +1,11 @@
 <?php
 
-namespace ByJG\RestServer;
+namespace ByJG\RestServer\Enum;
 
-enum SerializationRuleEnum
+enum OutputMode
 {
     case Automatic;
     case SingleObject;
     case ObjectList;
-    case Raw;
+    case Plain;
 }

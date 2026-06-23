@@ -3,12 +3,12 @@
 namespace Tests;
 
 use ByJG\RestServer\HttpRequest;
-use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Middleware\AfterMiddlewareInterface;
 use ByJG\RestServer\Middleware\BeforeMiddlewareInterface;
 use ByJG\RestServer\Middleware\MiddlewareResult;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
+use ByJG\RestServer\Server;
 use ByJG\RestServer\Writer\MemoryWriter;
 use InvalidArgumentException;
 use Override;
@@ -18,7 +18,7 @@ use stdClass;
 
 class HttpRequestHandlerTest extends TestCase
 {
-    private HttpRequestHandler $handler;
+    private Server $handler;
 
     /**
      * Set up the test environment
@@ -26,7 +26,7 @@ class HttpRequestHandlerTest extends TestCase
     #[Override]
     protected function setUp(): void
     {
-        $this->handler = new HttpRequestHandler();
+        $this->handler = new Server();
     }
 
     /**
@@ -39,7 +39,7 @@ class HttpRequestHandlerTest extends TestCase
         $this->assertSame($this->handler, $result);
 
         // Test that useErrorHandler is set to false
-        $reflectionProperty = new ReflectionProperty(HttpRequestHandler::class, 'useErrorHandler');
+        $reflectionProperty = new ReflectionProperty(Server::class, 'useErrorHandler');
         $this->assertFalse($reflectionProperty->getValue($this->handler));
     }
 
@@ -53,7 +53,7 @@ class HttpRequestHandlerTest extends TestCase
         $this->assertSame($this->handler, $result);
 
         // Test that detailedErrorHandler is set to true
-        $reflectionProperty = new ReflectionProperty(HttpRequestHandler::class, 'detailedErrorHandler');
+        $reflectionProperty = new ReflectionProperty(Server::class, 'detailedErrorHandler');
         $this->assertTrue($reflectionProperty->getValue($this->handler));
     }
 
@@ -67,7 +67,7 @@ class HttpRequestHandlerTest extends TestCase
         $this->assertSame($this->handler, $result);
 
         // Test that defaultOutputProcessor is set correctly
-        $reflectionProperty = new ReflectionProperty(HttpRequestHandler::class, 'defaultOutputProcessor');
+        $reflectionProperty = new ReflectionProperty(Server::class, 'defaultOutputProcessor');
         $this->assertEquals(JsonOutputProcessor::class, $reflectionProperty->getValue($this->handler));
     }
 
@@ -93,7 +93,7 @@ class HttpRequestHandlerTest extends TestCase
         $this->assertSame($this->handler, $result);
 
         // Test that writer is set correctly
-        $reflectionProperty = new ReflectionProperty(HttpRequestHandler::class, 'writer');
+        $reflectionProperty = new ReflectionProperty(Server::class, 'writer');
         $this->assertSame($writer, $reflectionProperty->getValue($this->handler));
     }
 
@@ -110,7 +110,7 @@ class HttpRequestHandlerTest extends TestCase
         $this->assertSame($this->handler, $result);
 
         // Test that middleware is added to beforeMiddlewareList
-        $reflectionProperty = new ReflectionProperty(HttpRequestHandler::class, 'beforeMiddlewareList');
+        $reflectionProperty = new ReflectionProperty(Server::class, 'beforeMiddlewareList');
         $beforeList = $reflectionProperty->getValue($this->handler);
 
         $this->assertCount(1, $beforeList);
@@ -143,7 +143,7 @@ class HttpRequestHandlerTest extends TestCase
         $this->assertSame($this->handler, $result);
 
         // Test that middleware is added to afterMiddlewareList
-        $reflectionProperty = new ReflectionProperty(HttpRequestHandler::class, 'afterMiddlewareList');
+        $reflectionProperty = new ReflectionProperty(Server::class, 'afterMiddlewareList');
         $afterList = $reflectionProperty->getValue($this->handler);
 
         $this->assertCount(1, $afterList);
@@ -186,10 +186,10 @@ class HttpRequestHandlerTest extends TestCase
         $result = $this->handler->withMiddleware($middleware);
 
         // Test that middleware is added to both lists
-        $reflectionBefore = new ReflectionProperty(HttpRequestHandler::class, 'beforeMiddlewareList');
+        $reflectionBefore = new ReflectionProperty(Server::class, 'beforeMiddlewareList');
         $beforeList = $reflectionBefore->getValue($this->handler);
 
-        $reflectionAfter = new ReflectionProperty(HttpRequestHandler::class, 'afterMiddlewareList');
+        $reflectionAfter = new ReflectionProperty(Server::class, 'afterMiddlewareList');
         $afterList = $reflectionAfter->getValue($this->handler);
 
         $this->assertCount(1, $beforeList);

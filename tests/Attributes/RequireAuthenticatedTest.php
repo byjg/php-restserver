@@ -5,12 +5,12 @@ namespace Tests\Attributes;
 use ByJG\RestServer\Attributes\RequireAuthenticated;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\HttpRequest;
-use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Middleware\BeforeMiddlewareInterface;
 use ByJG\RestServer\Middleware\JwtMiddleware;
 use ByJG\RestServer\Middleware\MiddlewareResult;
 use ByJG\RestServer\Route\RouteList;
+use ByJG\RestServer\Server;
 use Override;
 use PHPUnit\Framework\TestCase;
 use Tests\MockServerTrait;
@@ -24,7 +24,7 @@ class RequireAuthenticatedTest extends TestCase
     public function setup(): void
     {
         ini_set('output_buffering', 4096);
-        $this->object = new HttpRequestHandler();
+        $this->object = new Server();
         $this->reach = false;
         $this->definition = new RouteList();
 
@@ -85,7 +85,7 @@ class RequireAuthenticatedTest extends TestCase
                 HttpRequest  $request
             ): MiddlewareResult
             {
-                $request->appendVars([
+                $request->addAttributes([
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => 'failed',
                     JwtMiddleware::JWT_PARAM_PARSE_MESSAGE => 'Invalid token'
                 ]);
@@ -128,7 +128,7 @@ class RequireAuthenticatedTest extends TestCase
                 HttpRequest  $request
             ): MiddlewareResult
             {
-                $request->appendVars([
+                $request->addAttributes([
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => JwtMiddleware::JWT_SUCCESS
                 ]);
                 return MiddlewareResult::continue;

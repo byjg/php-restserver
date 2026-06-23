@@ -82,14 +82,14 @@ class Psr7RequestAdapter
         }
 
         // Set query params
-        $getData = $request->get();
+        $getData = $request->query();
         if (is_array($getData) && !empty($getData)) {
             $psr7Request = $psr7Request->withQueryParams($getData);
         }
 
         // Set parsed body (POST data)
         // Note: withParsedBody also updates the body stream, so we need to set Content-Type first
-        $postData = $request->post();
+        $postData = $request->body();
         if (is_array($postData) && !empty($postData)) {
             // Ensure Content-Type header is set for proper encoding
             if (!$psr7Request->hasHeader('Content-Type')) {
@@ -98,8 +98,8 @@ class Psr7RequestAdapter
             $psr7Request = $psr7Request->withParsedBody($postData);
         }
 
-        // Set route params as attributes
-        $params = $request->param();
+        // Set request attributes as PSR-7 attributes
+        $params = $request->attribute();
         if (!empty($params)) {
             foreach ($params as $key => $value) {
                 $psr7Request = $psr7Request->withAttribute($key, $value);

@@ -30,7 +30,7 @@ use Override;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-class HttpRequestHandler implements RequestHandler
+class Server implements ServerInterface
 {
     const string OK = "OK";
     const string METHOD_NOT_ALLOWED = "NOT_ALLOWED";
@@ -92,7 +92,7 @@ class HttpRequestHandler implements RequestHandler
         $dispatcher = $routeDefinition->getDispatcher();
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
         $this->getHttpRequest()->setRouteMetadata($routeInfo[1] ?? []);
-        $this->getHttpRequest()->appendVars(array_merge($routeInfo[2] ?? [], $queryStr));
+        $this->getHttpRequest()->addAttributes(array_merge($routeInfo[2] ?? [], $queryStr));
 
         // Get OutputProcessor
         $outputProcessor = $this->initializeProcessor(

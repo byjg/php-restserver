@@ -22,7 +22,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 //   4. or auto-generate from an OpenApi definition
 
 // Set up the RestServer
-$restServer = new \ByJG\RestServer\HttpRequestHandler();
+$restServer = new \ByJG\RestServer\Server();
 
 // Optional configurations
 $restServer
