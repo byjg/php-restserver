@@ -102,17 +102,12 @@ class Server implements ServerInterface
         );
         
         // Process Before Middleware
-        try {
-            $middlewareResult = MiddlewareManagement::processBefore(
-                $this->beforeMiddlewareList,
-                $routeInfo[0],
-                $this->getHttpResponse(),
-                $this->getHttpRequest()
-            );
-        } catch (Exception $ex) {
-            $outputProcessor->processResponse($this->getHttpResponse());
-            throw $ex;
-        }
+        $middlewareResult = MiddlewareManagement::processBefore(
+            $this->beforeMiddlewareList,
+            $routeInfo[0],
+            $this->getHttpResponse(),
+            $this->getHttpRequest()
+        );
         
         if ($middlewareResult != MiddlewareResult::continue) {
             $outputProcessor->processResponse($this->getHttpResponse());
