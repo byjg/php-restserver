@@ -4,6 +4,7 @@ namespace ByJG\RestServer\OutputProcessor;
 
 use ByJG\RestServer\Enum\OutputMode;
 use ByJG\RestServer\ErrorHandler;
+use ByJG\RestServer\Exception\Error406Exception;
 use ByJG\RestServer\Exception\HttpResponseException;
 use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\Handler\ExceptionFormatter;
@@ -29,7 +30,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
     }
 
     /**
-     * @throws OperationIdInvalidException
+     * @throws Error406Exception
      */
     public static function getFromContentType(string $contentType): string
     {
@@ -44,7 +45,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         ];
 
         if (!isset($mimeTypeOutputProcessor[$contentType])) {
-            throw new OperationIdInvalidException("There is no output processor for $contentType");
+            throw new Error406Exception("There is no output processor for $contentType");
         }
 
         return $mimeTypeOutputProcessor[$contentType];
@@ -61,7 +62,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
             $contentType = trim(explode(";", $acceptItem)[0]);
             try {
                 return self::getFromClassName(self::getFromContentType($contentType));
-            } catch (OperationIdInvalidException) {
+            } catch (Error406Exception) {
                 // Type not supported, try next
             }
         }

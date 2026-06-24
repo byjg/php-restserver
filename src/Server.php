@@ -216,8 +216,7 @@ class Server implements ServerInterface
             if ($classDefinition instanceof Closure) {
                 // Process Closure
                 $className = 'Closure';
-                $requestPath = $this->getHttpRequest()->getRequestPath();
-                $methodName = is_array($requestPath) ? '/' : (string)$requestPath;
+                $methodName = $this->getHttpRequest()->getRequestPath() ?? '/';
                 $classDefinition($this->getHttpResponse(), $this->getHttpRequest());
             } else {
                 // Process Class::Method()

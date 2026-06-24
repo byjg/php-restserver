@@ -73,7 +73,7 @@ class MockServer extends Server
         }
 
         if (is_null($this->httpRequest)) {
-            throw new RuntimeException("MockRequestHandler::withRequestObject() must be called before handle method");
+            throw new RuntimeException("MockServer::withRequestObject() must be called before handle method");
         }
 
         return $this->httpRequest;

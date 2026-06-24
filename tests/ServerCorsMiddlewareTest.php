@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\Middleware\CorsMiddleware;
 use PHPUnit\Framework\TestCase;
 
@@ -54,7 +54,7 @@ class ServerCorsMiddlewareTest extends TestCase
 
     public function testFailedCorsWrongAllowedServer(): void
     {
-        $this->expectException(Error401Exception::class);
+        $this->expectException(Error403Exception::class);
         $this->expectExceptionMessage("CORS verification failed. Request Blocked.");
 
         $_SERVER['REQUEST_METHOD'] = 'OPTIONS';
@@ -65,7 +65,7 @@ class ServerCorsMiddlewareTest extends TestCase
         $this->processAndGetContent(
             $this->object,
             null,
-            '{"error":{"type":"Error 401","message":"CORS verification failed. Request Blocked."}}',
+            '{"error":{"type":"Error 403","message":"CORS verification failed. Request Blocked."}}',
             (new CorsMiddleware())->withCorsOrigins("anotherhost")
         );
     }

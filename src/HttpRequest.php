@@ -253,10 +253,11 @@ class HttpRequest
         return $this->server($header);
     }
 
-    public function getRequestPath(): string
+    public function getRequestPath(): ?string
     {
         $requestUri = $this->serverString('REQUEST_URI', "");
-        return parse_url($requestUri, PHP_URL_PATH);
+        $path = parse_url($requestUri ?? "", PHP_URL_PATH);
+        return $path !== false ? $path : null;
     }
 
     private ?UploadedFiles $uploadedFiles = null;
