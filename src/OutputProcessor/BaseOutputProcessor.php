@@ -52,15 +52,21 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
 
     /**
      * @return OutputProcessorInterface|null
-     * @throws OperationIdInvalidException
      */
     protected static function getFromHttpAccept(): OutputProcessorInterface|null
     {
         $accept = $_SERVER["HTTP_ACCEPT"] ?? "application/json";
 
-        $acceptList = explode(",", $accept);
+        foreach (explode(",", $accept) as $acceptItem) {
+            $contentType = trim(explode(";", $acceptItem)[0]);
+            try {
+                return self::getFromClassName(self::getFromContentType($contentType));
+            } catch (OperationIdInvalidException) {
+                // Type not supported, try next
+            }
+        }
 
-        return self::getFromClassName(self::getFromContentType($acceptList[0]));
+        return null;
     }
 
     /**

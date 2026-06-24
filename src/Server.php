@@ -8,6 +8,7 @@ use ByJG\RestServer\Attributes\BeforeRouteInterface;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
+use ByJG\RestServer\Exception\Error406Exception;
 use ByJG\RestServer\Exception\Error422Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
@@ -121,11 +122,9 @@ class Server implements ServerInterface
         // Processing
         switch ($routeInfo[0] ?? Dispatcher::NOT_FOUND) {
             case Dispatcher::NOT_FOUND: // 0
-                $outputProcessor->processResponse($this->getHttpResponse());
                 throw new Error404Exception("Route '$uri' not found");
 
             case Dispatcher::METHOD_NOT_ALLOWED: // 2
-                $outputProcessor->processResponse($this->getHttpResponse());
                 throw new Error405Exception('Method not allowed');
 
             case Dispatcher::FOUND:  // 1
@@ -157,7 +156,7 @@ class Server implements ServerInterface
             $outputProcessor = BaseOutputProcessor::factory($this->defaultOutputProcessor);
         }
         if (empty($outputProcessor)) {
-            throw new Error422Exception('Accept content not allowed');
+            throw new Error406Exception('Accept content not allowed');
         }
         $outputProcessor->setWriter($this->writer);
         $outputProcessor->writeContentType();
