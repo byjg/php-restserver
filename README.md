@@ -36,6 +36,7 @@ Advanced:
     - [CORS Support](docs/middleware-cors.md)
     - [Static Server Files](docs/middleware-staticserver.md)
     - [JWT Authentication](docs/middleware-jwt.md)
+    - [Block Path](docs/middleware-blockpath.md)
 - [Error Handler](docs/error-handler.md)
 - [Intercepting the Request](docs/intercepting-request.md)
 - [Output Processors](docs/outprocessor.md)

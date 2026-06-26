@@ -34,6 +34,7 @@ Some examples:
 * [CORS Support](middleware-cors.md)
 * [Static Server Files](middleware-staticserver.md)
 * [JWT Authentication](middleware-jwt.md)
+* [Block Path](middleware-blockpath.md)
 
 
 
