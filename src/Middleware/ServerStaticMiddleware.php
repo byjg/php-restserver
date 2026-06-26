@@ -15,6 +15,13 @@ use Override;
 class ServerStaticMiddleware implements BeforeMiddlewareInterface
 {
 
+    protected string $directoryIndex;
+
+    public function __construct(string $directoryIndex = 'index.html')
+    {
+        $this->directoryIndex = $directoryIndex;
+    }
+
     protected array $mimeTypes = [
         '123' => 'application/vnd.lotus-1-2-3',
         '3dml' => 'text/vnd.in3d.3dml',
@@ -1031,6 +1038,10 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
             $script = explode('/', $_SERVER['SCRIPT_FILENAME'] ?? '');
             $script[count($script)-1] = ltrim($requestUri->getPath(), '/');
             $file = implode('/', $script);
+        }
+
+        if (is_dir($file) && !empty($this->directoryIndex)) {
+            $file = rtrim($file, '/') . '/' . $this->directoryIndex;
         }
 
         if (file_exists($file)) {
