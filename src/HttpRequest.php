@@ -248,9 +248,8 @@ class HttpRequest
 
     public function getHeader(string $header): bool|array|string|null
     {
-        $header = strtoupper(str_replace('-', '_', $header));
-        $header = 'HTTP_' . $header;
-        return $this->server($header);
+        $normalized = strtoupper(str_replace('-', '_', $header));
+        return $this->server('HTTP_' . $normalized) ?? $this->server($normalized);
     }
 
     public function getRequestPath(): ?string
