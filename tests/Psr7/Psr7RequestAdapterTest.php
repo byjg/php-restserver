@@ -4,6 +4,7 @@ namespace Tests\Psr7;
 
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\Psr7\Psr7RequestAdapter;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -106,9 +107,10 @@ class Psr7RequestAdapterTest extends TestCase
         $this->assertEquals('secret', $parsedBody['password']);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function testFromHttpRequestWithPayload(): void
     {
-        // Create a mock HttpRequest with payload
+        // Partial mock of the real HttpRequest, overriding only payload() to return a fixed body.
         $httpRequest = $this->getMockBuilder(HttpRequest::class)
             ->setConstructorArgs([
                 [],
