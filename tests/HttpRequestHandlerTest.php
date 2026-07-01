@@ -102,8 +102,8 @@ class HttpRequestHandlerTest extends TestCase
      */
     public function testWithBeforeMiddleware(): void
     {
-        // Create a mock BeforeMiddleware
-        $middleware = $this->createMock(BeforeMiddlewareInterface::class);
+        // Create a stub BeforeMiddleware
+        $middleware = $this->createStub(BeforeMiddlewareInterface::class);
 
         $result = $this->handler->withMiddleware($middleware, '/test');
 
@@ -135,8 +135,8 @@ class HttpRequestHandlerTest extends TestCase
      */
     public function testWithAfterMiddleware(): void
     {
-        // Create a mock AfterMiddleware
-        $middleware = $this->createMock(AfterMiddlewareInterface::class);
+        // Create a stub AfterMiddleware
+        $middleware = $this->createStub(AfterMiddlewareInterface::class);
 
         $result = $this->handler->withMiddleware($middleware, '/test');
 
