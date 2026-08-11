@@ -6,6 +6,7 @@ use ByJG\RestServer\Attributes\AfterRouteInterface;
 use ByJG\RestServer\Attributes\AttributeParse;
 use ByJG\RestServer\Attributes\BeforeRouteInterface;
 use ByJG\RestServer\Exception\ClassNotFoundException;
+use ByJG\RestServer\Exception\ControllerNotRegisteredException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error406Exception;
@@ -28,6 +29,9 @@ use Exception;
 use FastRoute\Dispatcher;
 use InvalidArgumentException;
 use Override;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -50,6 +54,9 @@ class Server implements ServerInterface
 
     /** @var WriterInterface */
     protected WriterInterface $writer;
+
+    protected ?ContainerInterface $container = null;
+    protected bool $allowUnregisteredControllers = false;
 
     public function __construct(?LoggerInterface $logger = null)
     {
@@ -220,7 +227,7 @@ class Server implements ServerInterface
                 if (!class_exists($className)) {
                     throw new ClassNotFoundException("Class '$className' defined in the route is not found");
                 }
-                $instance = new $className();
+                $instance = $this->instantiateController($className);
                 if (!method_exists($instance, $methodName)) {
                     throw new InvalidClassException("There is no method '$className::$methodName''");
                 }
@@ -331,5 +338,64 @@ class Server implements ServerInterface
     {
         $this->writer = $writer;
         return $this;
+    }
+
+    /**
+     * Resolve route controllers from a PSR-11 container instead of instantiating them
+     * with `new`, so a controller can declare its dependencies in its constructor.
+     *
+     * Strict by default: once a container is set, a controller missing from it raises
+     * ControllerNotRegisteredException rather than being quietly built with no
+     * dependencies. Set $allowUnregistered while migrating an existing application, then
+     * remove it — the strict default is what protects new code.
+     *
+     * @param ContainerInterface $container
+     * @param bool $allowUnregistered Fall back to `new $className()` for controllers the
+     *                                container does not know about.
+     * @return static
+     */
+    public function withContainer(ContainerInterface $container, bool $allowUnregistered = false): static
+    {
+        $this->container = $container;
+        $this->allowUnregisteredControllers = $allowUnregistered;
+        return $this;
+    }
+
+    /**
+     * @param string $className
+     * @return object
+     * @throws ContainerExceptionInterface
+     * @throws ControllerNotRegisteredException
+     * @throws InvalidClassException
+     * @throws NotFoundExceptionInterface
+     */
+    protected function instantiateController(string $className): object
+    {
+        if ($this->container === null) {
+            return new $className();
+        }
+
+        if ($this->container->has($className)) {
+            $instance = $this->container->get($className);
+
+            // A binding can return anything. Without this check the mismatch surfaces
+            // as a confusing "no method" error further down instead of the real cause.
+            if (!$instance instanceof $className) {
+                throw new InvalidClassException(
+                    "The container returned " . get_debug_type($instance) . " for '$className'"
+                );
+            }
+
+            return $instance;
+        }
+
+        if ($this->allowUnregisteredControllers) {
+            return new $className();
+        }
+
+        throw new ControllerNotRegisteredException(
+            "Controller '$className' is not registered in the container. Register it, "
+            . "or pass allowUnregistered: true to withContainer()."
+        );
     }
 }

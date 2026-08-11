@@ -38,6 +38,7 @@ Advanced:
     - [JWT Authentication](docs/middleware-jwt.md)
     - [Block Path](docs/middleware-blockpath.md)
 - [Error Handler](docs/error-handler.md)
+- [Dependency Injection](docs/dependency-injection.md)
 - [Intercepting the Request](docs/intercepting-request.md)
 - [Output Processors](docs/outprocessor.md)
 - [Caching Routes](docs/caching-routes.md)
