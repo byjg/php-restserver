@@ -15,7 +15,7 @@
   "prefer-stable": true,
   "require": {
     "php": ">=8.3 <8.6",
-    "byjg/serializer": "^6.0",
+    "byjg/serializer": "^7.0",
     "byjg/singleton-pattern": "^6.0",
     "nikic/fast-route": "v1.3.*",
     "byjg/cache-engine": "^7.0",
