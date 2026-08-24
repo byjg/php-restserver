@@ -44,8 +44,7 @@ class JwtMiddleware implements BeforeMiddlewareInterface
     ): MiddlewareResult
     {
         foreach ($this->ignorePath as $path) {
-            $requestPath = $request->getRequestPath();
-            $requestPathStr = is_array($requestPath) ? '' : (string)$requestPath;
+            $requestPathStr = $request->getRequestPath() ?? '';
             if (preg_match("~$path~", $requestPathStr)) {
                 return MiddlewareResult::continue;
             }
@@ -63,7 +62,7 @@ class JwtMiddleware implements BeforeMiddlewareInterface
         } catch (Exception $ex) {
             throw new Error401Exception($ex->getMessage());
         }
-        $request->appendVars($vars);
+        $request->addAttributes($vars);
 
         return MiddlewareResult::continue;
     }

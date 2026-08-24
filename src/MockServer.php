@@ -19,7 +19,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use RuntimeException;
 
-class MockRequestHandler extends HttpRequestHandler
+class MockServer extends Server
 {
     /**
      * @var RequestInterface|null
@@ -46,7 +46,7 @@ class MockRequestHandler extends HttpRequestHandler
     /**
      * @param RouteListInterface $routes
      * @param RequestInterface $request
-     * @return MockRequestHandler
+     * @return MockServer
      * @throws Error404Exception
      * @throws Error405Exception
      * @throws Error520Exception
@@ -55,7 +55,7 @@ class MockRequestHandler extends HttpRequestHandler
      */
     public static function mock(RouteListInterface $routes, RequestInterface $request)
     {
-        $handler = new MockRequestHandler();
+        $handler = new MockServer();
         $handler->withRequestObject($request);
         $handler->handle($routes);
         return $handler;
@@ -73,7 +73,7 @@ class MockRequestHandler extends HttpRequestHandler
         }
 
         if (is_null($this->httpRequest)) {
-            throw new RuntimeException("MockRequestHandler::withRequestObject() must be called before handle method");
+            throw new RuntimeException("MockServer::withRequestObject() must be called before handle method");
         }
 
         return $this->httpRequest;

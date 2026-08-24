@@ -6,8 +6,10 @@ use ByJG\RestServer\Attributes\AfterRouteInterface;
 use ByJG\RestServer\Attributes\AttributeParse;
 use ByJG\RestServer\Attributes\BeforeRouteInterface;
 use ByJG\RestServer\Exception\ClassNotFoundException;
+use ByJG\RestServer\Exception\ControllerNotRegisteredException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
+use ByJG\RestServer\Exception\Error406Exception;
 use ByJG\RestServer\Exception\Error422Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
@@ -27,10 +29,13 @@ use Exception;
 use FastRoute\Dispatcher;
 use InvalidArgumentException;
 use Override;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-class HttpRequestHandler implements RequestHandler
+class Server implements ServerInterface
 {
     const string OK = "OK";
     const string METHOD_NOT_ALLOWED = "NOT_ALLOWED";
@@ -49,6 +54,9 @@ class HttpRequestHandler implements RequestHandler
 
     /** @var WriterInterface */
     protected WriterInterface $writer;
+
+    protected ?ContainerInterface $container = null;
+    protected bool $allowUnregisteredControllers = false;
 
     public function __construct(?LoggerInterface $logger = null)
     {
@@ -92,7 +100,7 @@ class HttpRequestHandler implements RequestHandler
         $dispatcher = $routeDefinition->getDispatcher();
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
         $this->getHttpRequest()->setRouteMetadata($routeInfo[1] ?? []);
-        $this->getHttpRequest()->appendVars(array_merge($routeInfo[2] ?? [], $queryStr));
+        $this->getHttpRequest()->addAttributes(array_merge($routeInfo[2] ?? [], $queryStr));
 
         // Get OutputProcessor
         $outputProcessor = $this->initializeProcessor(
@@ -101,17 +109,12 @@ class HttpRequestHandler implements RequestHandler
         );
         
         // Process Before Middleware
-        try {
-            $middlewareResult = MiddlewareManagement::processBefore(
-                $this->beforeMiddlewareList,
-                $routeInfo[0],
-                $this->getHttpResponse(),
-                $this->getHttpRequest()
-            );
-        } catch (Exception $ex) {
-            $outputProcessor->processResponse($this->getHttpResponse());
-            throw $ex;
-        }
+        $middlewareResult = MiddlewareManagement::processBefore(
+            $this->beforeMiddlewareList,
+            $routeInfo[0],
+            $this->getHttpResponse(),
+            $this->getHttpRequest()
+        );
         
         if ($middlewareResult != MiddlewareResult::continue) {
             $outputProcessor->processResponse($this->getHttpResponse());
@@ -121,11 +124,9 @@ class HttpRequestHandler implements RequestHandler
         // Processing
         switch ($routeInfo[0] ?? Dispatcher::NOT_FOUND) {
             case Dispatcher::NOT_FOUND: // 0
-                $outputProcessor->processResponse($this->getHttpResponse());
                 throw new Error404Exception("Route '$uri' not found");
 
             case Dispatcher::METHOD_NOT_ALLOWED: // 2
-                $outputProcessor->processResponse($this->getHttpResponse());
                 throw new Error405Exception('Method not allowed');
 
             case Dispatcher::FOUND:  // 1
@@ -157,7 +158,7 @@ class HttpRequestHandler implements RequestHandler
             $outputProcessor = BaseOutputProcessor::factory($this->defaultOutputProcessor);
         }
         if (empty($outputProcessor)) {
-            throw new Error422Exception('Accept content not allowed');
+            throw new Error406Exception('Accept content not allowed');
         }
         $outputProcessor->setWriter($this->writer);
         $outputProcessor->writeContentType();
@@ -217,8 +218,7 @@ class HttpRequestHandler implements RequestHandler
             if ($classDefinition instanceof Closure) {
                 // Process Closure
                 $className = 'Closure';
-                $requestPath = $this->getHttpRequest()->getRequestPath();
-                $methodName = is_array($requestPath) ? '/' : (string)$requestPath;
+                $methodName = $this->getHttpRequest()->getRequestPath() ?? '/';
                 $classDefinition($this->getHttpResponse(), $this->getHttpRequest());
             } else {
                 // Process Class::Method()
@@ -227,7 +227,7 @@ class HttpRequestHandler implements RequestHandler
                 if (!class_exists($className)) {
                     throw new ClassNotFoundException("Class '$className' defined in the route is not found");
                 }
-                $instance = new $className();
+                $instance = $this->instantiateController($className);
                 if (!method_exists($instance, $methodName)) {
                     throw new InvalidClassException("There is no method '$className::$methodName''");
                 }
@@ -338,5 +338,64 @@ class HttpRequestHandler implements RequestHandler
     {
         $this->writer = $writer;
         return $this;
+    }
+
+    /**
+     * Resolve route controllers from a PSR-11 container instead of instantiating them
+     * with `new`, so a controller can declare its dependencies in its constructor.
+     *
+     * Strict by default: once a container is set, a controller missing from it raises
+     * ControllerNotRegisteredException rather than being quietly built with no
+     * dependencies. Set $allowUnregistered while migrating an existing application, then
+     * remove it — the strict default is what protects new code.
+     *
+     * @param ContainerInterface $container
+     * @param bool $allowUnregistered Fall back to `new $className()` for controllers the
+     *                                container does not know about.
+     * @return static
+     */
+    public function withContainer(ContainerInterface $container, bool $allowUnregistered = false): static
+    {
+        $this->container = $container;
+        $this->allowUnregisteredControllers = $allowUnregistered;
+        return $this;
+    }
+
+    /**
+     * @param string $className
+     * @return object
+     * @throws ContainerExceptionInterface
+     * @throws ControllerNotRegisteredException
+     * @throws InvalidClassException
+     * @throws NotFoundExceptionInterface
+     */
+    protected function instantiateController(string $className): object
+    {
+        if ($this->container === null) {
+            return new $className();
+        }
+
+        if ($this->container->has($className)) {
+            $instance = $this->container->get($className);
+
+            // A binding can return anything. Without this check the mismatch surfaces
+            // as a confusing "no method" error further down instead of the real cause.
+            if (!$instance instanceof $className) {
+                throw new InvalidClassException(
+                    "The container returned " . get_debug_type($instance) . " for '$className'"
+                );
+            }
+
+            return $instance;
+        }
+
+        if ($this->allowUnregisteredControllers) {
+            return new $className();
+        }
+
+        throw new ControllerNotRegisteredException(
+            "Controller '$className' is not registered in the container. Register it, "
+            . "or pass allowUnregistered: true to withContainer()."
+        );
     }
 }

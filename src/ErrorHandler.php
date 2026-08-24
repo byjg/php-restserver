@@ -3,6 +3,7 @@
 namespace ByJG\RestServer;
 
 use ByJG\DesignPattern\Singleton;
+use ByJG\RestServer\Exception\HttpResponseException;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
 use ErrorException;
 use Psr\Log\LoggerInterface;
@@ -108,7 +109,8 @@ class ErrorHandler
             ]);
 
             if (!headers_sent()) {
-                http_response_code(500);
+                $statusCode = ($exception instanceof HttpResponseException) ? $exception->getStatusCode() : 500;
+                http_response_code($statusCode);
                 header('Content-Type: application/json');
             }
 

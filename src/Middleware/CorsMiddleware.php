@@ -2,10 +2,10 @@
 
 namespace ByJG\RestServer\Middleware;
 
-use ByJG\RestServer\Exception\Error401Exception;
+use ByJG\RestServer\Enum\OutputMode;
+use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\SerializationRuleEnum;
 use Override;
 
 class CorsMiddleware implements BeforeMiddlewareInterface
@@ -36,7 +36,7 @@ class CorsMiddleware implements BeforeMiddlewareInterface
      * @param HttpResponse $response
      * @param HttpRequest $request
      * @return MiddlewareResult
-     * @throws Error401Exception
+     * @throws Error403Exception
      */
     #[Override]
     public function beforeProcess(
@@ -49,10 +49,10 @@ class CorsMiddleware implements BeforeMiddlewareInterface
         if ($corsStatus != self::CORS_OK) {
             if ($corsStatus == self::CORS_OPTIONS) {
                 $response->emptyResponse();
-                $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::Raw);
+                $response->getResponseBody()->serializeAs(OutputMode::Plain);
                 return MiddlewareResult::stopProcessingOthers;
             } elseif ($corsStatus == self::CORS_FAILED) {
-                throw new Error401Exception("CORS verification failed. Request Blocked.");
+                throw new Error403Exception("CORS verification failed. Request Blocked.");
             }
         }
 
