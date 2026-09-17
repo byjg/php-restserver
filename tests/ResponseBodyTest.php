@@ -2,26 +2,28 @@
 
 namespace Tests;
 
-use ByJG\RestServer\ResponseBag;
-use ByJG\RestServer\SerializationRuleEnum;
+use ByJG\RestServer\Enum\OutputMode;
+use ByJG\RestServer\ResponseBody;
 use InvalidArgumentException;
+use Override;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 use Tests\Model\ModelSample;
 
-class ResponseBagTest extends TestCase
+class ResponseBodyTest extends TestCase
 {
     /**
-     * @var ResponseBag
+     * @var ResponseBody
      */
     private $object;
 
-    #[\Override]
+    #[Override]
     public function setup(): void
     {
-        $this->object = new ResponseBag();
+        $this->object = new ResponseBody();
     }
 
-    #[\Override]
+    #[Override]
     public function tearDown(): void
     {
         $this->object = null;
@@ -47,7 +49,7 @@ class ResponseBagTest extends TestCase
 
     public function testAddStringArray(): void
     {
-        $this->object->setSerializationRule(SerializationRuleEnum::ObjectList);
+        $this->object->serializeAs(OutputMode::ObjectList);
         $this->object->add('Test1');
         $this->assertEquals(
             [
@@ -68,7 +70,7 @@ class ResponseBagTest extends TestCase
 
     public function testAddStringSingleObject(): void
     {
-        $this->object->setSerializationRule(SerializationRuleEnum::SingleObject);
+        $this->object->serializeAs(OutputMode::SingleObject);
         $this->object->add('Test1');
         $this->assertEquals(
             'Test1',
@@ -105,7 +107,7 @@ class ResponseBagTest extends TestCase
 
     public function testAddArrayArray(): void
     {
-        $this->object->setSerializationRule(SerializationRuleEnum::ObjectList);
+        $this->object->serializeAs(OutputMode::ObjectList);
         $this->object->add(['key1' => 'Test1']);
         $this->assertEquals(
             [
@@ -126,7 +128,7 @@ class ResponseBagTest extends TestCase
 
     public function testAddArraySingleObject(): void
     {
-        $this->object->setSerializationRule(SerializationRuleEnum::SingleObject);
+        $this->object->serializeAs(OutputMode::SingleObject);
         $this->object->add(['key1' => 'Test1']);
         $this->assertEquals(
             ['key1' => 'Test1'],
@@ -145,7 +147,7 @@ class ResponseBagTest extends TestCase
 
     public function testAddObjectAutomatic(): void
     {
-        $obj1 = new \stdClass();
+        $obj1 = new stdClass();
         $obj1->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
         $obj1->OtherField = "OK";
 
@@ -178,13 +180,13 @@ class ResponseBagTest extends TestCase
 
     public function testAddObjectArray(): void
     {
-        $obj1 = new \stdClass();
+        $obj1 = new stdClass();
         $obj1->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
         $obj1->OtherField = "OK";
 
         $obj2 = new ModelSample('value3', 'value4');
 
-        $this->object->setSerializationRule(SerializationRuleEnum::ObjectList);
+        $this->object->serializeAs(OutputMode::ObjectList);
         $this->object->add($obj1);
         $this->assertEquals(
             [
@@ -214,13 +216,13 @@ class ResponseBagTest extends TestCase
 
     public function testAddObjectSingleObject(): void
     {
-        $obj1 = new \stdClass();
+        $obj1 = new stdClass();
         $obj1->MyField = [ "teste1" => "value1", "test2" => [ "3", "4"]];
         $obj1->OtherField = "OK";
 
         $obj2 = new ModelSample('value3', 'value4');
 
-        $this->object->setSerializationRule(SerializationRuleEnum::SingleObject);
+        $this->object->serializeAs(OutputMode::SingleObject);
         $this->object->add($obj1);
         $this->assertEquals(
             [
@@ -249,7 +251,7 @@ class ResponseBagTest extends TestCase
 
     public function testRaw(): void
     {
-        $this->object->setSerializationRule(SerializationRuleEnum::Raw);
+        $this->object->serializeAs(OutputMode::Plain);
         $this->object->add('Test1');
         $this->assertEquals(
             'Test1',
@@ -266,7 +268,7 @@ class ResponseBagTest extends TestCase
     public function testRawInvalid(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->object->setSerializationRule(SerializationRuleEnum::Raw);
+        $this->object->serializeAs(OutputMode::Plain);
         $this->object->add(['Test1']);
     }
 }

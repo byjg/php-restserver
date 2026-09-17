@@ -2,28 +2,29 @@
 
 namespace ByJG\RestServer;
 
+use ByJG\RestServer\Enum\OutputMode;
 use ByJG\Serializer\Serialize;
 use InvalidArgumentException;
 
-class ResponseBag
+class ResponseBody
 {
     protected array $collection = [];
-    protected SerializationRuleEnum $serializationRule = SerializationRuleEnum::Automatic;
+    protected OutputMode $outputMode = OutputMode::Automatic;
 
     /**
      * @param string|mixed $object
      */
     public function add(mixed $object): void
     {
-        if (!is_string($object) && !is_numeric($object) && $this->serializationRule === SerializationRuleEnum::Raw) {
-            throw new InvalidArgumentException("Raw data can be only string or numbers");
+        if (!is_string($object) && !is_numeric($object) && $this->outputMode === OutputMode::Plain) {
+            throw new InvalidArgumentException("Plain output mode only accepts strings or numbers");
         }
 
         if (!is_object($object) && !is_array($object)) {
             $object = [ $object ];
         }
 
-        if ($this->serializationRule !== SerializationRuleEnum::SingleObject && $this->serializationRule !== SerializationRuleEnum::Raw) {
+        if ($this->outputMode !== OutputMode::SingleObject && $this->outputMode !== OutputMode::Plain) {
             $this->collection[] = $object;
             return;
         }
@@ -42,12 +43,12 @@ class ResponseBag
     public function process(bool $buildNull = true, bool $onlyString = false): array|string
     {
         $collection = $this->collection;
-        if ($this->serializationRule === SerializationRuleEnum::Raw) {
+        if ($this->outputMode === OutputMode::Plain) {
             return implode("", $collection);
         }
 
         if (count($collection) === 1
-            && $this->serializationRule !== SerializationRuleEnum::ObjectList && isset($collection[0])
+            && $this->outputMode !== OutputMode::ObjectList && isset($collection[0])
         ) {
             $collection = $collection[0];
         }
@@ -69,13 +70,13 @@ class ResponseBag
         return $this->collection;
     }
 
-    public function setSerializationRule(SerializationRuleEnum $value): void
+    public function serializeAs(OutputMode $value): void
     {
-        $this->serializationRule = $value;
+        $this->outputMode = $value;
     }
 
-    public function getSerializationRule(): SerializationRuleEnum
+    public function getOutputMode(): OutputMode
     {
-        return $this->serializationRule;
+        return $this->outputMode;
     }
 }

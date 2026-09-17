@@ -41,7 +41,7 @@ In that case the `operationId` will be generated automatically. The format will 
 vendor/bin/openapi -c operationid.hash=false src
 ```
 
-After you have the proper swagger.json just call the `HttpRequestHandler`
+After you have the proper swagger.json just call the `Server`
 and set automatic routes:
 
 ```php
@@ -49,9 +49,12 @@ and set automatic routes:
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use ByJG\RestServer\Server;
+use ByJG\RestServer\Route\OpenApiRouteList;
+
 $routeDefinition = new OpenApiRouteList(__DIR__ . '/swagger.json');
 
-$restServer = new HttpRequestHandler();
+$restServer = new Server();
 $restServer->handle($routeDefinition);
 ```
 

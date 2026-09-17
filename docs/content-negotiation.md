@@ -53,7 +53,7 @@ RestServer automatically sets the appropriate `Content-Type` header based on the
 - `application/xml` for XML responses
 - Custom content types as defined by your output processors
 
-You can override this at runtime by adding your own `Content-Type` header. When you do so, `HttpRequestHandler`
+You can override this at runtime by adding your own `Content-Type` header. When you do so, `Server`
 will detect the header (`HttpResponse::addHeader('Content-Type', ...)`) and automatically re-initialize the matching
 output processor before the response is serialized. This makes it possible to start with an XML route and switch to JSON
 for a particular response (or vice-versa).
@@ -109,7 +109,7 @@ You can implement custom content negotiation logic:
 public function processRequest(HttpRequest $request, HttpResponse $response)
 {
     // Check for a specific format parameter
-    $format = $request->param('format');
+    $format = $request->query('format');
     
     if ($format === 'csv') {
         $response->addHeader('Content-Type', 'text/csv');

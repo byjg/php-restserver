@@ -14,15 +14,16 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "php": ">=8.3 <8.6",
-    "byjg/serializer": "^6.0",
-    "byjg/singleton-pattern": "^6.0",
+    "php": ">=8.3 <8.7",
+    "byjg/serializer": "^7.0",
+    "byjg/singleton-pattern": "^7.0",
     "nikic/fast-route": "v1.3.*",
-    "byjg/cache-engine": "^6.0",
-    "byjg/webrequest": "^6.0",
-    "byjg/jwt-wrapper": "^6.0",
+    "byjg/cache-engine": "^7.0",
+    "byjg/webrequest": "^7.0",
+    "byjg/jwt-wrapper": "^7.0",
     "psr/log": "^1.0|^2.0|^3.0",
     "psr/http-client": "^1.0",
+    "psr/container": "^2.0|^3.0",
     "psr/http-factory": "^1.0|^1.1",
     "ext-json": "*"
   },
@@ -31,12 +32,14 @@
   },
   "require-dev": {
     "monolog/monolog": "^2.9|^3.4",
-    "phpunit/phpunit": "^12.5.30",
-    "vimeo/psalm": "^5.9|^6.13"
+    "phpunit/phpunit": "^12.5.30"
   },
   "scripts": {
     "test": "vendor/bin/phpunit",
-    "psalm": "vendor/bin/psalm --threads=1"
+    "psalm": [
+      "@composer --working-dir=tools/psalm update --no-interaction",
+      "tools/psalm/vendor/bin/psalm --threads=1"
+    ]
   },
   "license": "MIT"
 }

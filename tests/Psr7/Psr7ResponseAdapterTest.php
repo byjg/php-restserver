@@ -156,8 +156,8 @@ class Psr7ResponseAdapterTest extends TestCase
 
         $httpResponse = Psr7ResponseAdapter::toHttpResponse($psr7Response);
 
-        $responseBag = $httpResponse->getResponseBag();
-        $collection = $responseBag->getCollection();
+        $responseBody = $httpResponse->getResponseBody();
+        $collection = $responseBody->getCollection();
 
         $this->assertNotEmpty($collection);
         $this->assertEquals($data, $collection[0]);
@@ -173,11 +173,11 @@ class Psr7ResponseAdapterTest extends TestCase
 
         $httpResponse = Psr7ResponseAdapter::toHttpResponse($psr7Response);
 
-        $responseBag = $httpResponse->getResponseBag();
-        $collection = $responseBag->getCollection();
+        $responseBody = $httpResponse->getResponseBody();
+        $collection = $responseBody->getCollection();
 
         $this->assertNotEmpty($collection);
-        // When writing a string to ResponseBag, it wraps it in an array
+        // When writing a string to ResponseBody, it wraps it in an array
         $this->assertEquals(['Plain text response'], $collection[0]);
     }
 
@@ -222,7 +222,7 @@ class Psr7ResponseAdapterTest extends TestCase
         $headers = $convertedResponse->getHeaders();
         $this->assertArrayHasKey('x-test', $headers);
 
-        $collection = $convertedResponse->getResponseBag()->getCollection();
+        $collection = $convertedResponse->getResponseBody()->getCollection();
         $this->assertEquals(['message' => 'Hello World'], $collection[0]);
     }
 

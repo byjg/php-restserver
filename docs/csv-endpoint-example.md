@@ -23,8 +23,6 @@ First, create a custom output processor for CSV files:
 
 namespace ByJG\RestServer\OutputProcessor;
 
-use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\Serializer\Formatter\FormatterInterface;
 
 class CsvOutputProcessor extends BaseOutputProcessor
@@ -140,9 +138,9 @@ class YourController
    $filename = 'user-data-' . $userId . '-' . date('Y-m-d') . '.csv';
    ```
 
-4. **Raw CSV content**: If you need to create the CSV content manually, use the Raw serialization rule:
+4. **Plain CSV content**: If you need to create the CSV content manually, use the Plain output mode:
    ```php
-   $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::Raw);
+   $response->getResponseBody()->serializeAs(OutputMode::Plain);
    $csvContent = "id,name,email\n1,\"John Doe\",john@example.com\n2,\"Jane Smith\",jane@example.com";
    $response->write($csvContent);
    ```

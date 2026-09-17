@@ -2,13 +2,14 @@
 
 namespace ByJG\RestServer\OutputProcessor;
 
+use ByJG\RestServer\Enum\OutputMode;
 use ByJG\RestServer\ErrorHandler;
+use ByJG\RestServer\Exception\Error406Exception;
 use ByJG\RestServer\Exception\HttpResponseException;
 use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\Handler\ExceptionFormatter;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\RestServer\Writer\WriterInterface;
 use Override;
 use Throwable;
@@ -29,7 +30,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
     }
 
     /**
-     * @throws OperationIdInvalidException
+     * @throws Error406Exception
      */
     public static function getFromContentType(string $contentType): string
     {
@@ -44,7 +45,7 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         ];
 
         if (!isset($mimeTypeOutputProcessor[$contentType])) {
-            throw new OperationIdInvalidException("There is no output processor for $contentType");
+            throw new Error406Exception("There is no output processor for $contentType");
         }
 
         return $mimeTypeOutputProcessor[$contentType];
@@ -52,15 +53,21 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
 
     /**
      * @return OutputProcessorInterface|null
-     * @throws OperationIdInvalidException
      */
     protected static function getFromHttpAccept(): OutputProcessorInterface|null
     {
         $accept = $_SERVER["HTTP_ACCEPT"] ?? "application/json";
 
-        $acceptList = explode(",", $accept);
+        foreach (explode(",", $accept) as $acceptItem) {
+            $contentType = trim(explode(";", $acceptItem)[0]);
+            try {
+                return self::getFromClassName(self::getFromContentType($contentType));
+            } catch (Error406Exception) {
+                // Type not supported, try next
+            }
+        }
 
-        return self::getFromClassName(self::getFromContentType($acceptList[0]));
+        return null;
     }
 
     /**
@@ -184,10 +191,10 @@ abstract class BaseOutputProcessor implements OutputProcessorInterface
         $this->writeHeader($response);
 
         $serialized = $response
-            ->getResponseBag()
+            ->getResponseBody()
             ->process($this->buildNull, $this->onlyString);
 
-        if ($response->getResponseBag()->getSerializationRule() === SerializationRuleEnum::Raw) {
+        if ($response->getResponseBody()->getOutputMode() === OutputMode::Plain) {
             $this->writeData(is_array($serialized) ? json_encode($serialized) : $serialized);
         } else {
             $this->writeData(

@@ -14,7 +14,7 @@ You can define route with constant and/or variable. For example:
 | `/myroute/{id:[0-9]+}`  | Matches /myroute + any number combination and set to ID    |
 
 All variables defined above will be available as a parameter. In the example above,
-if the route matches the "id" you can get using `$request->param('id');`
+if the route matches the "id" you can get using `$request->attributeString('id');`
 
 Creating the pattern:
 
@@ -25,7 +25,7 @@ Creating the pattern:
 all matches values can be obtained by
 
 ```php
-$this->getRequest()->param('variable');
+$this->getRequest()->attributeString('variable');
 ```
 
 ## Best Practices for Route Names

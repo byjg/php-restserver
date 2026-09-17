@@ -2,8 +2,9 @@
 
 namespace Tests;
 
-use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\Route\RouteList;
+use ByJG\RestServer\Server;
+use Override;
 use PHPUnit\Framework\TestCase;
 use Tests\Routes\RouteFromAttributes;
 
@@ -11,11 +12,11 @@ class ServerHandlerAttributeTest extends TestCase
 {
     use MockServerTrait;
 
-    #[\Override]
+    #[Override]
     public function setup(): void
     {
         ini_set('output_buffering', 4096);
-        $this->object = new HttpRequestHandler();
+        $this->object = new Server();
         $this->reach = false;
         $this->definition = new RouteList();
 

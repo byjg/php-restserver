@@ -82,4 +82,12 @@ class JsonOutputProcessorTest extends TestCase
         $expected = '{"name":"teste","address1":"","address2":null,"value":0}';
         $this->assertEquals($expected, $writer->getData());
     }
+
+    public function testFormatterOmitsUninitializedTypedProperty(): void
+    {
+        $model = new UninitializedFieldModel("teste");
+        $processor = new JsonOutputProcessor();
+        // The uninitialized `missing` property is omitted instead of raising an error.
+        $this->assertEquals('{"name":"teste"}', $processor->getFormatter()->process($model));
+    }
 }

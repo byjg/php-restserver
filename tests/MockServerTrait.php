@@ -9,7 +9,6 @@ use ByJG\RestServer\Exception\Error405Exception;
 use ByJG\RestServer\Exception\Error520Exception;
 use ByJG\RestServer\Exception\InvalidClassException;
 use ByJG\RestServer\HttpRequest;
-use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Middleware\AfterMiddlewareInterface;
 use ByJG\RestServer\Middleware\BeforeMiddlewareInterface;
@@ -18,6 +17,7 @@ use ByJG\RestServer\MockResponse;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\Route\Route;
 use ByJG\RestServer\Route\RouteList;
+use ByJG\RestServer\Server;
 use ByJG\RestServer\Writer\MemoryWriter;
 use ByJG\Util\Uri;
 use Exception;
@@ -27,9 +27,9 @@ use Monolog\Logger;
 trait MockServerTrait
 {
     /**
-     * @var HttpRequestHandler|null
+     * @var Server|null
      */
-    protected ?HttpRequestHandler $object;
+    protected ?Server $object;
 
     /**
      * @var RouteList
@@ -47,7 +47,7 @@ trait MockServerTrait
         $logger = new Logger("unittest");
         $stream_handler = new StreamHandler("php://stderr");
         $logger->pushHandler($stream_handler);
-        $this->object = new HttpRequestHandler($logger);
+        $this->object = new Server($logger);
 
         $this->reach = false;
 
@@ -79,8 +79,8 @@ trait MockServerTrait
                 ->withClosure(function ($response, $request) {
                     $this->assertInstanceOf(HttpResponse::class, $response);
                     $this->assertInstanceOf(HttpRequest::class, $request);
-                    $this->reach = $request->param('id');
-                    $response->write(["key" => $request->param('id')]);
+                    $this->reach = $request->attributeString('id');
+                    $response->write(["key" => $request->attributeString('id')]);
                 })
         );
 
@@ -89,7 +89,7 @@ trait MockServerTrait
                 ->withClosure(function ($response, $request) {
                     $this->assertInstanceOf(HttpResponse::class, $response);
                     $this->assertInstanceOf(HttpRequest::class, $request);
-                    $this->reach = $request->param('id');
+                    $this->reach = $request->attributeString('id');
                     $response->write("Success!");
                 })
         );
@@ -99,9 +99,9 @@ trait MockServerTrait
                 ->withClosure(function ($response, $request) {
                     $response->write(
                         [
-                            JwtMiddleware::JWT_PARAM_PARSE_STATUS => $request->param(JwtMiddleware::JWT_PARAM_PARSE_STATUS),
-                            JwtMiddleware::JWT_PARAM_PARSE_MESSAGE => $request->param(JwtMiddleware::JWT_PARAM_PARSE_MESSAGE),
-                            JwtMiddleware::JWT_PARAM_PREFIX . ".userid" => $request->param(JwtMiddleware::JWT_PARAM_PREFIX . ".userid")
+                            JwtMiddleware::JWT_PARAM_PARSE_STATUS => $request->attribute(JwtMiddleware::JWT_PARAM_PARSE_STATUS),
+                            JwtMiddleware::JWT_PARAM_PARSE_MESSAGE => $request->attribute(JwtMiddleware::JWT_PARAM_PARSE_MESSAGE),
+                            JwtMiddleware::JWT_PARAM_PREFIX . ".userid" => $request->attribute(JwtMiddleware::JWT_PARAM_PREFIX . ".userid")
                         ]
                     );
                 })
@@ -130,7 +130,7 @@ trait MockServerTrait
     }
 
     /**
-     * @param HttpRequestHandler $handler
+     * @param Server $handler
      * @param array|null $expectedHeader
      * @param mixed $expectedData
      * @param AfterMiddlewareInterface|BeforeMiddlewareInterface|null $middleWare
@@ -141,7 +141,7 @@ trait MockServerTrait
      * @throws Error520Exception
      * @throws InvalidClassException
      */
-    public function processAndGetContent(HttpRequestHandler $handler, ?array $expectedHeader, mixed $expectedData, AfterMiddlewareInterface|BeforeMiddlewareInterface|null $middleWare = null, array $expectedParams = []): void
+    public function processAndGetContent(Server $handler, ?array $expectedHeader, mixed $expectedData, AfterMiddlewareInterface|BeforeMiddlewareInterface|null $middleWare = null, array $expectedParams = []): void
     {
         $writer = new MemoryWriter();
 

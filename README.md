@@ -12,7 +12,7 @@ Auto-Generate routes from swagger.json definition.
 [![Build Status](https://github.com/byjg/php-restserver/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-restserver/actions/workflows/phpunit.yml)
 [![Opensource ByJG](https://img.shields.io/badge/opensource-byjg-success.svg)](http://opensource.byjg.com)
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-restserver/)
-[![GitHub license](https://img.shields.io/github/license/byjg/php-restserver.svg)](https://opensource.byjg.com/opensource/licensing.html)
+[![GitHub license](https://img.shields.io/github/license/byjg/php-restserver.svg)](https://opensource.byjg.com/license/)
 [![GitHub release](https://img.shields.io/github/release/byjg/php-restserver.svg)](https://github.com/byjg/php-restserver/releases/)
 
 ## Documentation
@@ -36,7 +36,9 @@ Advanced:
     - [CORS Support](docs/middleware-cors.md)
     - [Static Server Files](docs/middleware-staticserver.md)
     - [JWT Authentication](docs/middleware-jwt.md)
+    - [Block Path](docs/middleware-blockpath.md)
 - [Error Handler](docs/error-handler.md)
+- [Dependency Injection](docs/dependency-injection.md)
 - [Intercepting the Request](docs/intercepting-request.md)
 - [Output Processors](docs/outprocessor.md)
 - [Caching Routes](docs/caching-routes.md)
@@ -53,17 +55,6 @@ Additional topics:
 
 ```bash
 composer require "byjg/restserver"
-```
-
-## Dependencies
-
-```mermaid
-flowchart TD
-    byjg/restserver --> byjg/serializer
-    byjg/restserver --> byjg/singleton-pattern
-    byjg/restserver --> byjg/cache-engine
-    byjg/restserver --> byjg/webrequest
-    byjg/restserver --> byjg/jwt-wrapper
 ```
 
 ----
