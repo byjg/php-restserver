@@ -5,6 +5,7 @@ namespace Tests;
 use ByJG\RestServer\Exception\ClassNotFoundException;
 use ByJG\RestServer\Exception\Error404Exception;
 use ByJG\RestServer\Exception\Error405Exception;
+use ByJG\RestServer\Exception\Error406Exception;
 use ByJG\RestServer\Exception\Error422Exception;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -79,14 +80,14 @@ class ServerRequestHandlerTest extends TestCase
         $handler = clone $this->object;
 
         // Expect an exception
-        $this->expectException(Error422Exception::class);
+        $this->expectException(Error406Exception::class);
         $this->expectExceptionMessage('Accept content not allowed');
 
         // Process the request - should throw exception
         $this->processAndGetContent(
             $handler,
             null,
-            '{"error":{"type":"Error 422","message":"Accept content not allowed"}}'
+            '{"error":{"type":"Error 406","message":"Accept content not allowed"}}'
         );
     }
 

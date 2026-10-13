@@ -2,6 +2,7 @@
 
 namespace ByJG\RestServer;
 
+use ByJG\RestServer\Exception\Error400Exception;
 use ByJG\RestServer\Exception\OperationIdInvalidException;
 use Override;
 use Psr\Http\Message\RequestInterface;
@@ -149,7 +150,7 @@ class MockHttpRequest extends HttpRequest
             preg_match('/\r?\n\r?\n(.*)$/s', $block, $content);
 
             if (empty($name)) {
-                throw new OperationIdInvalidException("The multipart should provide a name");
+                throw new Error400Exception("The multipart should provide a name");
             }
 
             $content = (empty($content) ? "" : $content[1]);

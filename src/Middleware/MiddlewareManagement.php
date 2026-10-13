@@ -73,7 +73,7 @@ class MiddlewareManagement
         ?Exception $exception = null
     ): MiddlewareResult
     {
-        $continue = MiddlewareResult::continue;
+        $continue = MiddlewareResult::Continue;
 
         if (empty($middlewareList)) {
             return $continue;
@@ -83,8 +83,7 @@ class MiddlewareManagement
             $middleWare = $item['middleware'];
             $routePattern = $item['routePattern'];
 
-            $requestPath = $request->getRequestPath();
-            $requestPathStr = is_array($requestPath) ? '' : (string)$requestPath;
+            $requestPathStr = $request->getRequestPath() ?? '';
             if (!is_null($routePattern) && !preg_match("~$routePattern~", $requestPathStr)) {
                 continue;
             }
@@ -95,9 +94,9 @@ class MiddlewareManagement
                 $result = $middleWare->afterProcess($response, $request, $class, $method, $exception);
             }
             
-            if ($result === MiddlewareResult::stopProcessingOthers) {
+            if ($result === MiddlewareResult::StopProcessingOthers) {
                 return $result;
-            } elseif ($result === MiddlewareResult::stopProcessing) {
+            } elseif ($result === MiddlewareResult::StopProcessing) {
                 $continue = $result;
             }
         }

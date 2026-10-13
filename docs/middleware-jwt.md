@@ -39,20 +39,20 @@ Valid values are:
 - JwtMiddleware::JWT_PARAM_PARSE_STATUS_ERROR
 
 ```php
-$request->param(JwtMiddleware::JWT_PARAM_PARSE_STATUS)
+$request->attribute(JwtMiddleware::JWT_PARAM_PARSE_STATUS)
 ```
 
 #### Return the reason why the token is invalid
 
 ```php
-$request->param(JwtMiddleware::JWT_PARAM_PARSE_MESSAGE)
+$request->attribute(JwtMiddleware::JWT_PARAM_PARSE_MESSAGE)
 ```
 
 #### Return the decoded token
 
 ```php
 // KEY is the key defined in the token
-$request->param(JwtMiddleware::JWT_PARAM_PREFIX . "." . $KEY);
+$request->attribute(JwtMiddleware::JWT_PARAM_PREFIX . "." . $KEY);
 ```
 
 ## Ignoring Paths

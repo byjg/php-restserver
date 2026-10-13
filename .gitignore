@@ -8,3 +8,4 @@ vendor
 .DS_Store
 /phpunit.xml.dist.bak
 /.claude/settings.local.json
+.vscode

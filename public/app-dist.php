@@ -2,12 +2,12 @@
 
 namespace My;
 
-use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\Middleware\ServerStaticMiddleware;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
 use ByJG\RestServer\Route\Route;
 use ByJG\RestServer\Route\RouteList;
+use ByJG\RestServer\Server;
 
 /**
  * Basic Handler Object
@@ -37,7 +37,7 @@ $routeDefinition->addRoute(Route::get("/testclosure")
 
 $routeDefinition->addRoute(Route::get("/testerror/{code}")
     ->withClosure(function ($response, $request) {
-        $code = $request->param('code');
+        $code = $request->attributeString('code');
         $class = "ByJG\RestServer\Exception\Error" . $code . "Exception";
         throw new $class("Teste");
     })
@@ -62,7 +62,7 @@ $routeDefinition->addRoute(Route::get("/testoverride/json-to-xml")
 );
 
 // Handle Request
-$restServer = new HttpRequestHandler();
+$restServer = new Server();
 $restServer->withDefaultOutputProcessor(JsonOutputProcessor::class);
 // $restServer->withDetailedErrorHandler();
 // $restServer->withCorsOrigins('localhost.*');

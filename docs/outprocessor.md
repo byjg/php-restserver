@@ -24,7 +24,7 @@ The main responsibilities are:
 
 ## How it works
 
-The HttpRequestHandler will call the route and the route will call the OutputProcessor to process the
+The `Server` will call the route and the route will call the OutputProcessor to process the
 proper output for that route.
 
 You can create a route in several ways. e.g.:
@@ -36,14 +36,14 @@ You can create a route in several ways. e.g.:
 
 Each option has its own way to define the OutputProcessor. Check the documentation for each one.
 
-Once you have the route defined, you can initialize the HttpRequestHandler and handle the request.
+Once you have the route defined, you can initialize the `Server` and handle the request.
 
 ```php
 <?php
-use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Server;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 
-$server = new HttpRequestHandler();
+$server = new Server();
 
 // This is the default processor for the routes that don't have a specific output processor
 $server->withDefaultOutputProcessor(JsonOutputProcessor::class);
@@ -58,7 +58,7 @@ $server->handle($routeList);
 ## Content Negotiation
 
 By default, the OutputProcessor is determined by the route definition or the default processor set in
-HttpRequestHandler.
+`Server`.
 However, the client can request a specific output format using the `Accept` header. The RestServer will use the first
 content type in the Accept header that matches an available OutputProcessor.
 
@@ -303,7 +303,7 @@ class CachedJsonOutputProcessor extends JsonOutputProcessor
         }
     
         // Build the payload the same way JsonOutputProcessor does, so we can store it
-        $serialized = $response->getResponseBag()->process($this->buildNull, $this->onlyString);
+        $serialized = $response->getResponseBody()->process($this->buildNull, $this->onlyString);
         $payload = $this->getFormatter()->process($serialized);
     
         $cacheItem->set($payload);
@@ -323,7 +323,7 @@ class CachedJsonOutputProcessor extends JsonOutputProcessor
         return sprintf(
             'api_response_%d_%s',
             $response->getResponseCode(),
-            md5(serialize($response->getResponseBag()->getCollection()))
+            md5(serialize($response->getResponseBody()->getCollection()))
         );
     }
 }
@@ -350,9 +350,9 @@ The default writer that sends output directly to the HTTP response using PHP's n
 ```php
 <?php
 use ByJG\RestServer\Writer\HttpWriter;
-use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Server;
 
-$server = new HttpRequestHandler();
+$server = new Server();
 // HttpWriter is used by default - no need to set explicitly
 ```
 
@@ -370,10 +370,10 @@ methods to retrieve captured data.
 ```php
 <?php
 use ByJG\RestServer\Writer\MemoryWriter;
-use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Server;
 
 $writer = new MemoryWriter();
-$server = new HttpRequestHandler();
+$server = new Server();
 $server->withWriter($writer);
 $server->handle($routeDefinition);
 
@@ -403,9 +403,9 @@ Outputs headers and body to stdout (standard output) instead of HTTP. Useful for
 ```php
 <?php
 use ByJG\RestServer\Writer\StdoutWriter;
-use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Server;
 
-$server = new HttpRequestHandler();
+$server = new Server();
 $server->withWriter(new StdoutWriter());
 $server->handle($routeDefinition);
 
@@ -425,7 +425,7 @@ $server->handle($routeDefinition);
 
 ### Creating Custom Writers
 
-You can create your own writer by implementing the `WriterInterface` and setting it in the HttpRequestHandler:
+You can create your own writer by implementing the `WriterInterface` and setting it in the `Server`:
 
 ```php
 use ByJG\RestServer\Writer\WriterInterface;

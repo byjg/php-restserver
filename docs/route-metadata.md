@@ -148,7 +148,7 @@ class AuthMiddleware implements BeforeMiddlewareInterface
             }
         }
         
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 }
 ```
@@ -179,7 +179,7 @@ class CacheMiddleware implements BeforeMiddlewareInterface
             }
         }
         
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 }
 ```
@@ -204,7 +204,7 @@ class RateLimitMiddleware implements BeforeMiddlewareInterface
             }
         }
         
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 }
 ```

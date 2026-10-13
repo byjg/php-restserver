@@ -6,14 +6,14 @@ class HttpResponse
 {
 
     /**
-     * @var ResponseBag
+     * @var ResponseBody
      */
-    protected ResponseBag $response;
+    protected ResponseBody $response;
 
     /**
-     * @var ResponseBag|null
+     * @var ResponseBody|null
      */
-    protected ?ResponseBag $responseDebug = null;
+    protected ?ResponseBody $responseDebug = null;
 
     /**
      * @var array
@@ -81,12 +81,12 @@ class HttpResponse
     }
 
     /**
-     * ResponseBag is a collection of objects will be returned to the  client. RestServer call handle the ResponseBag to
+     * ResponseBody is a collection of objects will be returned to the client. RestServer will handle the ResponseBody to
      * return the proper output. Avoid to use it directly here. Prefer the methods write or writeDebug;
      *
-     * @return ResponseBag
+     * @return ResponseBody
      */
-    public function getResponseBag(): ResponseBag
+    public function getResponseBody(): ResponseBody
     {
         return $this->response;
     }
@@ -112,7 +112,7 @@ class HttpResponse
     {
         // @todo Review this.
         if (is_null($this->responseDebug)) {
-            $this->responseDebug = new ResponseBag();
+            $this->responseDebug = new ResponseBody();
             $this->response->add($this->responseDebug);
         }
         $this->responseDebug->add(['debug' => [$key => $string]]);
@@ -121,7 +121,7 @@ class HttpResponse
 
     public function emptyResponse(): void
     {
-        $this->response = new ResponseBag();
+        $this->response = new ResponseBody();
     }
 
     /**

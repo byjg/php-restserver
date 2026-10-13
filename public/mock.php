@@ -3,8 +3,9 @@
 namespace My;
 
 use ByJG\RestServer\Exception\Error401Exception;
-use ByJG\RestServer\MockRequestHandler;
+use ByJG\RestServer\MockServer;
 use ByJG\RestServer\OutputProcessor\XmlOutputProcessor;
+use ByJG\RestServer\Route\Route;
 use ByJG\RestServer\Route\RouteList;
 use ByJG\Util\Uri;
 use ByJG\WebRequest\Psr7\Request;
@@ -19,16 +20,16 @@ require_once __DIR__ . '/../vendor/autoload.php';
 // Defining Routes
 $routeDefinition = new RouteList();
 
-$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testjson")
-    ->withClass(\My\ClassName::class, "someMethod")
+$routeDefinition->addRoute(Route::get("/testjson")
+    ->withClass(ClassName::class, "someMethod")
 );
 
-$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testxml")
+$routeDefinition->addRoute(Route::get("/testxml")
     ->withOutputProcessor(XmlOutputProcessor::class)
-    ->withClass(\My\ClassName::class, "someMethod")
+    ->withClass(ClassName::class, "someMethod")
 );
 
-$routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testclosure")
+$routeDefinition->addRoute(Route::get("/testclosure")
     ->withClosure(function ($response, $request) {
         $response->write('OK');
         throw new Error401Exception("Bla");
@@ -38,7 +39,7 @@ $routeDefinition->addRoute(\ByJG\RestServer\Route\Route::get("/testclosure")
 $request = Request::getInstance(Uri::getInstanceFromString("http://localhost/testxml"));
 
 // Handle Request
-$mockHandler = MockRequestHandler::mock($routeDefinition, $request);
+$mockHandler = MockServer::mock($routeDefinition, $request);
 
 print_r($mockHandler->getPsr7Response()->getStatusCode());
 echo "\n";

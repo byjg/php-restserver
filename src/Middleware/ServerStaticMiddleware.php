@@ -2,11 +2,11 @@
 
 namespace ByJG\RestServer\Middleware;
 
+use ByJG\RestServer\Enum\OutputMode;
 use ByJG\RestServer\Exception\Error415Exception;
 use ByJG\RestServer\Exception\Error500Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\RestServer\Util\GeneralUtil;
 use ByJG\Util\Uri;
 use FastRoute\Dispatcher;
@@ -14,6 +14,13 @@ use Override;
 
 class ServerStaticMiddleware implements BeforeMiddlewareInterface
 {
+
+    protected string $directoryIndex;
+
+    public function __construct(string $directoryIndex = 'index.html')
+    {
+        $this->directoryIndex = $directoryIndex;
+    }
 
     protected array $mimeTypes = [
         '123' => 'application/vnd.lotus-1-2-3',
@@ -1021,7 +1028,7 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
     ): MiddlewareResult
     {
         if ($dispatcherStatus != Dispatcher::NOT_FOUND) {
-            return MiddlewareResult::continue;
+            return MiddlewareResult::Continue;
         }
 
         $requestUri = new Uri($_SERVER['REQUEST_URI'] ?? '/');
@@ -1033,21 +1040,25 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
             $file = implode('/', $script);
         }
 
+        if (is_dir($file) && !empty($this->directoryIndex)) {
+            $file = rtrim($file, '/') . '/' . $this->directoryIndex;
+        }
+
         if (file_exists($file)) {
             $mime = $this->mimeContentType($file);
 
             if (empty($mime)) {
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
 
             $response->addHeader("Content-Type", $mime);
             $response->emptyResponse();
-            $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::Raw);
+            $response->getResponseBody()->serializeAs(OutputMode::Plain);
             $response->write(file_get_contents($file));
-            return MiddlewareResult::stopProcessingOthers;
+            return MiddlewareResult::StopProcessingOthers;
         }
 
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 
     /**
