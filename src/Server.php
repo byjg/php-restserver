@@ -116,7 +116,7 @@ class Server implements ServerInterface
             $this->getHttpRequest()
         );
         
-        if ($middlewareResult != MiddlewareResult::continue) {
+        if ($middlewareResult != MiddlewareResult::Continue) {
             $outputProcessor->processResponse($this->getHttpResponse());
             return true;
         }

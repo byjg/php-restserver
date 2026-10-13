@@ -46,7 +46,7 @@ class JwtMiddleware implements BeforeMiddlewareInterface
         foreach ($this->ignorePath as $path) {
             $requestPathStr = $request->getRequestPath() ?? '';
             if (preg_match("~$path~", $requestPathStr)) {
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         }
 
@@ -64,6 +64,6 @@ class JwtMiddleware implements BeforeMiddlewareInterface
         }
         $request->addAttributes($vars);
 
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 }

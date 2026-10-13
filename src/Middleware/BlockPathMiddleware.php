@@ -48,6 +48,6 @@ class BlockPathMiddleware implements BeforeMiddlewareInterface
             }
         }
 
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 }

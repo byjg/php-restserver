@@ -158,7 +158,7 @@ $handler->withMiddleware(new class extends \ByJG\RestServer\Middleware\BeforeMid
         $middleware = new LoggingMiddleware();
         // ... apply middleware logic
 
-        return \ByJG\RestServer\Middleware\MiddlewareResult::continue;
+        return \ByJG\RestServer\Middleware\MiddlewareResult::Continue;
     }
 });
 

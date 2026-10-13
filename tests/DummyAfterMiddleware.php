@@ -18,7 +18,7 @@ class DummyAfterMiddleware implements AfterMiddlewareInterface
     public function afterProcess(HttpResponse $response, HttpRequest $request, string $class, string $method, ?string $exception): MiddlewareResult
     {
         $this->here++;
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 
     public function getHere(): int

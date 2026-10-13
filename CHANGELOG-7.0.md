@@ -137,6 +137,16 @@ Also added: `cookieString()`, `serverString()`, `sessionString()`.
 
 ---
 
+### Enum cases renamed to PascalCase
+
+Enum cases follow the ByJG standard and are written in PascalCase. The backed values did not
+change, so `->value`, `from()`, `tryFrom()` and stored data are not affected; only code that
+names a case (or reads `->name`) has to be updated.
+
+| Enum | Before (6.x) | After (7.0) |
+|---|---|---|
+| `MiddlewareResult` | `stopProcessingOthers`, `stopProcessing`, `continue` | `StopProcessingOthers`, `StopProcessing`, `Continue` |
+
 ## Upgrade Path from 6.x to 7.x
 
 ### Step 1: Update the dependency

@@ -1028,7 +1028,7 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
     ): MiddlewareResult
     {
         if ($dispatcherStatus != Dispatcher::NOT_FOUND) {
-            return MiddlewareResult::continue;
+            return MiddlewareResult::Continue;
         }
 
         $requestUri = new Uri($_SERVER['REQUEST_URI'] ?? '/');
@@ -1048,17 +1048,17 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
             $mime = $this->mimeContentType($file);
 
             if (empty($mime)) {
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
 
             $response->addHeader("Content-Type", $mime);
             $response->emptyResponse();
             $response->getResponseBody()->serializeAs(OutputMode::Plain);
             $response->write(file_get_contents($file));
-            return MiddlewareResult::stopProcessingOthers;
+            return MiddlewareResult::StopProcessingOthers;
         }
 
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 
     /**

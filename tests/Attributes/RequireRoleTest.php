@@ -76,7 +76,7 @@ class RequireRoleTest extends TestCase
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => JwtMiddleware::JWT_SUCCESS,
                     'role' => 'user'
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 
@@ -119,7 +119,7 @@ class RequireRoleTest extends TestCase
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => JwtMiddleware::JWT_SUCCESS,
                     'role' => 'admin'
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 
@@ -151,7 +151,7 @@ class RequireRoleTest extends TestCase
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => JwtMiddleware::JWT_SUCCESS,
                     'role' => 'user'
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 
@@ -182,7 +182,7 @@ class RequireRoleTest extends TestCase
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => JwtMiddleware::JWT_SUCCESS,
                     'role' => 'admin'
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 
@@ -225,7 +225,7 @@ class RequireRoleTest extends TestCase
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => JwtMiddleware::JWT_SUCCESS,
                     'role' => 'admin'
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 
@@ -486,7 +486,7 @@ class RequireRoleTest extends TestCase
                         'email' => 'admin@example.com'
                     ]
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 
@@ -523,7 +523,7 @@ class RequireRoleTest extends TestCase
                         'email' => 'user@example.com'
                     ]
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 

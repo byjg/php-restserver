@@ -45,10 +45,10 @@ will determine if it will be processed before or after the request. If the same 
 
 The middleware is required to return a `MiddlewareResult` enum value. The possible values are:
 
-- MiddlewareResult::continue - It will continue to process the next middleware and process the request.
-- MiddlewareResult::stopProcessingOthers - It will stop processing the next middleware and it will abort gracefully
+- MiddlewareResult::Continue - It will continue to process the next middleware and process the request.
+- MiddlewareResult::StopProcessingOthers - It will stop processing the next middleware and it will abort gracefully
   processing the request.
-- MiddlewareResult::stopProcessing - It will allow to process the next middleware, however it will abort gracefully
+- MiddlewareResult::StopProcessing - It will allow to process the next middleware, however it will abort gracefully
   processing the request.
 
 The key difference between stopProcessingOthers and stopProcessing is whether other middleware in the chain gets a
@@ -77,10 +77,10 @@ class MyCustomMiddleware implements BeforeMiddlewareInterface
         // Do something with the request
         
         if ($someCondition) {
-            return MiddlewareResult::stopProcessing;
+            return MiddlewareResult::StopProcessing;
         }
         
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 }
 ```

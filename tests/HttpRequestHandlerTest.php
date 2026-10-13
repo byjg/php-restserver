@@ -173,13 +173,13 @@ class HttpRequestHandlerTest extends TestCase
             #[Override]
             public function beforeProcess(mixed $dispatcherStatus, HttpResponse $response, HttpRequest $request): MiddlewareResult
             {
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
 
             #[Override]
             public function afterProcess(HttpResponse $response, HttpRequest $request, string $class, string $method, ?string $exception): MiddlewareResult
             {
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 

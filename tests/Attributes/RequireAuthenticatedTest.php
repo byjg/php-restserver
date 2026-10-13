@@ -89,7 +89,7 @@ class RequireAuthenticatedTest extends TestCase
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => 'failed',
                     JwtMiddleware::JWT_PARAM_PARSE_MESSAGE => 'Invalid token'
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 
@@ -131,7 +131,7 @@ class RequireAuthenticatedTest extends TestCase
                 $request->addAttributes([
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => JwtMiddleware::JWT_SUCCESS
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 

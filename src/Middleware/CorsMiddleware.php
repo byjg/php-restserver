@@ -50,13 +50,13 @@ class CorsMiddleware implements BeforeMiddlewareInterface
             if ($corsStatus == self::CORS_OPTIONS) {
                 $response->emptyResponse();
                 $response->getResponseBody()->serializeAs(OutputMode::Plain);
-                return MiddlewareResult::stopProcessingOthers;
+                return MiddlewareResult::StopProcessingOthers;
             } elseif ($corsStatus == self::CORS_FAILED) {
                 throw new Error403Exception("CORS verification failed. Request Blocked.");
             }
         }
 
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 
     /**
