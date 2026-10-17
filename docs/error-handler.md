@@ -191,7 +191,7 @@ You can create custom error handlers that process exception metadata in specific
 ```php
 <?php
 // Example of a controller with custom error handling
-public function processRequest(HttpRequest $request, HttpResponse $response)
+public function processRequest(HttpResponse $response, HttpRequest $request)
 {
     try {
         // Business logic...

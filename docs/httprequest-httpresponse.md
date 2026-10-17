@@ -24,7 +24,7 @@ informations to the requester.
 | session($var, $default)            | Get a value from the session ($_SESSION) or all values if $var is null      |
 | cookie($var, $default)             | Get a value from the cookies ($_COOKIE) or all values if $var is null       |
 | input($var, $default)              | Get a value from any source (query, body, server, session, cookie merged)   |
-| attribute($var, $default)          | Get a value injected by middleware or the framework (not URL or HTTP input) |
+| attribute($var, $default)          | Get a value from the attribute bag: route placeholders, query string values and values injected by middleware |
 | payload()                          | Get the raw request body (php://input)                                      |
 | getRequestIp()                     | Get the client IP address (checks proxy headers before REMOTE_ADDR)         |
 | ip()                               | Static method to get the client IP                                          |
@@ -53,7 +53,7 @@ Each source also has typed variants that always return `?string` or `?array`:
 | serverString($key, $default)    | $_SERVER                                         |
 | cookieString($key, $default)    | $_COOKIE                                         |
 | sessionString($key, $default)   | $_SESSION                                        |
-| attributeString($key, $default) | attribute bag (route params + middleware values) |
+| attributeString($key, $default) | attribute bag (route params, query string + middleware values) |
 | inputString($key, $default)     | any source                                       |
 
 Example:
@@ -92,7 +92,7 @@ function ($response, $request) {
 
     // Get uploaded files
     $files = $request->uploadedFiles();
-    $uploadedFile = $files->get('myfile');
+    $tmpFile = $files->getUploadedFile('myfile');
 }
 ```
 
@@ -106,11 +106,11 @@ function ($response, $request) {
 | removeCookie($var)                                | Remove a value from the cookies;                        |
 | getResponseBody()                                 | Returns the ResponseBody object;                        |
 | write($object)                                    | See below;                                              |
-| writeDebug($object)                               | Add information to be displayed in case of error;       |
+| writeDebug($key, $value)                          | Add information to be displayed in case of error;       |
 | emptyResponse()                                   | Empty all previously write responses;                   |
 | addHeader($header, $value)                        | Add an header entry;                                    |
 | getHeaders()                                      | Get all headers that have been set;                     |
-| setResponseCode($code, $description = null)       | Set the HTTP response code (eg. 200, 401, etc);         |
+| setResponseCode($code, $description = "")         | Set the HTTP response code (eg. 200, 401, etc);         |
 | getResponseCode()                                 | Get the current HTTP response code;                     |
 | getResponseCodeDescription()                      | Get the response reason phrase (eg. "OK", "Not Found"); |
 

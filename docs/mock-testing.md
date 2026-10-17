@@ -89,8 +89,10 @@ try {
         '/api/resource'
     );
     
-    // Examine the raw JSON returned by the error handler
-    $this->assertJsonStringEqualsJsonString('{"error": "Not Found"}', $result);
+    // Examine the raw JSON returned by the error handler:
+    // {"error": {"type": "...", "message": "..."}} (plus "meta" when the exception has metadata)
+    $error = json_decode($result, true)['error'];
+    $this->assertSame($ex->getMessage(), $error['message']);
 }
 ```
 

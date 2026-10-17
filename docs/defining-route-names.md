@@ -25,7 +25,7 @@ Creating the pattern:
 all matches values can be obtained by
 
 ```php
-$this->getRequest()->attributeString('variable');
+$request->attributeString('variable');
 ```
 
 ## Best Practices for Route Names

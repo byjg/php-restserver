@@ -62,7 +62,7 @@ The `RouteDefinition` attribute accepts the following parameters:
 
 ```php
 #[RouteDefinition(
-    string $method = 'GET',          // HTTP method (GET, POST, PUT, DELETE, etc.)
+    string $method = 'GET',          // HTTP method: GET, POST, PUT or DELETE
     string $path = '/',              // URL path pattern
     string $outputProcessor = JsonOutputProcessor::class  // Output processor class
 )]
@@ -99,7 +99,7 @@ class ValidateUserAccess implements BeforeRouteInterface
         $this->requiredRoles = $requiredRoles;
     }
 
-    public function processBefore(HttpResponse $response, HttpRequest $request)
+    public function processBefore(HttpResponse $response, HttpRequest $request): void
     {
         $userRoles = $this->getUserRoles($request);
         
@@ -141,13 +141,13 @@ class LogApiCall implements AfterRouteInterface
         $this->logLevel = $logLevel;
     }
 
-    public function processAfter(HttpResponse $response, HttpRequest $request)
+    public function processAfter(HttpResponse $response, HttpRequest $request): void
     {
         // Implementation to log the API call
         $logger = /* Get your logger instance */;
         $logger->{$this->logLevel}('API call', [
             'path' => $request->getRequestPath(),
-            'method' => $request->getMethod(),
+            'method' => $request->routeMethod(),
             'status' => $response->getResponseCode(),
             'user' => $request->attribute('jwt.sub') ?? 'anonymous'
         ]);

@@ -35,8 +35,12 @@ Once the page is processed, the middleware will add the `jwt` attribute to the r
 #### Return if the token is valid or not
 
 Valid values are:
-- JwtMiddleware::JWT_PARAM_PARSE_STATUS_OK
-- JwtMiddleware::JWT_PARAM_PARSE_STATUS_ERROR
+- JwtMiddleware::JWT_SUCCESS
+- JwtMiddleware::JWT_FAILED
+
+A missing token, or one whose issuer does not match, does not stop the request: the status is set to `JWT_FAILED`
+and the route still runs. Use the [`RequireAuthenticated` / `RequireRole` attributes](routes-using-php-attributes.md)
+to block it. A token that fails to decode (bad signature, expired, malformed) throws `Error401Exception` instead.
 
 ```php
 $request->attribute(JwtMiddleware::JWT_PARAM_PARSE_STATUS)

@@ -148,8 +148,8 @@ $routeList->addRoute(
 
 // Create request handler with PSR-7 middleware integration
 $handler = new Server();
-$handler->withMiddleware(new class extends \ByJG\RestServer\Middleware\BeforeMiddlewareInterface {
-    public function beforeProcess($dispatcherStatus, $response, $request)
+$handler->withMiddleware(new class implements \ByJG\RestServer\Middleware\BeforeMiddlewareInterface {
+    public function beforeProcess($dispatcherStatus, $response, $request): \ByJG\RestServer\Middleware\MiddlewareResult
     {
         // Convert to PSR-7
         $psr7Request = Psr7RequestAdapter::fromHttpRequest($request);

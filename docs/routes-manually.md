@@ -51,7 +51,8 @@ class ClassName
 
 ## Using Route Factory Methods
 
-RestServer provides convenient factory methods for all HTTP methods:
+RestServer provides factory methods for GET, POST, PUT and DELETE. For any other method use
+`Route::create()` (or `new Route()`), which accepts a string or a `ByJG\WebRequest\HttpMethod` case:
 
 ```php
 <?php
@@ -75,6 +76,11 @@ $routeDefinition->addRoute(
 // DELETE request
 $routeDefinition->addRoute(
     Route::delete("/api/users/{id}")->withClass(UserController::class, "delete")
+);
+
+// Any other method
+$routeDefinition->addRoute(
+    Route::create('PATCH', "/api/users/{id}")->withClass(UserController::class, "patch")
 );
 ```
 

@@ -51,7 +51,7 @@ The middleware is required to return a `MiddlewareResult` enum value. The possib
 - MiddlewareResult::StopProcessing - It will allow to process the next middleware, however it will abort gracefully
   processing the request.
 
-The key difference between stopProcessingOthers and stopProcessing is whether other middleware in the chain gets a
+The key difference between StopProcessingOthers and StopProcessing is whether other middleware in the chain gets a
 chance to run.
 Both will prevent the actual route handler from being executed.
 
@@ -69,8 +69,8 @@ use ByJG\RestServer\Middleware\MiddlewareResult;
 
 class MyCustomMiddleware implements BeforeMiddlewareInterface
 {
-    public function handleBefore(
-        int $dispatcherResult,
+    public function beforeProcess(
+        mixed $dispatcherStatus,
         HttpResponse $response,
         HttpRequest $request
     ): MiddlewareResult {

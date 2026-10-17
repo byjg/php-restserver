@@ -126,6 +126,26 @@ Also added: `cookieString()`, `serverString()`, `sessionString()`.
   a `parse_url()` failure now yields `null`. Code guarding this value with `is_array()` can
   drop those checks.
 
+### Renamed methods
+
+| **Before (6.x)**                       | **After (7.0)**                      |
+|----------------------------------------|--------------------------------------|
+| `HttpResponse::getResponseBag()`       | `HttpResponse::getResponseBody()`    |
+| `ResponseBag::setSerializationRule()`  | `ResponseBody::serializeAs()`        |
+| `ResponseBag::getSerializationRule()`  | `ResponseBody::getOutputMode()`      |
+
+### Changed exceptions and status codes
+
+- `CorsMiddleware` rejects an origin with `Error403Exception` (403) instead of
+  `Error401Exception` (401).
+- `InvalidClassException` now extends `Error500Exception` instead of `\Exception`, so it is an
+  `HttpResponseException` reported as 500.
+- `BaseOutputProcessor::getFromContentType()` throws `Error406Exception` instead of
+  `OperationIdInvalidException` for an unknown content type. This also applies when
+  `OpenApiRouteList` generates routes for a content type with no output processor.
+- `MockHttpRequest` throws `Error400Exception` instead of `OperationIdInvalidException` for a
+  multipart part without a name.
+
 ### Dependency updates
 
 | **Before (6.x)**            | **After (7.0)**              |
@@ -171,6 +191,9 @@ $server = new Server();
 Apply the same for `RequestHandler` → `ServerInterface`, `MockRequestHandler` →
 `MockServer`, `ResponseBag` → `ResponseBody`, and `SerializationRuleEnum` →
 `Enum\OutputMode` (remembering `Raw` → `Plain`).
+
+Then rename the methods: `getResponseBag()` → `getResponseBody()`,
+`setSerializationRule()` → `serializeAs()` and `getSerializationRule()` → `getOutputMode()`.
 
 ### Step 3: Update the `HttpRequest` calls
 

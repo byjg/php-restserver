@@ -528,7 +528,7 @@ Checks if a file was uploaded successfully without errors.
 
 **Returns:** `true` if upload was successful, `false` otherwise
 
-#### `getErrorCode(string $key): int|string|null`
+#### `getErrorCode(string $key): int|null`
 
 Returns the PHP upload error code for a file.
 
@@ -548,7 +548,7 @@ Reads and returns the file contents.
 
 **Returns:** File contents as string, or `false` on failure
 
-#### `getFileName(string $key): int|string|null`
+#### `getFileName(string $key): string|null`
 
 Returns the original filename from the client.
 
@@ -588,7 +588,7 @@ Manually deletes the temporary uploaded file.
 
 - `$key` - Upload field name
 
-#### `getFileSize(string $key): int|string|null`
+#### `getFileSize(string $key): int|null`
 
 Returns the file size in bytes.
 

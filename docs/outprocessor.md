@@ -11,6 +11,7 @@ The available output processors are:
 - `XmlOutputProcessor` - Outputs data as XML (content-type: `text/xml` or `application/xml`)
 - `HtmlOutputProcessor` - Outputs data as HTML (content-type: `text/html`)
 - `PlainTextOutputProcessor` - Outputs data as plain text (content-type: `text/plain`)
+- `CsvOutputProcessor` - Outputs data as CSV (content-type: `text/csv`)
 - `JsonCleanOutputProcessor` - Same as JsonOutputProcessor but doesn't output empty/null keys
 - `JsonTwirpOutputProcessor` - JSON output format compatible with Twirp service handler
 
@@ -59,8 +60,9 @@ $server->handle($routeList);
 
 By default, the OutputProcessor is determined by the route definition or the default processor set in
 `Server`.
-However, the client can request a specific output format using the `Accept` header. The RestServer will use the first
-content type in the Accept header that matches an available OutputProcessor.
+When the route does not define an output processor (or defines a list of them), the client can request a specific
+output format using the `Accept` header. The RestServer will use the first content type in the Accept header that
+matches an available OutputProcessor. See [Content Negotiation](content-negotiation.md).
 
 Available MIME types:
 
@@ -68,19 +70,20 @@ Available MIME types:
 - `text/xml` or `application/xml` - Uses XmlOutputProcessor
 - `text/html` - Uses HtmlOutputProcessor
 - `text/plain` - Uses PlainTextOutputProcessor
+- `text/csv` - Uses CsvOutputProcessor
 - `*/*` - Falls back to JsonOutputProcessor
 
-The following methods are available for selecting an output processor:
+The following public methods are available for selecting an output processor:
 
 ```php
-// From a specific class name
-BaseOutputProcessor::getFromClassName(JsonOutputProcessor::class);
+// Returns the class name for a content type; throws Error406Exception if there is none
+BaseOutputProcessor::getFromContentType("application/json"); // JsonOutputProcessor::class
 
-// From an HTTP Accept header
-BaseOutputProcessor::getFromHttpAccept();
-
-// From a specific content type
-BaseOutputProcessor::getFromContentType("application/json");
+// Returns an instance from a class name, a content type, or a list of class names.
+// With null (or a list) the HTTP Accept header is used.
+BaseOutputProcessor::factory(JsonOutputProcessor::class);
+BaseOutputProcessor::factory("application/json");
+BaseOutputProcessor::factory();
 ```
 
 ## Creating your own OutputProcessor
@@ -124,18 +127,18 @@ class MyCustomOutputProcessor extends BaseOutputProcessor
         $errorData = ExceptionFormatter::format($exception, $detailed);
 
         // Write custom error response
-        $response->write([
+        $error = [
             'error' => $errorData['message'],
             'type' => ExceptionFormatter::beautifyClassName($errorData['type'])
-        ]);
+        ];
 
         if ($detailed) {
-            $response->appendContent([
-                'file' => $errorData['file'],
-                'line' => $errorData['line'],
-                'trace' => $errorData['trace'] ?? []
-            ]);
+            $error['file'] = $errorData['file'];
+            $error['line'] = $errorData['line'];
+            $error['trace'] = $errorData['trace'] ?? [];
         }
+
+        $response->write($error);
 
         // Process and write the response
         $this->processResponse($response);
