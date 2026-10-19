@@ -9,7 +9,7 @@ use ByJG\RestServer\Route\RouteListInterface;
 
 interface ServerInterface
 {
-    public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = true);
+    public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = false);
 
     public function withErrorHandlerDisabled();
 

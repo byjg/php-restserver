@@ -578,6 +578,9 @@ Saves the uploaded file to a destination directory.
 - `$destinationPath` - Destination directory path
 - `$newName` - Optional new filename (defaults to original)
 
+Throws `InvalidArgumentException` when the name (the new one, or the client's when none is given) is not a plain
+file name, e.g. `../app.php`: a path would write outside `$destinationPath`.
+
 **Throws:** `InvalidArgumentException` if upload key doesn't exist
 
 #### `clearTemp(string $key): void`

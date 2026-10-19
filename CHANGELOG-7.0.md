@@ -86,6 +86,23 @@ $server->withMiddleware(
 - **JSON output**: uninitialized typed properties no longer break serialization (regression
   test added).
 - `MockServer` no longer reports the stale name "MockRequestHandler" in its error message.
+- **After-middleware on a failed route**: `afterProcess()` declared the exception as
+  `?string` but received the exception object, a `TypeError`. See Breaking Changes.
+- **Path traversal in `ServerStaticMiddleware`**: a request path with `..` could serve any
+  file the PHP process could read, and a `file://` request URI was served from its absolute
+  path. Now only files inside the directory of the entry script are served; anything that
+  resolves outside it (`..`, symlinks, `file://`) is a 404.
+- **Path traversal in `UploadedFiles::saveTo()`**: the file name (the client's, when no new
+  name is given) was appended to the destination as it came, so `../app.php` wrote outside
+  it. A name that is not a plain file name now throws `InvalidArgumentException`.
+- **`#[RouteDefinition]` with PATCH, OPTIONS or any method other than GET/POST/PUT/DELETE**:
+  the route was built with `Route::$method()`, which only exists for those four, so
+  registering the class failed with "Call to undefined method". It now uses `Route::create()`.
+- **`Error500Exception`** extended `\Exception` instead of `HttpResponseException`, unlike every
+  other `Error*Exception`, and the status list had no 500 entry. It is now an
+  `HttpResponseException` with status message "Internal Server Error". See Breaking Changes.
+- **`ServerInterface::handle()`** declared `$session = true` while `Server` and `MockServer`
+  default to `false` (the documented default). The interface now says `false`.
 
 ---
 
@@ -134,10 +151,23 @@ Also added: `cookieString()`, `serverString()`, `sessionString()`.
 | `ResponseBag::setSerializationRule()`  | `ResponseBody::serializeAs()`        |
 | `ResponseBag::getSerializationRule()`  | `ResponseBody::getOutputMode()`      |
 
+### `AfterMiddlewareInterface::afterProcess()` receives the exception
+
+- The last parameter is `?\Exception $exception` instead of `?string $exception`. The server
+  always passed the exception object, so a route that threw while an after-middleware was
+  registered failed with a `TypeError`. Change the signature in your after-middleware:
+
+  ```php
+  public function afterProcess(HttpResponse $response, HttpRequest $request, string $class, string $method, ?\Exception $exception): MiddlewareResult
+  ```
+
 ### Changed exceptions and status codes
 
 - `CorsMiddleware` rejects an origin with `Error403Exception` (403) instead of
   `Error401Exception` (401).
+- `Error500Exception` now extends `HttpResponseException` instead of `\Exception`. A
+  `catch (HttpResponseException $e)` now also catches it, and the response status line is
+  `500 Internal Server Error` instead of `500 Internal Error`.
 - `InvalidClassException` now extends `Error500Exception` instead of `\Exception`, so it is an
   `HttpResponseException` reported as 500.
 - `BaseOutputProcessor::getFromContentType()` throws `Error406Exception` instead of

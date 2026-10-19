@@ -1031,20 +1031,19 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
             return MiddlewareResult::Continue;
         }
 
-        $requestUri = new Uri($_SERVER['REQUEST_URI'] ?? '/');
-        if ($requestUri->getScheme() === "file") {
-            $file = $requestUri->getPath();
-        } else {
-            $script = explode('/', $_SERVER['SCRIPT_FILENAME'] ?? '');
-            $script[count($script)-1] = ltrim($requestUri->getPath(), '/');
-            $file = implode('/', $script);
+        if (empty($_SERVER['SCRIPT_FILENAME'])) {
+            return MiddlewareResult::Continue;
         }
 
-        if (is_dir($file) && !empty($this->directoryIndex)) {
-            $file = rtrim($file, '/') . '/' . $this->directoryIndex;
+        $root = dirname($_SERVER['SCRIPT_FILENAME']);
+        $path = (new Uri($_SERVER['REQUEST_URI'] ?? '/'))->getPath();
+
+        $file = $this->resolveFile($root, $path);
+        if (!is_null($file) && is_dir($file) && !empty($this->directoryIndex)) {
+            $file = $this->resolveFile($root, rtrim($path, '/') . '/' . $this->directoryIndex);
         }
 
-        if (file_exists($file)) {
+        if (!is_null($file) && is_file($file)) {
             $mime = $this->mimeContentType($file);
 
             if (empty($mime)) {
@@ -1059,6 +1058,25 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
         }
 
         return MiddlewareResult::Continue;
+    }
+
+    /**
+     * Resolve the request path inside the root directory.
+     * Returns null when it doesn't exist or resolves outside the root (`..`, symlinks).
+     */
+    protected function resolveFile(string $root, string $path): ?string
+    {
+        $root = realpath($root);
+        if ($root === false) {
+            return null;
+        }
+
+        $file = realpath($root . '/' . ltrim($path, '/'));
+        if ($file === false || ($file !== $root && !str_starts_with($file, $root . DIRECTORY_SEPARATOR))) {
+            return null;
+        }
+
+        return $file;
     }
 
     /**

@@ -21,4 +21,10 @@ class RouteFromAttributes
     {
         $response->write(["a" => 'Route 1 post']);
     }
+
+    #[RouteDefinition('PATCH', '/route1')]
+    public function route1Patch(HttpResponse $response, HttpRequest $request): void
+    {
+        $response->write(["a" => 'Route 1 patch']);
+    }
 }

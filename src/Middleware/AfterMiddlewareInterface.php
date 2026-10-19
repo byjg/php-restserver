@@ -4,6 +4,7 @@ namespace ByJG\RestServer\Middleware;
 
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
+use Exception;
 
 interface AfterMiddlewareInterface
 {
@@ -14,8 +15,8 @@ interface AfterMiddlewareInterface
      * @param HttpRequest $request
      * @param string $class
      * @param string $method
-     * @param string|null $exception
+     * @param Exception|null $exception
      * @return MiddlewareResult
      */
-    public function afterProcess(HttpResponse $response, HttpRequest $request, string $class, string $method, ?string $exception): MiddlewareResult;
+    public function afterProcess(HttpResponse $response, HttpRequest $request, string $class, string $method, ?Exception $exception): MiddlewareResult;
 }

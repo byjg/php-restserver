@@ -62,7 +62,7 @@ The `RouteDefinition` attribute accepts the following parameters:
 
 ```php
 #[RouteDefinition(
-    string $method = 'GET',          // HTTP method: GET, POST, PUT or DELETE
+    string $method = 'GET',          // Any HTTP method: GET, POST, PUT, DELETE, PATCH, OPTIONS, ...
     string $path = '/',              // URL path pattern
     string $outputProcessor = JsonOutputProcessor::class  // Output processor class
 )]

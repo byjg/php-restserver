@@ -39,6 +39,9 @@ The ServerStaticMiddleware:
 
 This component will try to find the file in the directory starting from where the `app.php` is located.
 
+Only files inside that directory are served. A request path that resolves outside it, with `..` or through a
+symlink, is treated as not found.
+
 ## MIME Type Detection
 
 The middleware maps the file extension to a MIME type using a built-in list of extensions. Unknown extensions are

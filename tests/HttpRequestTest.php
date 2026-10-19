@@ -3,7 +3,9 @@
 namespace Tests;
 
 use ByJG\RestServer\HttpRequest;
+use InvalidArgumentException;
 use Override;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class HttpRequestTest extends TestCase
@@ -59,6 +61,36 @@ class HttpRequestTest extends TestCase
         $this->assertEquals(4, $upload->getFileSize('test'));
         $this->assertEquals('test', $upload->getUploadedFile('test'));
         $upload->clearTemp('test');
+    }
+
+    /**
+     * @return string[][]
+     */
+    public static function invalidFileNameProvider(): array
+    {
+        return [
+            'client name with parent directory' => ['../../app.php', ''],
+            'client name with absolute path' => ['/etc/cron.d/job', ''],
+            'new name with parent directory' => ['test.txt', '../app.php'],
+            'new name is parent directory' => ['test.txt', '..'],
+        ];
+    }
+
+    #[DataProvider('invalidFileNameProvider')]
+    public function testSaveToRejectsPath(string $clientName, string $newName): void
+    {
+        $_FILES = [
+            'test' => [
+                'name' => $clientName,
+                'type' => 'text/plain',
+                'size' => 4,
+                'tmp_name' => sys_get_temp_dir() . "/tmpfile.txt",
+                'error' => UPLOAD_ERR_OK
+            ]
+        ];
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->request->uploadedFiles()->saveTo('test', sys_get_temp_dir(), $newName);
     }
 
     public function testCookie(): void
