@@ -1,5 +1,5 @@
 ---
-sidebar_position: 14
+sidebar_position: 16
 sidebar_label: Intercepting Request
 ---
 # Intercepting Request
@@ -30,7 +30,7 @@ use ByJG\RestServer\HttpResponse;
 #[Attribute(Attribute::TARGET_METHOD)]
 class MyBeforeProcess implements BeforeRouteInterface
 {
-    public function processBefore(HttpResponse $response, HttpRequest $request)
+    public function processBefore(HttpResponse $response, HttpRequest $request): void
     {
         // Validation, authentication, logging, etc.
     }
@@ -53,7 +53,7 @@ use ByJG\RestServer\HttpResponse;
 #[Attribute(Attribute::TARGET_METHOD)]
 class MyAfterProcess implements AfterRouteInterface
 {
-    public function processAfter(HttpResponse $response, HttpRequest $request)
+    public function processAfter(HttpResponse $response, HttpRequest $request): void
     {
         // Response transformation, logging, cleanup, etc.
     }

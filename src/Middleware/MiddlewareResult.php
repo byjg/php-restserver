@@ -4,7 +4,7 @@ namespace ByJG\RestServer\Middleware;
 
 enum MiddlewareResult
 {
-    case stopProcessingOthers;
-    case stopProcessing;
-    case continue;
+    case StopProcessingOthers;
+    case StopProcessing;
+    case Continue;
 }

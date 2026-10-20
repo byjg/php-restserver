@@ -14,12 +14,12 @@ easier to understand.
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use ByJG\RestServer\Route\RouteList;
-use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Server;
 
 $routeDefinition = new RouteList();
 $routeDefinition->addClass(\My\ClassName::class);
 
-$restServer = new HttpRequestHandler();
+$restServer = new Server();
 $restServer->handle($routeDefinition);
 ```
 
@@ -62,7 +62,7 @@ The `RouteDefinition` attribute accepts the following parameters:
 
 ```php
 #[RouteDefinition(
-    string $method = 'GET',          // HTTP method (GET, POST, PUT, DELETE, etc.)
+    string $method = 'GET',          // Any HTTP method: GET, POST, PUT, DELETE, PATCH, OPTIONS, ...
     string $path = '/',              // URL path pattern
     string $outputProcessor = JsonOutputProcessor::class  // Output processor class
 )]
@@ -99,7 +99,7 @@ class ValidateUserAccess implements BeforeRouteInterface
         $this->requiredRoles = $requiredRoles;
     }
 
-    public function processBefore(HttpResponse $response, HttpRequest $request)
+    public function processBefore(HttpResponse $response, HttpRequest $request): void
     {
         $userRoles = $this->getUserRoles($request);
         
@@ -115,7 +115,7 @@ class ValidateUserAccess implements BeforeRouteInterface
     {
         // Implementation to get user roles from request
         // For example, from JWT token
-        return $request->param('jwt.roles') ?? [];
+        return $request->attribute('jwt.roles') ?? [];
     }
 }
 ```
@@ -141,15 +141,15 @@ class LogApiCall implements AfterRouteInterface
         $this->logLevel = $logLevel;
     }
 
-    public function processAfter(HttpResponse $response, HttpRequest $request)
+    public function processAfter(HttpResponse $response, HttpRequest $request): void
     {
         // Implementation to log the API call
         $logger = /* Get your logger instance */;
         $logger->{$this->logLevel}('API call', [
             'path' => $request->getRequestPath(),
-            'method' => $request->getMethod(),
+            'method' => $request->routeMethod(),
             'status' => $response->getResponseCode(),
-            'user' => $request->param('jwt.sub') ?? 'anonymous'
+            'user' => $request->attribute('jwt.sub') ?? 'anonymous'
         ]);
     }
 }
@@ -196,7 +196,7 @@ class UserController
     public function getUserProfile(HttpResponse $response, HttpRequest $request)
     {
         // Both users and admins can access profiles
-        $userId = $request->param('jwt.sub');
+        $userId = $request->attribute('jwt.sub');
         $profile = $this->getUserProfile($userId);
         $response->write($profile);
     }
@@ -280,7 +280,7 @@ class SecureController
     public function getProfile(HttpResponse $response, HttpRequest $request)
     {
         // Only authenticated users can access this endpoint
-        $userId = $request->param('jwt.sub');
+        $userId = $request->attribute('jwt.sub');
         $response->write(['user_id' => $userId]);
     }
 }
@@ -332,17 +332,17 @@ class AdminController
 **Examples:**
 
 ```php
-// Basic usage - checks if $request->param('role') === 'admin'
+// Basic usage - checks if $request->attribute('role') === 'admin'
 #[RequireRole('admin')]
 
-// Custom parameter - checks if $request->param('jwt.role') === 'moderator'
+// Custom parameter - checks if $request->attribute('jwt.role') === 'moderator'
 #[RequireRole('moderator', 'jwt.role')]
 
-// Extract from array - if $request->param('user') returns ['role' => 'admin'],
+// Extract from array - if $request->attribute('user') returns ['role' => 'admin'],
 // checks if $user['role'] === 'admin'
 #[RequireRole('admin', 'user', 'role')]
 
-// Extract from object - if $request->param('user') returns object with role property,
+// Extract from object - if $request->attribute('user') returns object with role property,
 // checks if $user->role === 'editor'
 #[RequireRole('editor', 'user', 'role')]
 ```

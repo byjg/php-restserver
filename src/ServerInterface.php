@@ -7,9 +7,9 @@ use ByJG\RestServer\Middleware\AfterMiddlewareInterface;
 use ByJG\RestServer\Middleware\BeforeMiddlewareInterface;
 use ByJG\RestServer\Route\RouteListInterface;
 
-interface RequestHandler
+interface ServerInterface
 {
-    public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = true);
+    public function handle(RouteListInterface $routeDefinition, bool $outputBuffer = true, bool $session = false);
 
     public function withErrorHandlerDisabled();
 

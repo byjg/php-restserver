@@ -1,5 +1,5 @@
 ---
-sidebar_position: 21
+sidebar_position: 23
 sidebar_label: CSV Endpoint Example
 ---
 
@@ -14,74 +14,13 @@ browser will prompt the user to download the file.
 
 ## Example Implementation
 
-### 1. Create a CSV Output Processor
+### 1. The CSV Output Processor
 
-First, create a custom output processor for CSV files:
+`ByJG\RestServer\OutputProcessor\CsvOutputProcessor` is built in. It sets the `text/csv` content type and formats the
+response with `ByJG\Serializer\Formatter\CsvFormatter`. It is also selected automatically for `Accept: text/csv`, so
+there is nothing to register.
 
-```php
-<?php
-
-namespace ByJG\RestServer\OutputProcessor;
-
-use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\SerializationRuleEnum;
-use ByJG\Serializer\Formatter\FormatterInterface;
-
-class CsvOutputProcessor extends BaseOutputProcessor
-{
-    public function __construct()
-    {
-        $this->contentType = "text/csv";
-    }
-
-    #[\Override]
-    public function getFormatter(): FormatterInterface
-    {
-        return new class implements FormatterInterface {
-            public function process($data): string|false
-            {
-                if (!is_array($data)) {
-                    return false;
-                }
-
-                // Create CSV output
-                $output = fopen('php://temp', 'r+');
-
-                // Add headers if we have an associative array
-                if (isset($data[0]) && is_array($data[0])) {
-                    fputcsv($output, array_keys($data[0]));
-
-                    // Add data rows
-                    foreach ($data as $row) {
-                        fputcsv($output, $row);
-                    }
-                } else {
-                    // It's a single record
-                    fputcsv($output, array_keys($data));
-                    fputcsv($output, array_values($data));
-                }
-
-                rewind($output);
-                $csvContent = stream_get_contents($output);
-                fclose($output);
-
-                return $csvContent;
-            }
-        };
-    }
-}
-```
-
-### 2. Register the CSV Output Processor
-
-Register the CSV output processor for the MIME type:
-
-```php
-// Register the CSV output processor for the MIME type
-BaseOutputProcessor::$mimeTypeOutputProcessor["text/csv"] = CsvOutputProcessor::class;
-```
-
-### 3. Create an Endpoint with the CSV Output Processor
+### 2. Create an Endpoint with the CSV Output Processor
 
 Create an endpoint that uses the CSV output processor:
 
@@ -124,7 +63,7 @@ class YourController
 }
 ```
 
-### 4. Key Points for CSV File Downloads
+### 3. Key Points for CSV File Downloads
 
 1. **Set the Content-Disposition header**: This tells the browser to download the file instead of displaying it:
    ```php
@@ -140,23 +79,19 @@ class YourController
    $filename = 'user-data-' . $userId . '-' . date('Y-m-d') . '.csv';
    ```
 
-4. **Raw CSV content**: If you need to create the CSV content manually, use the Raw serialization rule:
+4. **Plain CSV content**: If you need to create the CSV content manually, use the Plain output mode:
    ```php
-   $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::Raw);
+   $response->getResponseBody()->serializeAs(OutputMode::Plain);
    $csvContent = "id,name,email\n1,\"John Doe\",john@example.com\n2,\"Jane Smith\",jane@example.com";
    $response->write($csvContent);
    ```
-
-## Complete Example
-
-See the `CsvEndpointExample` class and `csv-example.php` file for a complete working example.
 
 ## Testing the CSV Endpoint
 
 To test the CSV endpoint, navigate to:
 
 ```
-http://your-server/csv-example.php/export-csv
+http://your-server/export-csv
 ```
 
 Your browser should prompt you to download a CSV file with the sample data.

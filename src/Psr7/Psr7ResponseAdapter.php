@@ -68,8 +68,8 @@ class Psr7ResponseAdapter
             $psr7Response = $psr7Response->withHeader('Content-Type', $contentType);
         }
 
-        // Convert ResponseBag to body
-        $body = self::convertResponseBagToString($response, $contentType);
+        // Convert ResponseBody to body
+        $body = self::convertResponseBodyToString($response, $contentType);
         $stream = new MemoryStream($body);
         return $psr7Response->withBody($stream);
     }
@@ -125,19 +125,19 @@ class Psr7ResponseAdapter
     }
 
     /**
-     * Convert ResponseBag content to string
+     * Convert ResponseBody content to string
      *
      * @param HttpResponse $response
      * @param string $contentType
      * @return string
      */
-    private static function convertResponseBagToString(
+    private static function convertResponseBodyToString(
         HttpResponse $response,
         string       $contentType
     ): string
     {
-        $responseBag = $response->getResponseBag();
-        $collection = $responseBag->getCollection();
+        $responseBody = $response->getResponseBody();
+        $collection = $responseBody->getCollection();
 
         if (empty($collection)) {
             return '';

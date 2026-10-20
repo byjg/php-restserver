@@ -1,5 +1,5 @@
 ---
-sidebar_position: 22
+sidebar_position: 24
 sidebar_label: PSR-7 Adapters
 ---
 
@@ -76,7 +76,7 @@ $psr7Response = Psr7ResponseAdapter::fromHttpResponse($httpResponse, 'applicatio
 
 ### Response Body Conversion
 
-The adapter automatically converts the ResponseBag content to a string:
+The adapter automatically converts the ResponseBody content to a string:
 
 - **JSON content**: Encodes data with `JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE`
 - **Single item arrays**: Flattened to the item itself (e.g., `[{...}]` becomes `{...}`)
@@ -115,7 +115,7 @@ Here's a complete example using RestServer with PSR-7 middleware:
 
 ```php
 <?php
-use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Server;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\Psr7\Psr7RequestAdapter;
@@ -141,15 +141,15 @@ $routeList->addRoute(
     Route::get('/api/user/{id}')
         ->withClosure(function (HttpResponse $response, HttpRequest $request) {
             // Your route logic
-            $userId = $request->param('id');
+            $userId = $request->attribute('id');
             $response->write(['user_id' => $userId, 'name' => 'John Doe']);
         })
 );
 
 // Create request handler with PSR-7 middleware integration
-$handler = new HttpRequestHandler();
-$handler->withMiddleware(new class extends \ByJG\RestServer\Middleware\BeforeMiddlewareInterface {
-    public function beforeProcess($dispatcherStatus, $response, $request)
+$handler = new Server();
+$handler->withMiddleware(new class implements \ByJG\RestServer\Middleware\BeforeMiddlewareInterface {
+    public function beforeProcess($dispatcherStatus, $response, $request): \ByJG\RestServer\Middleware\MiddlewareResult
     {
         // Convert to PSR-7
         $psr7Request = Psr7RequestAdapter::fromHttpRequest($request);
@@ -158,7 +158,7 @@ $handler->withMiddleware(new class extends \ByJG\RestServer\Middleware\BeforeMid
         $middleware = new LoggingMiddleware();
         // ... apply middleware logic
 
-        return \ByJG\RestServer\Middleware\MiddlewareResult::continue;
+        return \ByJG\RestServer\Middleware\MiddlewareResult::Continue;
     }
 });
 

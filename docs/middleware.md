@@ -4,14 +4,15 @@ sidebar_label: Middleware
 ---
 # Middleware
 
-HttpServerHandler has the ability to inject processing Before and After process the request. Using this you can inject code, change headers
+The `Server` class has the ability to inject processing Before and After the request. Using this you can inject code,
+change headers
 or even block the processing.
 
 You need to implement the class `BeforeMiddlewareInterface` and `AfterMiddlewareInterface` and then add to the handler:
 
 ```php
 <?php
-$httpHandler = new \ByJG\RestServer\HttpRequestHandler();
+$httpHandler = new \ByJG\RestServer\Server();
 $httpHandler
     ->withMiddleware(/*... instance of BeforeMiddlewareInterface or AfterMiddlewareInterface ...*/, /* routing pattern */);
 ```
@@ -33,6 +34,7 @@ Some examples:
 * [CORS Support](middleware-cors.md)
 * [Static Server Files](middleware-staticserver.md)
 * [JWT Authentication](middleware-jwt.md)
+* [Block Path](middleware-blockpath.md)
 
 
 
@@ -43,13 +45,13 @@ will determine if it will be processed before or after the request. If the same 
 
 The middleware is required to return a `MiddlewareResult` enum value. The possible values are:
 
-- MiddlewareResult::continue - It will continue to process the next middleware and process the request.
-- MiddlewareResult::stopProcessingOthers - It will stop processing the next middleware and it will abort gracefully
+- MiddlewareResult::Continue - It will continue to process the next middleware and process the request.
+- MiddlewareResult::StopProcessingOthers - It will stop processing the next middleware and it will abort gracefully
   processing the request.
-- MiddlewareResult::stopProcessing - It will allow to process the next middleware, however it will abort gracefully
+- MiddlewareResult::StopProcessing - It will allow to process the next middleware, however it will abort gracefully
   processing the request.
 
-The key difference between stopProcessingOthers and stopProcessing is whether other middleware in the chain gets a
+The key difference between StopProcessingOthers and StopProcessing is whether other middleware in the chain gets a
 chance to run.
 Both will prevent the actual route handler from being executed.
 
@@ -67,18 +69,18 @@ use ByJG\RestServer\Middleware\MiddlewareResult;
 
 class MyCustomMiddleware implements BeforeMiddlewareInterface
 {
-    public function handleBefore(
-        int $dispatcherResult,
+    public function beforeProcess(
+        mixed $dispatcherStatus,
         HttpResponse $response,
         HttpRequest $request
     ): MiddlewareResult {
         // Do something with the request
         
         if ($someCondition) {
-            return MiddlewareResult::stopProcessing;
+            return MiddlewareResult::StopProcessing;
         }
         
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 }
 ```

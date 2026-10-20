@@ -2,8 +2,9 @@
 
 namespace Tests;
 
-use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\Route\RouteList;
+use ByJG\RestServer\Server;
+use Override;
 use PHPUnit\Framework\TestCase;
 use Tests\Routes\RouteFromAttributes;
 
@@ -11,11 +12,11 @@ class ServerHandlerAttributeTest extends TestCase
 {
     use MockServerTrait;
 
-    #[\Override]
+    #[Override]
     public function setup(): void
     {
         ini_set('output_buffering', 4096);
-        $this->object = new HttpRequestHandler();
+        $this->object = new Server();
         $this->reach = false;
         $this->definition = new RouteList();
 
@@ -24,7 +25,7 @@ class ServerHandlerAttributeTest extends TestCase
 
     public function testSanity(): void
     {
-        $this->assertCount(2, $this->definition->getRoutes());
+        $this->assertCount(3, $this->definition->getRoutes());
     }
 
     public function testRoute1(): void
@@ -51,6 +52,21 @@ class ServerHandlerAttributeTest extends TestCase
         $expectedData = '[{"a":"Route 1 post"},{"x":"After Process"}]';
 
         $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_SERVER['REQUEST_URI'] = "http://localhost/route1";
+        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
+
+        $this->processAndGetContent($this->object, $expectedHeader, $expectedData);
+    }
+
+    public function testRoutePatch(): void
+    {
+        $expectedHeader = [
+            "HTTP/1.1 200 OK",
+            "Content-Type: application/json",
+        ];
+        $expectedData = '{"a":"Route 1 patch"}';
+
+        $_SERVER['REQUEST_METHOD'] = 'PATCH';
         $_SERVER['REQUEST_URI'] = "http://localhost/route1";
         $_SERVER['SCRIPT_FILENAME'] = __FILE__;
 

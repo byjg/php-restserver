@@ -32,8 +32,7 @@ class RouteDefinition
 
     public function createRoute(string $class, string $methodName): Route
     {
-        $method = $this->method;
-        $route = Route::$method($this->path)
+        $route = Route::create($this->method, $this->path)
             ->withClass($class, $methodName);
 
         if (!empty($this->outputProcessor)) {

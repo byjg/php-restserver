@@ -2,9 +2,7 @@
 
 namespace ByJG\RestServer\Exception;
 
-use Exception;
-
-class InvalidClassException extends Exception
+class InvalidClassException extends Error500Exception
 {
     //put your code here
 }

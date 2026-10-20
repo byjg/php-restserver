@@ -2,11 +2,11 @@
 
 namespace ByJG\RestServer\Middleware;
 
+use ByJG\RestServer\Enum\OutputMode;
 use ByJG\RestServer\Exception\Error415Exception;
 use ByJG\RestServer\Exception\Error500Exception;
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\SerializationRuleEnum;
 use ByJG\RestServer\Util\GeneralUtil;
 use ByJG\Util\Uri;
 use FastRoute\Dispatcher;
@@ -14,6 +14,13 @@ use Override;
 
 class ServerStaticMiddleware implements BeforeMiddlewareInterface
 {
+
+    protected string $directoryIndex;
+
+    public function __construct(string $directoryIndex = 'index.html')
+    {
+        $this->directoryIndex = $directoryIndex;
+    }
 
     protected array $mimeTypes = [
         '123' => 'application/vnd.lotus-1-2-3',
@@ -1021,33 +1028,55 @@ class ServerStaticMiddleware implements BeforeMiddlewareInterface
     ): MiddlewareResult
     {
         if ($dispatcherStatus != Dispatcher::NOT_FOUND) {
-            return MiddlewareResult::continue;
+            return MiddlewareResult::Continue;
         }
 
-        $requestUri = new Uri($_SERVER['REQUEST_URI'] ?? '/');
-        if ($requestUri->getScheme() === "file") {
-            $file = $requestUri->getPath();
-        } else {
-            $script = explode('/', $_SERVER['SCRIPT_FILENAME'] ?? '');
-            $script[count($script)-1] = ltrim($requestUri->getPath(), '/');
-            $file = implode('/', $script);
+        if (empty($_SERVER['SCRIPT_FILENAME'])) {
+            return MiddlewareResult::Continue;
         }
 
-        if (file_exists($file)) {
+        $root = dirname($_SERVER['SCRIPT_FILENAME']);
+        $path = (new Uri($_SERVER['REQUEST_URI'] ?? '/'))->getPath();
+
+        $file = $this->resolveFile($root, $path);
+        if (!is_null($file) && is_dir($file) && !empty($this->directoryIndex)) {
+            $file = $this->resolveFile($root, rtrim($path, '/') . '/' . $this->directoryIndex);
+        }
+
+        if (!is_null($file) && is_file($file)) {
             $mime = $this->mimeContentType($file);
 
             if (empty($mime)) {
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
 
             $response->addHeader("Content-Type", $mime);
             $response->emptyResponse();
-            $response->getResponseBag()->setSerializationRule(SerializationRuleEnum::Raw);
+            $response->getResponseBody()->serializeAs(OutputMode::Plain);
             $response->write(file_get_contents($file));
-            return MiddlewareResult::stopProcessingOthers;
+            return MiddlewareResult::StopProcessingOthers;
         }
 
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
+    }
+
+    /**
+     * Resolve the request path inside the root directory.
+     * Returns null when it doesn't exist or resolves outside the root (`..`, symlinks).
+     */
+    protected function resolveFile(string $root, string $path): ?string
+    {
+        $root = realpath($root);
+        if ($root === false) {
+            return null;
+        }
+
+        $file = realpath($root . '/' . ltrim($path, '/'));
+        if ($file === false || ($file !== $root && !str_starts_with($file, $root . DIRECTORY_SEPARATOR))) {
+            return null;
+        }
+
+        return $file;
     }
 
     /**

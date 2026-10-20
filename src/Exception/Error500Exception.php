@@ -2,9 +2,12 @@
 
 namespace ByJG\RestServer\Exception;
 
-use Exception;
+use Throwable;
 
-class Error500Exception extends Exception
+class Error500Exception extends HttpResponseException
 {
-    //put your code here
+    public function __construct(string $message = "", int $code = 0, ?Throwable $previous = null, array $meta = [])
+    {
+        parent::__construct(500, $message, $code, $previous, $meta);
+    }
 }

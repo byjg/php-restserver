@@ -12,10 +12,13 @@ Enable the Server Handler process the CORS headers and block the access if the o
 <?php
 $corsMiddleware = new \ByJG\RestServer\Middleware\CorsMiddleware();
 $corsMiddleware
-    ->withCorsOrigins([/* list of accepted origin */])  // Required to enable CORS
-    ->withAcceptCorsMethods([/* list of methods */])     // Optional. Default all methods. Don't need to pass 'OPTIONS'
-    ->withAcceptCorsHeaders([/* list of headers */])     // Optional. Default all headers
+    ->withCorsOrigins([/* list of accepted origin */])  // Optional. Default: any origin ('.*')
+    ->withAcceptCorsMethods([/* list of methods */])     // Optional. Default GET, POST, PUT, DELETE, PATCH. Don't need to pass 'OPTIONS'
+    ->withAcceptCorsHeaders([/* list of headers */])     // Optional. Default Authorization, Content-Type, Accept, Origin, User-Agent, Cache-Control, Keep-Alive, X-Requested-With, If-Modified-Since
 ```
+
+If the request has an `Origin` header that does not match any accepted origin, the middleware throws
+`Error403Exception` (403 Forbidden). A matching `OPTIONS` pre-flight request is answered with `204 No Content`.
 
 Note that the method `withCorsOrigins` accept a list of hosts regular expressions. e.g.
 

@@ -6,6 +6,8 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Middleware\AfterMiddlewareInterface;
 use ByJG\RestServer\Middleware\MiddlewareResult;
+use Exception;
+use Override;
 
 class DummyAfterMiddleware implements AfterMiddlewareInterface
 {
@@ -14,11 +16,11 @@ class DummyAfterMiddleware implements AfterMiddlewareInterface
     /**
      * @inheritDoc
      */
-    #[\Override]
-    public function afterProcess(HttpResponse $response, HttpRequest $request, string $class, string $method, ?string $exception): MiddlewareResult
+    #[Override]
+    public function afterProcess(HttpResponse $response, HttpRequest $request, string $class, string $method, ?Exception $exception): MiddlewareResult
     {
         $this->here++;
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 
     public function getHere(): int

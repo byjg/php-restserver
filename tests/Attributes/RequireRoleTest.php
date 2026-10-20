@@ -6,12 +6,12 @@ use ByJG\RestServer\Attributes\RequireRole;
 use ByJG\RestServer\Exception\Error401Exception;
 use ByJG\RestServer\Exception\Error403Exception;
 use ByJG\RestServer\HttpRequest;
-use ByJG\RestServer\HttpRequestHandler;
 use ByJG\RestServer\HttpResponse;
 use ByJG\RestServer\Middleware\BeforeMiddlewareInterface;
 use ByJG\RestServer\Middleware\JwtMiddleware;
 use ByJG\RestServer\Middleware\MiddlewareResult;
 use ByJG\RestServer\Route\RouteList;
+use ByJG\RestServer\Server;
 use Override;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
@@ -26,7 +26,7 @@ class RequireRoleTest extends TestCase
     public function setup(): void
     {
         ini_set('output_buffering', 4096);
-        $this->object = new HttpRequestHandler();
+        $this->object = new Server();
         $this->reach = false;
         $this->definition = new RouteList();
 
@@ -72,11 +72,11 @@ class RequireRoleTest extends TestCase
                 HttpRequest  $request
             ): MiddlewareResult
             {
-                $request->appendVars([
+                $request->addAttributes([
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => JwtMiddleware::JWT_SUCCESS,
                     'role' => 'user'
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 
@@ -115,11 +115,11 @@ class RequireRoleTest extends TestCase
                 HttpRequest  $request
             ): MiddlewareResult
             {
-                $request->appendVars([
+                $request->addAttributes([
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => JwtMiddleware::JWT_SUCCESS,
                     'role' => 'admin'
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 
@@ -147,11 +147,11 @@ class RequireRoleTest extends TestCase
                 HttpRequest  $request
             ): MiddlewareResult
             {
-                $request->appendVars([
+                $request->addAttributes([
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => JwtMiddleware::JWT_SUCCESS,
                     'role' => 'user'
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 
@@ -178,11 +178,11 @@ class RequireRoleTest extends TestCase
                 HttpRequest  $request
             ): MiddlewareResult
             {
-                $request->appendVars([
+                $request->addAttributes([
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => JwtMiddleware::JWT_SUCCESS,
                     'role' => 'admin'
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 
@@ -221,11 +221,11 @@ class RequireRoleTest extends TestCase
                 HttpRequest  $request
             ): MiddlewareResult
             {
-                $request->appendVars([
+                $request->addAttributes([
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => JwtMiddleware::JWT_SUCCESS,
                     'role' => 'admin'
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 
@@ -478,7 +478,7 @@ class RequireRoleTest extends TestCase
                 HttpRequest  $request
             ): MiddlewareResult
             {
-                $request->appendVars([
+                $request->addAttributes([
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => JwtMiddleware::JWT_SUCCESS,
                     'jwt.data' => [
                         'user_id' => 123,
@@ -486,7 +486,7 @@ class RequireRoleTest extends TestCase
                         'email' => 'admin@example.com'
                     ]
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 
@@ -515,7 +515,7 @@ class RequireRoleTest extends TestCase
                 HttpRequest  $request
             ): MiddlewareResult
             {
-                $request->appendVars([
+                $request->addAttributes([
                     JwtMiddleware::JWT_PARAM_PARSE_STATUS => JwtMiddleware::JWT_SUCCESS,
                     'jwt.data' => [
                         'user_id' => 456,
@@ -523,7 +523,7 @@ class RequireRoleTest extends TestCase
                         'email' => 'user@example.com'
                     ]
                 ]);
-                return MiddlewareResult::continue;
+                return MiddlewareResult::Continue;
             }
         };
 

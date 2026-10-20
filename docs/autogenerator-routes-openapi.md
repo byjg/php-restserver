@@ -13,7 +13,7 @@ Restserver supports both specifications 2.0 (former Swagger) and 3.0.
 There are several tools for create and maintain the definition. Once you're using this concept/methodology
 you can apply here and generate automatically the routes without duplicate your work.
 
-First you need to create a swagger.json file.
+First you need to create a swagger.json file (a `.yaml` or `.yml` file is also accepted).
 The "operationId" must have the `Namespace\\Class::method` like the example below:
 
 ```json
@@ -41,7 +41,7 @@ In that case the `operationId` will be generated automatically. The format will 
 vendor/bin/openapi -c operationid.hash=false src
 ```
 
-After you have the proper swagger.json just call the `HttpRequestHandler`
+After you have the proper swagger.json just call the `Server`
 and set automatic routes:
 
 ```php
@@ -49,9 +49,12 @@ and set automatic routes:
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+use ByJG\RestServer\Server;
+use ByJG\RestServer\Route\OpenApiRouteList;
+
 $routeDefinition = new OpenApiRouteList(__DIR__ . '/swagger.json');
 
-$restServer = new HttpRequestHandler();
+$restServer = new Server();
 $restServer->handle($routeDefinition);
 ```
 
@@ -71,7 +74,18 @@ $routeDefinition->withOutputProcessorForMimeType(
 );
 ```
 
+### Default Processor
+
+Routes that do not declare any content type use `JsonOutputProcessor`. To change it:
+
+```php
+<?php
+$routeDefinition->withDefaultProcessor(\ByJG\RestServer\OutputProcessor\XmlOutputProcessor::class);
+```
+
 ### Specific Route
+
+The path must include the schema base path (`basePath`, or the path of the first `servers` URL), if any.
 
 ```php
 <?php

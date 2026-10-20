@@ -12,6 +12,10 @@ the middleware will try to find a file that matches with the request path and ou
 ```php
 <?php
 $serverStatic = new ServerStaticMiddleware();
+
+// When the request path is a directory, serve this file from it (default: 'index.html').
+// Pass an empty string to disable it.
+$serverStatic = new ServerStaticMiddleware('default.htm');
 ```
 
 ## Features
@@ -21,7 +25,8 @@ The ServerStaticMiddleware:
 - Serves static files when no matching route is found
 - Automatically detects appropriate MIME types for various file extensions
 - Sets the correct Content-Type header based on the file extension
-- Returns appropriate HTTP error codes when files cannot be accessed
+- Serves the directory index file (`index.html` by default) when the request path is a directory
+- Refuses to serve source files (`php`, `vb`, `cs`, `rb`, `py`, `py3`, `lua`) with `415 Unsupported Media Type`
 
 ## How It Works
 
@@ -34,10 +39,14 @@ The ServerStaticMiddleware:
 
 This component will try to find the file in the directory starting from where the `app.php` is located.
 
+Only files inside that directory are served. A request path that resolves outside it, with `..` or through a
+symlink, is treated as not found.
+
 ## MIME Type Detection
 
-The middleware uses the PHP `finfo` extension to detect MIME types. If the extension is not available, it falls back to
-a built-in list of common MIME types.
+The middleware maps the file extension to a MIME type using a built-in list of extensions. Unknown extensions are
+served as `application/octet-stream`. The PHP `finfo` extension is required: without it the middleware throws
+`Error500Exception`.
 
 ## Example Use Cases
 

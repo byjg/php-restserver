@@ -36,6 +36,7 @@ abstract class HttpResponseException extends Exception
         '415' => 'Unsupported Media Type',
         '422' => 'Unprocessable Entity',
         '429' => 'Too many requests',
+        '500' => 'Internal Server Error',
         '501' => 'Not Implemented',
         '503' => 'Service Unavailable',
         '520' => 'Unknown Error',

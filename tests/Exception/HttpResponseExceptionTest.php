@@ -15,6 +15,7 @@ use ByJG\RestServer\Exception\Error412Exception;
 use ByJG\RestServer\Exception\Error415Exception;
 use ByJG\RestServer\Exception\Error422Exception;
 use ByJG\RestServer\Exception\Error429Exception;
+use ByJG\RestServer\Exception\Error500Exception;
 use ByJG\RestServer\Exception\Error501Exception;
 use ByJG\RestServer\Exception\Error503Exception;
 use ByJG\RestServer\Exception\Error520Exception;
@@ -36,7 +37,7 @@ class HttpResponseExceptionTest extends TestCase
     /**
      * @return (int|string)[][]
      *
-     * @psalm-return list{list{Error400Exception::class, 400, 'Bad Request'}, list{Error401Exception::class, 401, 'Unauthorized'}, list{Error402Exception::class, 402, 'Payment Required'}, list{Error403Exception::class, 403, 'Forbidden'}, list{Error404Exception::class, 404, 'Not Found'}, list{Error405Exception::class, 405, 'Method not allowed'}, list{Error406Exception::class, 406, 'Not Acceptable'}, list{Error408Exception::class, 408, 'Request Timeout'}, list{Error409Exception::class, 409, 'Conflict'}, list{Error412Exception::class, 412, 'Precondition Failed'}, list{Error415Exception::class, 415, 'Unsupported Media Type'}, list{Error422Exception::class, 422, 'Unprocessable Entity'}, list{Error429Exception::class, 429, 'Too many requests'}, list{Error501Exception::class, 501, 'Not Implemented'}, list{Error503Exception::class, 503, 'Service Unavailable'}, list{Error520Exception::class, 520, 'Unknown Error'}}
+     * @psalm-return list{list{Error400Exception::class, 400, 'Bad Request'}, list{Error401Exception::class, 401, 'Unauthorized'}, list{Error402Exception::class, 402, 'Payment Required'}, list{Error403Exception::class, 403, 'Forbidden'}, list{Error404Exception::class, 404, 'Not Found'}, list{Error405Exception::class, 405, 'Method not allowed'}, list{Error406Exception::class, 406, 'Not Acceptable'}, list{Error408Exception::class, 408, 'Request Timeout'}, list{Error409Exception::class, 409, 'Conflict'}, list{Error412Exception::class, 412, 'Precondition Failed'}, list{Error415Exception::class, 415, 'Unsupported Media Type'}, list{Error422Exception::class, 422, 'Unprocessable Entity'}, list{Error429Exception::class, 429, 'Too many requests'}, list{Error500Exception::class, 500, 'Internal Server Error'}, list{Error501Exception::class, 501, 'Not Implemented'}, list{Error503Exception::class, 503, 'Service Unavailable'}, list{Error520Exception::class, 520, 'Unknown Error'}}
      */
     public static function dataProvider(): array
     {
@@ -54,6 +55,7 @@ class HttpResponseExceptionTest extends TestCase
             [ Error415Exception::class, 415, 'Unsupported Media Type' ],
             [ Error422Exception::class, 422, 'Unprocessable Entity' ],
             [ Error429Exception::class, 429, 'Too many requests' ],
+            [ Error500Exception::class, 500, 'Internal Server Error' ],
             [ Error501Exception::class, 501, 'Not Implemented' ],
             [ Error503Exception::class, 503, 'Service Unavailable' ],
             [ Error520Exception::class, 520, 'Unknown Error' ],

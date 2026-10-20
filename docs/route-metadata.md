@@ -1,5 +1,5 @@
 ---
-sidebar_position: 18
+sidebar_position: 20
 sidebar_label: Route Metadata
 ---
 
@@ -10,36 +10,29 @@ behavior to your API endpoints.
 
 ## Basic Usage
 
-You can attach metadata to routes when defining them:
+You can attach metadata to a route with the `Route::withMetadata()` method:
 
 ```php
 <?php
+use ByJG\RestServer\Route\Route;
 use ByJG\RestServer\Route\RouteList;
 
 $routeList = new RouteList();
 
 // Add route with metadata
-$routeList->addRoute('GET', '/api/resource', 'MyNamespace\\MyClass::method', null, [
-    'description' => 'Get a specific resource',
-    'roles' => ['admin', 'user'],
-    'cache_ttl' => 3600,
-    'rate_limit' => 100
-]);
+$routeList->addRoute(
+    Route::get('/api/resource')
+        ->withClass(\MyNamespace\MyClass::class, 'method')
+        ->withMetadata([
+            'description' => 'Get a specific resource',
+            'roles' => ['admin', 'user'],
+            'cache_ttl' => 3600,
+            'rate_limit' => 100
+        ])
+);
 ```
 
-Or using the fluent interface with the `withMetadata` method:
-
-```php
-<?php
-use ByJG\RestServer\Route\RouteList;
-
-$routeList = new RouteList();
-$routeList->addRoute('GET', '/api/resource', 'MyNamespace\\MyClass::method')
-    ->withMetadata([
-        'description' => 'Get a specific resource',
-        'roles' => ['admin', 'user']
-    ]);
-```
+`withMetadata()` replaces any metadata set before on the same route.
 
 ## Accessing Metadata in Controllers
 
@@ -54,7 +47,7 @@ use ByJG\RestServer\HttpResponse;
 
 class MyClass
 {
-    public function method(HttpRequest $request, HttpResponse $response)
+    public function method(HttpResponse $response, HttpRequest $request)
     {
         // Get all metadata
         $allMetadata = $request->getRouteMetadata();
@@ -74,46 +67,18 @@ class MyClass
 
 ## Using Metadata with PHP 8 Attributes
 
-When using PHP 8 attributes for route definitions, you can include metadata:
-
-```php
-<?php
-namespace MyNamespace;
-
-use ByJG\RestServer\Attributes\RouteDefinition;
-use ByJG\RestServer\HttpRequest;
-use ByJG\RestServer\HttpResponse;
-
-class MyController
-{
-    #[RouteDefinition('GET', '/api/resource')]
-    public function getResource(HttpRequest $request, HttpResponse $response)
-    {
-        // Method implementation
-    }
-}
-
-// When adding the class to the route list, attach metadata
-$routeList = new RouteList();
-$routeList->addClass(MyController::class, [
-    '/api/resource' => [
-        'GET' => [
-            'description' => 'Get resource info',
-            'roles' => ['admin', 'user']
-        ]
-    ]
-]);
-```
+The `RouteDefinition` attribute and `RouteList::addClass()` do not accept metadata. To attach metadata to an
+attribute-defined route, define that route with `Route::withMetadata()` as shown above.
 
 ## Predefined Metadata Keys
 
 RestServer uses some predefined metadata keys for special functionality:
 
-| Key                                | Description                                |
-|------------------------------------|--------------------------------------------|
-| `RouteList::META_CLASS`            | The class or object that handles the route |
-| `RouteList::META_METHOD`           | The method to call on the class            |
-| `RouteList::META_OUTPUT_PROCESSOR` | The output processor class to use          |
+| Key                                       | Description                                                     |
+|-------------------------------------------|-----------------------------------------------------------------|
+| `RouteList::META_CLASS`                   | The closure, or `[class, method]` array, that handles the route |
+| `RouteList::META_OUTPUT_PROCESSOR`        | The output processor class to use                               |
+| `RouteList::META_OUTPUT_PROCESSOR_STRICT` | Whether the route output processor is strict                    |
 
 ## Common Use Cases
 
@@ -122,11 +87,17 @@ RestServer uses some predefined metadata keys for special functionality:
 ```php
 <?php
 // Define routes with authentication requirements
-$routeList->addRoute('GET', '/api/public', 'PublicController::getPublicData')
-    ->withMetadata(['requires_auth' => false]);
+$routeList->addRoute(
+    Route::get('/api/public')
+        ->withClass(PublicController::class, 'getPublicData')
+        ->withMetadata(['requires_auth' => false])
+);
 
-$routeList->addRoute('GET', '/api/protected', 'ProtectedController::getProtectedData')
-    ->withMetadata(['requires_auth' => true, 'roles' => ['admin']]);
+$routeList->addRoute(
+    Route::get('/api/protected')
+        ->withClass(ProtectedController::class, 'getProtectedData')
+        ->withMetadata(['requires_auth' => true, 'roles' => ['admin']])
+);
 
 // Create a middleware that checks the authorization requirements
 class AuthMiddleware implements BeforeMiddlewareInterface
@@ -148,7 +119,7 @@ class AuthMiddleware implements BeforeMiddlewareInterface
             }
         }
         
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 }
 ```
@@ -158,8 +129,11 @@ class AuthMiddleware implements BeforeMiddlewareInterface
 ```php
 <?php
 // Define routes with caching metadata
-$routeList->addRoute('GET', '/api/products', 'ProductController::listProducts')
-    ->withMetadata(['cache_ttl' => 3600]); // Cache for 1 hour
+$routeList->addRoute(
+    Route::get('/api/products')
+        ->withClass(ProductController::class, 'listProducts')
+        ->withMetadata(['cache_ttl' => 3600]) // Cache for 1 hour
+);
 
 // Create a caching middleware
 class CacheMiddleware implements BeforeMiddlewareInterface
@@ -175,11 +149,11 @@ class CacheMiddleware implements BeforeMiddlewareInterface
             if ($cachedResponse) {
                 // Return cached response
                 $response->write($cachedResponse);
-                return MiddlewareResult::stop;
+                return MiddlewareResult::StopProcessing;
             }
         }
         
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 }
 ```
@@ -204,7 +178,7 @@ class RateLimitMiddleware implements BeforeMiddlewareInterface
             }
         }
         
-        return MiddlewareResult::continue;
+        return MiddlewareResult::Continue;
     }
 }
 ```

@@ -528,7 +528,7 @@ Checks if a file was uploaded successfully without errors.
 
 **Returns:** `true` if upload was successful, `false` otherwise
 
-#### `getErrorCode(string $key): int|string|null`
+#### `getErrorCode(string $key): int|null`
 
 Returns the PHP upload error code for a file.
 
@@ -548,7 +548,7 @@ Reads and returns the file contents.
 
 **Returns:** File contents as string, or `false` on failure
 
-#### `getFileName(string $key): int|string|null`
+#### `getFileName(string $key): string|null`
 
 Returns the original filename from the client.
 
@@ -578,6 +578,9 @@ Saves the uploaded file to a destination directory.
 - `$destinationPath` - Destination directory path
 - `$newName` - Optional new filename (defaults to original)
 
+Throws `InvalidArgumentException` when the name (the new one, or the client's when none is given) is not a plain
+file name, e.g. `../app.php`: a path would write outside `$destinationPath`.
+
 **Throws:** `InvalidArgumentException` if upload key doesn't exist
 
 #### `clearTemp(string $key): void`
@@ -588,7 +591,7 @@ Manually deletes the temporary uploaded file.
 
 - `$key` - Upload field name
 
-#### `getFileSize(string $key): int|string|null`
+#### `getFileSize(string $key): int|null`
 
 Returns the file size in bytes.
 

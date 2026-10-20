@@ -1,5 +1,5 @@
 ---
-sidebar_position: 15
+sidebar_position: 17
 sidebar_label: Output Processors
 ---
 # The OutputProcessors
@@ -11,6 +11,7 @@ The available output processors are:
 - `XmlOutputProcessor` - Outputs data as XML (content-type: `text/xml` or `application/xml`)
 - `HtmlOutputProcessor` - Outputs data as HTML (content-type: `text/html`)
 - `PlainTextOutputProcessor` - Outputs data as plain text (content-type: `text/plain`)
+- `CsvOutputProcessor` - Outputs data as CSV (content-type: `text/csv`)
 - `JsonCleanOutputProcessor` - Same as JsonOutputProcessor but doesn't output empty/null keys
 - `JsonTwirpOutputProcessor` - JSON output format compatible with Twirp service handler
 
@@ -24,7 +25,7 @@ The main responsibilities are:
 
 ## How it works
 
-The HttpRequestHandler will call the route and the route will call the OutputProcessor to process the
+The `Server` will call the route and the route will call the OutputProcessor to process the
 proper output for that route.
 
 You can create a route in several ways. e.g.:
@@ -36,14 +37,14 @@ You can create a route in several ways. e.g.:
 
 Each option has its own way to define the OutputProcessor. Check the documentation for each one.
 
-Once you have the route defined, you can initialize the HttpRequestHandler and handle the request.
+Once you have the route defined, you can initialize the `Server` and handle the request.
 
 ```php
 <?php
-use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Server;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 
-$server = new HttpRequestHandler();
+$server = new Server();
 
 // This is the default processor for the routes that don't have a specific output processor
 $server->withDefaultOutputProcessor(JsonOutputProcessor::class);
@@ -58,9 +59,10 @@ $server->handle($routeList);
 ## Content Negotiation
 
 By default, the OutputProcessor is determined by the route definition or the default processor set in
-HttpRequestHandler.
-However, the client can request a specific output format using the `Accept` header. The RestServer will use the first
-content type in the Accept header that matches an available OutputProcessor.
+`Server`.
+When the route does not define an output processor (or defines a list of them), the client can request a specific
+output format using the `Accept` header. The RestServer will use the first content type in the Accept header that
+matches an available OutputProcessor. See [Content Negotiation](content-negotiation.md).
 
 Available MIME types:
 
@@ -68,19 +70,20 @@ Available MIME types:
 - `text/xml` or `application/xml` - Uses XmlOutputProcessor
 - `text/html` - Uses HtmlOutputProcessor
 - `text/plain` - Uses PlainTextOutputProcessor
+- `text/csv` - Uses CsvOutputProcessor
 - `*/*` - Falls back to JsonOutputProcessor
 
-The following methods are available for selecting an output processor:
+The following public methods are available for selecting an output processor:
 
 ```php
-// From a specific class name
-BaseOutputProcessor::getFromClassName(JsonOutputProcessor::class);
+// Returns the class name for a content type; throws Error406Exception if there is none
+BaseOutputProcessor::getFromContentType("application/json"); // JsonOutputProcessor::class
 
-// From an HTTP Accept header
-BaseOutputProcessor::getFromHttpAccept();
-
-// From a specific content type
-BaseOutputProcessor::getFromContentType("application/json");
+// Returns an instance from a class name, a content type, or a list of class names.
+// With null (or a list) the HTTP Accept header is used.
+BaseOutputProcessor::factory(JsonOutputProcessor::class);
+BaseOutputProcessor::factory("application/json");
+BaseOutputProcessor::factory();
 ```
 
 ## Creating your own OutputProcessor
@@ -124,18 +127,18 @@ class MyCustomOutputProcessor extends BaseOutputProcessor
         $errorData = ExceptionFormatter::format($exception, $detailed);
 
         // Write custom error response
-        $response->write([
+        $error = [
             'error' => $errorData['message'],
             'type' => ExceptionFormatter::beautifyClassName($errorData['type'])
-        ]);
+        ];
 
         if ($detailed) {
-            $response->appendContent([
-                'file' => $errorData['file'],
-                'line' => $errorData['line'],
-                'trace' => $errorData['trace'] ?? []
-            ]);
+            $error['file'] = $errorData['file'];
+            $error['line'] = $errorData['line'];
+            $error['trace'] = $errorData['trace'] ?? [];
         }
+
+        $response->write($error);
 
         // Process and write the response
         $this->processResponse($response);
@@ -303,7 +306,7 @@ class CachedJsonOutputProcessor extends JsonOutputProcessor
         }
     
         // Build the payload the same way JsonOutputProcessor does, so we can store it
-        $serialized = $response->getResponseBag()->process($this->buildNull, $this->onlyString);
+        $serialized = $response->getResponseBody()->process($this->buildNull, $this->onlyString);
         $payload = $this->getFormatter()->process($serialized);
     
         $cacheItem->set($payload);
@@ -323,7 +326,7 @@ class CachedJsonOutputProcessor extends JsonOutputProcessor
         return sprintf(
             'api_response_%d_%s',
             $response->getResponseCode(),
-            md5(serialize($response->getResponseBag()->getCollection()))
+            md5(serialize($response->getResponseBody()->getCollection()))
         );
     }
 }
@@ -350,9 +353,9 @@ The default writer that sends output directly to the HTTP response using PHP's n
 ```php
 <?php
 use ByJG\RestServer\Writer\HttpWriter;
-use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Server;
 
-$server = new HttpRequestHandler();
+$server = new Server();
 // HttpWriter is used by default - no need to set explicitly
 ```
 
@@ -370,10 +373,10 @@ methods to retrieve captured data.
 ```php
 <?php
 use ByJG\RestServer\Writer\MemoryWriter;
-use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Server;
 
 $writer = new MemoryWriter();
-$server = new HttpRequestHandler();
+$server = new Server();
 $server->withWriter($writer);
 $server->handle($routeDefinition);
 
@@ -403,9 +406,9 @@ Outputs headers and body to stdout (standard output) instead of HTTP. Useful for
 ```php
 <?php
 use ByJG\RestServer\Writer\StdoutWriter;
-use ByJG\RestServer\HttpRequestHandler;
+use ByJG\RestServer\Server;
 
-$server = new HttpRequestHandler();
+$server = new Server();
 $server->withWriter(new StdoutWriter());
 $server->handle($routeDefinition);
 
@@ -425,7 +428,7 @@ $server->handle($routeDefinition);
 
 ### Creating Custom Writers
 
-You can create your own writer by implementing the `WriterInterface` and setting it in the HttpRequestHandler:
+You can create your own writer by implementing the `WriterInterface` and setting it in the `Server`:
 
 ```php
 use ByJG\RestServer\Writer\WriterInterface;

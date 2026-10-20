@@ -1,5 +1,5 @@
 ---
-sidebar_position: 19
+sidebar_position: 21
 sidebar_label: Content Negotiation
 ---
 
@@ -13,13 +13,17 @@ requests.
 Content negotiation allows clients to request different representations (JSON, XML, etc.) of the same resource.
 RestServer handles this through:
 
-1. Request analysis (Accept headers, file extensions)
+1. Request analysis (Accept header)
 2. Output processor selection
 3. Content-Type header setting in responses
 
 ## Accept Header Processing
 
-RestServer automatically processes the `Accept` header to determine the best format to return:
+RestServer processes the `Accept` header to determine the format to return when the route does not set an output
+processor, or sets a list of them (e.g. an OpenAPI route that declares several content types). A route with a single
+output processor always uses it. The types in `Accept` are tried in order and the first supported one wins
+(`text/xml`, `application/xml`, `text/csv`, `text/html`, `application/json`, `text/plain` or `*/*`). When none is
+supported, the server default output processor is used, or `Error406Exception` is thrown if there is none.
 
 ```php
 <?php
@@ -28,7 +32,7 @@ RestServer automatically processes the `Accept` header to determine the best for
 // Accept: application/xml
 
 // In your route handler
-public function getResource(HttpRequest $request, HttpResponse $response)
+public function getResource(HttpResponse $response, HttpRequest $request)
 {
     // RestServer will detect the Accept header and use the appropriate output processor
     $response->write(['data' => 'value']);
@@ -53,7 +57,8 @@ RestServer automatically sets the appropriate `Content-Type` header based on the
 - `application/xml` for XML responses
 - Custom content types as defined by your output processors
 
-You can override this at runtime by adding your own `Content-Type` header. When you do so, `HttpRequestHandler`
+You can override this at runtime by adding your own `Content-Type` header, using one of the content types listed above.
+When you do so, `Server`
 will detect the header (`HttpResponse::addHeader('Content-Type', ...)`) and automatically re-initialize the matching
 output processor before the response is serialized. This makes it possible to start with an XML route and switch to JSON
 for a particular response (or vice-versa).
@@ -63,7 +68,7 @@ for a particular response (or vice-versa).
 public function getCustomData(HttpResponse $response)
 {
     // Forces the handler to serialize using the JSON processor, even if the route default differs
-    $response->addHeader('Content-Type', 'application/custom+json');
+    $response->addHeader('Content-Type', 'application/json');
     $response->write(['data' => 'value']);
 }
 ```
@@ -73,32 +78,10 @@ The sample application in `public/app-dist.php` includes `/testoverride/*` route
 JSON and XML by setting the header inside the route closure.
 :::
 
-## File Extensions
+## Accept-Language
 
-RestServer can also determine the response format based on file extensions in the URL:
-
-- `/api/resource.json` → JSON format
-- `/api/resource.xml` → XML format
-
-This works automatically without additional configuration.
-
-## Accept-Language Support
-
-RestServer also supports language negotiation through the `Accept-Language` header:
-
-```php
-<?php
-public function getLocalizedData(HttpRequest $request, HttpResponse $response)
-{
-    // Get preferred language from Accept-Language header
-    $language = $request->getPreferredLanguage(['en', 'fr', 'es']);
-    
-    // Return localized content
-    $response->write([
-        'greeting' => $this->getGreetingForLanguage($language)
-    ]);
-}
-```
+RestServer does not negotiate the language. Read the header yourself with
+`$request->getHeader('Accept-Language')`.
 
 ## Custom Content Negotiation
 
@@ -106,10 +89,10 @@ You can implement custom content negotiation logic:
 
 ```php
 <?php
-public function processRequest(HttpRequest $request, HttpResponse $response)
+public function processRequest(HttpResponse $response, HttpRequest $request)
 {
     // Check for a specific format parameter
-    $format = $request->param('format');
+    $format = $request->query('format');
     
     if ($format === 'csv') {
         $response->addHeader('Content-Type', 'text/csv');

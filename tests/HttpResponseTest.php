@@ -3,7 +3,7 @@
 namespace Tests;
 
 use ByJG\RestServer\HttpResponse;
-use ByJG\RestServer\ResponseBag;
+use ByJG\RestServer\ResponseBody;
 use Override;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
@@ -159,18 +159,18 @@ class HttpResponseTest extends TestCase
         $this->assertArrayNotHasKey('test_cookie', $_COOKIE);
     }
 
-    public function testResponseBagAndWrite(): void
+    public function testResponseBodyAndWrite(): void
     {
-        // Test getResponseBag
-        $responseBag = $this->object->getResponseBag();
-        $this->assertInstanceOf(ResponseBag::class, $responseBag);
+        // Test getResponseBody
+        $responseBody = $this->object->getResponseBody();
+        $this->assertInstanceOf(ResponseBody::class, $responseBody);
 
         // Test write method
         $testData = ['key' => 'value'];
         $this->object->write($testData);
 
-        // Verify data was added to the response bag
-        $processedData = $responseBag->process();
+        // Verify data was added to the response body
+        $processedData = $responseBody->process();
         $this->assertEquals($testData, $processedData);
 
         // Test writing multiple items
@@ -178,12 +178,12 @@ class HttpResponseTest extends TestCase
         $this->object->write($testData2);
 
         // Verify both items are in the response
-        $processedData = $responseBag->process();
+        $processedData = $responseBody->process();
         $this->assertEquals([$testData, $testData2], $processedData);
 
         // Test emptyResponse
         $this->object->emptyResponse();
-        $processedData = $this->object->getResponseBag()->process();
+        $processedData = $this->object->getResponseBody()->process();
         $this->assertEquals([], $processedData);
     }
 
@@ -195,7 +195,7 @@ class HttpResponseTest extends TestCase
         $this->object->writeDebug($debugKey, $debugValue);
 
         // Get the processed response
-        $processedData = $this->object->getResponseBag()->process();
+        $processedData = $this->object->getResponseBody()->process();
 
         // Verify data was added to the response bag
         $this->assertIsArray($processedData);
@@ -220,7 +220,7 @@ class HttpResponseTest extends TestCase
         $this->object->writeDebug($debugKey2, $debugValue2);
 
         // Get the processed response again
-        $processedData = $this->object->getResponseBag()->process();
+        $processedData = $this->object->getResponseBody()->process();
 
         // Verify both debug entries are present
         $this->assertCount(2, $processedData);

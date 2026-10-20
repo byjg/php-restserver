@@ -4,7 +4,7 @@ sidebar_label: Routes Manually
 ---
 # Create Routes Using Classes
 
-> **Note:** For complete setup instructions including HttpRequestHandler configuration, see [Setup](setup.md).
+> **Note:** For complete setup instructions including Server configuration, see [Setup](setup.md).
 
 Creating routes with classes provides better organization, testability, and reusability compared to closures. This
 approach is recommended for production applications with complex business logic.
@@ -51,7 +51,8 @@ class ClassName
 
 ## Using Route Factory Methods
 
-RestServer provides convenient factory methods for all HTTP methods:
+RestServer provides factory methods for GET, POST, PUT and DELETE. For any other method use
+`Route::create()` (or `new Route()`), which accepts a string or a `ByJG\WebRequest\HttpMethod` case:
 
 ```php
 <?php
@@ -76,6 +77,11 @@ $routeDefinition->addRoute(
 $routeDefinition->addRoute(
     Route::delete("/api/users/{id}")->withClass(UserController::class, "delete")
 );
+
+// Any other method
+$routeDefinition->addRoute(
+    Route::create('PATCH', "/api/users/{id}")->withClass(UserController::class, "patch")
+);
 ```
 
 ## Route Parameters
@@ -93,7 +99,7 @@ class UserController
 {
     public function getUser(HttpResponse $response, HttpRequest $request)
     {
-        $userId = $request->param('id');
+        $userId = $request->attribute('id');
         // Fetch user data...
         $response->write(['user_id' => $userId]);
     }

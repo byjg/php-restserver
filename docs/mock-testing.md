@@ -1,5 +1,5 @@
 ---
-sidebar_position: 17
+sidebar_position: 19
 sidebar_label: Mock Testing
 ---
 
@@ -10,14 +10,14 @@ HTTP requests.
 
 ## Mock Request Handler
 
-The `MockRequestHandler` class provides a way to simulate HTTP requests to your API and get back the response that would
+The `MockServer` class provides a way to simulate HTTP requests to your API and get back the response that would
 be generated.
 
 ### Basic Example
 
 ```php
 <?php
-use ByJG\RestServer\MockRequestHandler;
+use ByJG\RestServer\MockServer;
 use ByJG\RestServer\Route\RouteList;
 use Nyholm\Psr7\Request;
 
@@ -33,7 +33,7 @@ $request = new Request(
 );
 
 // Create a mock handler
-$mockHandler = MockRequestHandler::mock($routeDefinition, $request);
+$mockHandler = MockServer::mock($routeDefinition, $request);
 
 // Get the response
 $statusCode = $mockHandler->getPsr7Response()->getStatusCode();
@@ -63,7 +63,7 @@ $mockHttpRequest = new MockHttpRequest($psr7Request, [
 ]);
 
 // Use the mock request for testing
-$id = $mockHttpRequest->param("id"); // Returns 123
+$id = $mockHttpRequest->attribute("id"); // Returns 123
 ```
 
 ## Mock Response
@@ -89,21 +89,23 @@ try {
         '/api/resource'
     );
     
-    // Examine the raw JSON returned by the error handler
-    $this->assertJsonStringEqualsJsonString('{"error": "Not Found"}', $result);
+    // Examine the raw JSON returned by the error handler:
+    // {"error": {"type": "...", "message": "..."}} (plus "meta" when the exception has metadata)
+    $error = json_decode($result, true)['error'];
+    $this->assertSame($ex->getMessage(), $error['message']);
 }
 ```
 
 ## Building reusable test harnesses
 
-Larger test suites benefit from a reusable helper that hides the boilerplate of instantiating `MockRequestHandler` and
+Larger test suites benefit from a reusable helper that hides the boilerplate of instantiating `MockServer` and
 creating PSR-7 requests. The following trait shows one way to structure that helper:
 
 ```php
 <?php
 namespace Tests\Support;
 
-use ByJG\RestServer\MockRequestHandler;
+use ByJG\RestServer\MockServer;
 use ByJG\RestServer\OutputProcessor\JsonOutputProcessor;
 use ByJG\RestServer\Route\Route;
 use ByJG\RestServer\Route\RouteList;
@@ -128,7 +130,7 @@ trait ApiTestTrait
     protected function request(string $method, string $path, array $headers = [], ?string $body = null): ResponseInterface
     {
         $psr7Request = new Request($method, $path, $headers, $body);
-        $handler = new MockRequestHandler();
+        $handler = new MockServer();
         $handler
             ->withDefaultOutputProcessor(JsonOutputProcessor::class)
             ->withRequestObject($psr7Request)
