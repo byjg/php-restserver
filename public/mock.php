@@ -36,7 +36,7 @@ $routeDefinition->addRoute(Route::get("/testclosure")
     })
 );
 
-$request = Request::getInstance(Uri::getInstanceFromString("http://localhost/testxml"));
+$request = Request::getInstance(Uri::getInstance("http://localhost/testxml"));
 
 // Handle Request
 $mockHandler = MockServer::mock($routeDefinition, $request);
@@ -47,7 +47,7 @@ print_r($mockHandler->getPsr7Response()->getHeaders());
 print_r($mockHandler->getPsr7Response()->getBody()->getContents());
 
 
-// $request = Request::getInstance(Uri::getInstanceFromString("http://localhost/testclosure"));
+// $request = Request::getInstance(Uri::getInstance("http://localhost/testclosure"));
 // $mockHandler = MockRequestHandler::mock($routeDefintion, $request);
 
 /**
