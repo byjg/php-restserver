@@ -134,8 +134,14 @@ removes the manual casting the old `mixed` returns required.
 | `request()`        | `input()` — plus `inputString()`                             |
 | `param()`          | `attribute()` — plus `attributeString()`                     |
 | `appendVars()`     | `addAttributes()`                                            |
+| `getHeader()`      | `header()` — plus `headerString()`; `getHeader()` is deprecated and removed in 8.0 |
 
 Also added: `cookieString()`, `serverString()`, `sessionString()`.
+
+`header($name)` reads only request headers, in any case (`Content-Type` or `content-type`), and
+returns all of them, keyed by lowercase name, when called without a name. `getHeader()` also
+fell back to any `$_SERVER` key (`getHeader('REQUEST_METHOD')` returned the method); `header()`
+does not.
 
 ### Stricter return types
 

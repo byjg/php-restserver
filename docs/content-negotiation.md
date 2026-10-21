@@ -81,7 +81,7 @@ JSON and XML by setting the header inside the route closure.
 ## Accept-Language
 
 RestServer does not negotiate the language. Read the header yourself with
-`$request->getHeader('Accept-Language')`.
+`$request->header('Accept-Language')`.
 
 ## Custom Content Negotiation
 

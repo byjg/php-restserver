@@ -119,6 +119,41 @@ class HttpRequestTest extends TestCase
         $this->assertEquals('application/json', $this->request->getHeader('content-type'));
     }
 
+    public function testHeader(): void
+    {
+        $this->assertSame('application/json', $this->request->header('Content-Type'));
+        $this->assertSame('application/json', $this->request->header('content-type'));
+        $this->assertSame('PHPUnit Test Browser', $this->request->header('User-Agent'));
+        $this->assertNull($this->request->header('Accept-Language'));
+        $this->assertSame('pt-BR', $this->request->header('Accept-Language', 'pt-BR'));
+        $this->assertSame('PHPUnit Test Browser', $this->request->headerString('user-agent'));
+        $this->assertSame('none', $this->request->headerString('X-Missing', 'none'));
+    }
+
+    public function testHeaderIgnoresServerVariables(): void
+    {
+        // getHeader() fell back to any $_SERVER key; header() only reads headers
+        $this->assertSame('POST', $this->request->getHeader('REQUEST_METHOD'));
+        $this->assertNull($this->request->header('REQUEST_METHOD'));
+        $this->assertNull($this->request->header('Request-Method'));
+    }
+
+    public function testHeaderWithoutPrefix(): void
+    {
+        // PHP puts Content-Type and Content-Length in $_SERVER without the HTTP_ prefix
+        $request = new HttpRequest([], [], ['CONTENT_TYPE' => 'text/xml', 'CONTENT_LENGTH' => '10'], [], []);
+        $this->assertSame('text/xml', $request->header('Content-Type'));
+        $this->assertSame('10', $request->headerString('Content-Length'));
+    }
+
+    public function testAllHeaders(): void
+    {
+        $this->assertSame(
+            ['content-type' => 'application/json', 'user-agent' => 'PHPUnit Test Browser'],
+            $this->request->header()
+        );
+    }
+
     public function testGetRequestPath(): void
     {
         $this->assertEquals('/test/123', $this->request->getRequestPath());
