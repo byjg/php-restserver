@@ -23,6 +23,7 @@ informations to the requester.
 | server($var, $default)             | Get a value from $_SERVER or all values if $var is null                     |
 | session($var, $default)            | Get a value from the session ($_SESSION) or all values if $var is null      |
 | cookie($var, $default)             | Get a value from the cookies ($_COOKIE) or all values if $var is null       |
+| header($name, $default)            | Get a request header, in any case, or all headers (lowercase names) if $name is null |
 | input($var, $default)              | Get a value from any source (query, body, server, session, cookie merged)   |
 | attribute($var, $default)          | Get a value from the attribute bag: route placeholders, query string values and values injected by middleware |
 | payload()                          | Get the raw request body (php://input)                                      |
@@ -32,7 +33,7 @@ informations to the requester.
 | userAgent()                        | Static method to get the user agent                                         |
 | getServerName()                    | Get the server name                                                         |
 | getRequestServer($port, $protocol) | Get the server name, optionally with port and/or protocol                   |
-| getHeader($header)                 | Get a specific request header value                                         |
+| getHeader($header)                 | **Deprecated**, removed in 8.0: use header()                                |
 | getRequestPath()                   | Get the request path                                                        |
 | uploadedFiles()                    | Return an instance of the UploadedFiles class                               |
 | addAttributes($array)              | Bulk-add values to the attribute bag (middleware/framework use)             |
@@ -52,6 +53,7 @@ Each source also has typed variants that always return `?string` or `?array`:
 | bodyArray($key, $default)       | $_POST                                           |
 | serverString($key, $default)    | $_SERVER                                         |
 | cookieString($key, $default)    | $_COOKIE                                         |
+| headerString($name, $default)   | request headers                                  |
 | sessionString($key, $default)   | $_SESSION                                        |
 | attributeString($key, $default) | attribute bag (route params, query string + middleware values) |
 | inputString($key, $default)     | any source                                       |

@@ -112,6 +112,31 @@ class HttpRequest
     }
 
     /**
+     * Get a request header by its name, in any case ('Content-Type' or 'content-type').
+     * Returns all headers, keyed by lowercase name, if $name is null. Returns $default if the
+     * header was not sent.
+     */
+    public function header(?string $name = null, mixed $default = null): mixed
+    {
+        $headers = [];
+        foreach ($this->server as $key => $value) {
+            // PHP keeps the headers in $_SERVER as HTTP_<NAME>; Content-Type, Content-Length and
+            // Content-MD5 come without the prefix.
+            if (str_starts_with((string)$key, 'HTTP_')) {
+                $headers[strtolower(str_replace('_', '-', substr((string)$key, 5)))] = $value;
+            } elseif (in_array($key, ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], true)) {
+                $headers[strtolower(str_replace('_', '-', $key))] = $value;
+            }
+        }
+
+        if (is_null($name)) {
+            return $headers;
+        }
+
+        return $headers[strtolower(str_replace('_', '-', $name))] ?? $default;
+    }
+
+    /**
      * Get a value from any source (query, body, server, session, cookie merged).
      * Returns all values if $value is null. Returns $default if the key is not found.
      */
@@ -246,6 +271,9 @@ class HttpRequest
         return $servername;
     }
 
+    /**
+     * @deprecated Use header(), which matches only real headers; removed in 8.0.
+     */
     public function getHeader(string $header): bool|array|string|null
     {
         $normalized = strtoupper(str_replace('-', '_', $header));
@@ -329,6 +357,16 @@ class HttpRequest
     public function cookieString(string $key, ?string $default = null): ?string
     {
         $value = $this->cookie($key);
+        if ($value === null || $value === false) {
+            return $default;
+        }
+        return is_array($value) ? implode(',', $value) : (string)$value;
+    }
+
+    /** Returns the request header $name as a string, or $default if it was not sent. */
+    public function headerString(string $name, ?string $default = null): ?string
+    {
+        $value = $this->header($name);
         if ($value === null || $value === false) {
             return $default;
         }
