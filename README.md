@@ -5,8 +5,7 @@ tags: [php, http]
 
 # Rest Server
 
-Create RESTFull services with different and customizable output handlers (JSON, XML, Html, etc.).
-Auto-Generate routes from swagger.json definition.
+A REST server whose routes can come straight from your OpenAPI specification: document the API once, and that document is the router.
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-%23ea4aaa?logo=githubsponsors&logoColor=white&labelColor=0d1117)](https://github.com/sponsors/byjg)
 [![Build Status](https://github.com/byjg/php-restserver/actions/workflows/phpunit.yml/badge.svg?branch=master)](https://github.com/byjg/php-restserver/actions/workflows/phpunit.yml)
@@ -15,6 +14,27 @@ Auto-Generate routes from swagger.json definition.
 [![GitHub source](https://img.shields.io/badge/Github-source-informational?logo=github)](https://github.com/byjg/php-restserver/)
 [![GitHub license](https://img.shields.io/github/license/byjg/php-restserver.svg)](https://opensource.byjg.com/license/)
 [![GitHub release](https://img.shields.io/github/release/byjg/php-restserver.svg)](https://github.com/byjg/php-restserver/releases/)
+
+## Why
+
+In most frameworks the routes and the API documentation are two separate things, written
+twice and kept in sync by hand. Sooner or later they disagree, and the documentation is the
+one that is wrong.
+
+RestServer can read the routes from the OpenAPI specification itself. Each `operationId`
+names the method that handles it:
+
+```php
+$restServer = new Server();
+$restServer->handle(new OpenApiRouteList(__DIR__ . '/openapi.json'));
+```
+
+- **The specification is the router.** An endpoint that is not documented does not exist,
+  so the documentation cannot drift from the code. Generate the specification from
+  attributes with [swagger-php](https://github.com/zircote/swagger-php), or write it by hand.
+- **Write objects, not responses.** A controller writes data to an `HttpResponse`; the output
+  handler serializes it to JSON, XML, CSV or HTML, chosen by content negotiation.
+- **Routes the usual ways too:** PHP attributes, closures, or a list built by hand.
 
 ## Documentation
 
