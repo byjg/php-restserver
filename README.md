@@ -1,5 +1,6 @@
 ---
 sidebar_key: restserver
+sidebar_category: http-apis
 tags: [php, http]
 ---
 
