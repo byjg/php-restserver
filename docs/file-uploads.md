@@ -32,6 +32,12 @@ Route::post('/upload')
     });
 ```
 
+For a request handled with `Server::withRequestObject()`, `uploadedFiles()` returns a
+`Psr7UploadedFiles` instead, with the same methods over the PSR-7 request's uploaded files rather than
+`$_FILES` (see [PSR-7 Adapters](psr7-adapters.md#converting-psr-7-to-httprequest)). There, `saveTo()`
+uses the uploaded file's `moveTo()`, and `clearTemp()` does nothing: the runtime that created the
+uploaded file removes its temporary file.
+
 ## UploadedFiles Methods
 
 ### Checking File Count

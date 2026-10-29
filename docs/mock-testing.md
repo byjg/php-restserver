@@ -13,6 +13,10 @@ HTTP requests.
 The `MockServer` class provides a way to simulate HTTP requests to your API and get back the response that would
 be generated.
 
+`MockServer::withRequestObject()` accepts any PSR-7 request and makes up the server parameters (a local client
+address, for instance). To serve real traffic from a PSR-7 request, use `Server::withRequestObject()`, which keeps
+them (see [PSR-7 Adapters](psr7-adapters.md#handling-a-psr-7-request)).
+
 ### Basic Example
 
 ```php
