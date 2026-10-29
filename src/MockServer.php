@@ -36,6 +36,11 @@ class MockServer extends Server
         ErrorHandler::getInstance()->setLogger($logger ?? new NullLogger());
     }
 
+    /**
+     * Simulates the request: unlike Server::withRequestObject(), any PSR-7 request is accepted
+     * and the server params are made up (see MockHttpRequest). For tests only.
+     */
+    #[Override]
     public function withRequestObject(RequestInterface $request): static
     {
         $this->requestInterface = $request;

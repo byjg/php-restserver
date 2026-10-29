@@ -56,16 +56,25 @@ class UploadedFiles
 
     public function saveTo(string $key, string $destinationPath, string $newName = ""): void
     {
+        $newName = $this->targetFileName($key, $newName);
+        move_uploaded_file((string)$this->getFileByKey($key)['tmp_name'], $destinationPath . '/' . $newName);
+    }
+
+    /**
+     * The name saveTo() writes: $newName, or the client's file name, but only a file name.
+     * A path (e.g. "../app.php" sent by the client) would write outside the destination.
+     */
+    protected function targetFileName(string $key, string $newName): string
+    {
         if (empty($newName)) {
             $newName = (string)$this->getFileName($key);
         }
 
-        // Only a file name: a path (e.g. "../app.php" sent by the client) would write outside $destinationPath
         if ($newName !== basename($newName) || in_array($newName, ['', '.', '..'], true)) {
             throw new InvalidArgumentException("Invalid file name '$newName'");
         }
 
-        move_uploaded_file((string)$this->getFileByKey($key)['tmp_name'], $destinationPath . '/' . $newName);
+        return $newName;
     }
 
     public function clearTemp(string $key): void

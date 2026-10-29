@@ -20,6 +20,7 @@ use ByJG\RestServer\Middleware\MiddlewareManagement;
 use ByJG\RestServer\Middleware\MiddlewareResult;
 use ByJG\RestServer\OutputProcessor\BaseOutputProcessor;
 use ByJG\RestServer\OutputProcessor\OutputProcessorInterface;
+use ByJG\RestServer\Psr7\Psr7RequestAdapter;
 use ByJG\RestServer\Route\RouteList;
 use ByJG\RestServer\Route\RouteListInterface;
 use ByJG\RestServer\Writer\HttpWriter;
@@ -32,6 +33,7 @@ use Override;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -284,10 +286,14 @@ class Server implements ServerInterface
             session_start();
         }
 
-        // --------------------------------------------------------------------------
-        // Check if script exists or if is itself
-        // --------------------------------------------------------------------------
-        return $this->process($routeDefinition);
+        // One Server can handle many requests (a DI singleton in a persistent worker): the
+        // response, and the request once handled, belong to this request only
+        $this->httpResponse = null;
+        try {
+            return $this->process($routeDefinition);
+        } finally {
+            $this->httpRequest = null;
+        }
     }
 
     #[Override]
@@ -337,6 +343,17 @@ class Server implements ServerInterface
     public function withWriter(WriterInterface $writer): static
     {
         $this->writer = $writer;
+        return $this;
+    }
+
+    /**
+     * Handle this PSR-7 request instead of the one PHP's globals describe: for a PSR-7
+     * runtime, or a persistent worker where php://input is not the request body.
+     * See Psr7RequestAdapter::toHttpRequest() for what is converted.
+     */
+    public function withRequestObject(ServerRequestInterface $request): static
+    {
+        $this->httpRequest = Psr7RequestAdapter::toHttpRequest($request);
         return $this;
     }
 

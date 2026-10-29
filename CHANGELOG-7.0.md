@@ -67,6 +67,28 @@ $server->withMiddleware(
 - `ServerStaticMiddleware` now supports `directoryIndex`, so a directory request can serve
   an index file.
 
+### Handling a PSR-7 request
+
+`Server::withRequestObject()` makes the Server handle a PSR-7 `ServerRequestInterface`
+instead of the request PHP's globals describe, for a PSR-7 runtime or a persistent worker
+where `php://input` is not the request body:
+
+```php
+$server->withRequestObject($psr7Request)->handle($routes);
+```
+
+It relies on the new `Psr7RequestAdapter::toHttpRequest()`, the counterpart of
+`fromHttpRequest()`, and on `HttpRequest`'s new optional `$payload` constructor argument
+(`null`, the default, still reads `php://input`). The request's uploaded files are available
+through `HttpRequest::uploadedFiles()` as the new `Psr7UploadedFiles`, read only when used (new
+`HttpRequest::setUploadedFiles()`). `MockServer::withRequestObject()` keeps simulating the request
+for tests.
+
+`Server::handle()` now starts every request with a new response and forgets the request once
+handled, so one `Server` can serve many requests. A `Server` bound as a DI singleton, as Gluo
+does, used to answer the next request with the previous one's status and body when the process
+outlives the request (a persistent worker).
+
 ---
 
 ## Bug Fixes

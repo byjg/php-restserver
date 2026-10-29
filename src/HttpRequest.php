@@ -14,8 +14,12 @@ class HttpRequest
     protected array $phpRequest;
     protected array $routeMetadata = [];
 
-    public function __construct(array $get, array $post, array $server, array $session, array $cookie, array $param = [])
+    /**
+     * @param string|null $payload The raw request body. Null reads php://input when payload() is called.
+     */
+    public function __construct(array $get, array $post, array $server, array $session, array $cookie, array $param = [], ?string $payload = null)
     {
+        $this->payload = $payload;
         $this->get = $get;
         $this->post = $post;
         $this->server = $server;
@@ -295,6 +299,12 @@ class HttpRequest
             $this->uploadedFiles = new UploadedFiles();
         }
         return $this->uploadedFiles;
+    }
+
+    /** Uploaded files from elsewhere than $_FILES (a PSR-7 request, see Psr7UploadedFiles). */
+    public function setUploadedFiles(UploadedFiles $uploadedFiles): void
+    {
+        $this->uploadedFiles = $uploadedFiles;
     }
 
     /** Bulk-add values to the context bag (middleware/framework use). */

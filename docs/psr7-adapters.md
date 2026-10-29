@@ -12,7 +12,8 @@ compliant interfaces. This enables seamless interoperability with PSR-7 middlewa
 
 The PSR-7 adapters allow you to:
 
-- Convert RestServer's `HttpRequest` to PSR-7 `ServerRequestInterface`
+- Convert RestServer's `HttpRequest` to PSR-7 `ServerRequestInterface`, and back
+- Have the `Server` handle a PSR-7 request instead of PHP's globals
 - Convert RestServer's `HttpResponse` to PSR-7 `ResponseInterface`
 - Convert PSR-7 `ResponseInterface` back to RestServer's `HttpResponse`
 - Use RestServer with any PSR-7-compliant middleware or framework
@@ -51,6 +52,54 @@ The adapter converts all relevant data from HttpRequest to PSR-7:
 | Route metadata    | `$request->getAttribute('_route_metadata')` |
 | Cookies           | `$request->getCookieParams()`               |
 | Server parameters | `$request->getServerParams()`               |
+
+## Converting PSR-7 to HttpRequest
+
+Use `Psr7RequestAdapter::toHttpRequest()` to convert a PSR-7 ServerRequest to RestServer's HttpRequest:
+
+```php
+<?php
+use ByJG\RestServer\Psr7\Psr7RequestAdapter;
+
+$httpRequest = Psr7RequestAdapter::toHttpRequest($psr7Request);
+```
+
+The values come from the PSR-7 request: its server params (the client address, for instance),
+query, cookies, attributes and body. Its method, URI and headers take precedence over its server
+params, so `REQUEST_METHOD`, `REQUEST_URI`, `QUERY_STRING` and the `HTTP_*` keys always describe it.
+
+| PSR-7 request                                    | HttpRequest                                   |
+|--------------------------------------------------|-----------------------------------------------|
+| `getServerParams()`, method, URI and headers     | `$request->server()`, `$request->header()`    |
+| `getQueryParams()`                               | `$request->query()`                           |
+| `getParsedBody()`, for form content types only   | `$request->body()`                            |
+| `getBody()`                                      | `$request->payload()`                         |
+| `getCookieParams()`                              | `$request->cookie()`                          |
+| `getAttributes()`                                | `$request->attribute()`                       |
+| `getAttribute('_route_metadata')`                | `$request->getRouteMetadata()`                |
+| `getUploadedFiles()`, read only when used        | `$request->uploadedFiles()` (a `Psr7UploadedFiles`) |
+
+As in PHP, a JSON body is the payload, not POST data. Not converted: the session (PSR-7 has none).
+
+### Handling a PSR-7 request
+
+`Server::withRequestObject()` makes the Server handle a PSR-7 request instead of the one PHP's
+globals describe. It is for a PSR-7 runtime, or a persistent worker, where `php://input` is not the
+request body:
+
+```php
+<?php
+use ByJG\RestServer\Server;
+
+$server = new Server();
+$server
+    ->withRequestObject($psr7Request)
+    ->handle($routes);
+```
+
+The Server keeps the request it handles, so use a new Server for each request.
+`MockServer::withRequestObject()` is different: it simulates the request for tests (see
+[Mock Testing](mock-testing.md)).
 
 ## Converting HttpResponse to PSR-7
 
@@ -288,6 +337,16 @@ Converts a RestServer HttpRequest to a PSR-7 ServerRequestInterface.
 
 - `MessageException` - If URI building fails
 - `RequestException` - If request construction fails
+
+#### `toHttpRequest(ServerRequestInterface $request): HttpRequest`
+
+Converts a PSR-7 ServerRequestInterface to a RestServer HttpRequest.
+
+**Parameters:**
+
+- `$request` - The PSR-7 request to convert
+
+**Returns:** HttpRequest
 
 ---
 

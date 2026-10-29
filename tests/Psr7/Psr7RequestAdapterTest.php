@@ -4,6 +4,9 @@ namespace Tests\Psr7;
 
 use ByJG\RestServer\HttpRequest;
 use ByJG\RestServer\Psr7\Psr7RequestAdapter;
+use ByJG\Util\Uri;
+use ByJG\WebRequest\Psr7\MemoryStream;
+use ByJG\WebRequest\Psr7\ServerRequest;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ServerRequestInterface;
@@ -289,5 +292,81 @@ class Psr7RequestAdapterTest extends TestCase
 
         $this->assertEquals(8080, $psr7Request->getUri()->getPort());
         $this->assertEquals('example.com', $psr7Request->getUri()->getHost());
+    }
+
+    public function testToHttpRequestKeepsTheRealServerParams(): void
+    {
+        $psr7Request = (new ServerRequest(
+            Uri::getInstance('https://example.com/api/users?page=2'),
+            ['REMOTE_ADDR' => '10.0.0.5', 'SERVER_NAME' => 'example.com', 'REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/stale'],
+            ['session_token' => 'abc123']
+        ))
+            ->withMethod('POST')
+            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('Authorization', 'Bearer token123')
+            ->withBody(new MemoryStream('{"name":"John"}'));
+
+        $httpRequest = Psr7RequestAdapter::toHttpRequest($psr7Request);
+
+        $this->assertEquals('10.0.0.5', $httpRequest->getRequestIp());
+        $this->assertEquals('example.com', $httpRequest->server('SERVER_NAME'));
+        // The PSR-7 method, URI and headers win over stale server params
+        $this->assertEquals('POST', $httpRequest->server('REQUEST_METHOD'));
+        $this->assertEquals('/api/users?page=2', $httpRequest->server('REQUEST_URI'));
+        $this->assertEquals('page=2', $httpRequest->server('QUERY_STRING'));
+        $this->assertEquals('Bearer token123', $httpRequest->header('Authorization'));
+        $this->assertEquals('application/json', $httpRequest->header('Content-Type'));
+        $this->assertEquals(['page' => '2'], $httpRequest->query());
+        $this->assertEquals(['session_token' => 'abc123'], $httpRequest->cookie());
+        // A JSON body is the payload, not POST data, as in PHP
+        $this->assertEquals('{"name":"John"}', $httpRequest->payload());
+        $this->assertEquals([], $httpRequest->body());
+    }
+
+    public function testToHttpRequestFormBody(): void
+    {
+        $psr7Request = (new ServerRequest(Uri::getInstance('http://localhost/form'), ['REMOTE_ADDR' => '127.0.0.1']))
+            ->withMethod('POST')
+            ->withHeader('Content-Type', 'application/x-www-form-urlencoded')
+            ->withBody(new MemoryStream('name=John&tags%5B%5D=a&tags%5B%5D=b'));
+
+        $httpRequest = Psr7RequestAdapter::toHttpRequest($psr7Request);
+
+        $this->assertEquals(['name' => 'John', 'tags' => ['a', 'b']], $httpRequest->body());
+        $this->assertEquals('John', $httpRequest->body('name'));
+        $this->assertEquals('name=John&tags%5B%5D=a&tags%5B%5D=b', $httpRequest->payload());
+    }
+
+    public function testHttpRequestRoundTrip(): void
+    {
+        $original = new HttpRequest(
+            ['page' => '1'],
+            ['name' => 'John'],
+            [
+                'REQUEST_METHOD' => 'POST',
+                'REQUEST_URI' => '/api/users?page=1',
+                'QUERY_STRING' => 'page=1',
+                'SERVER_NAME' => 'example.com',
+                'REMOTE_ADDR' => '10.0.0.5',
+                'HTTP_X_CUSTOM' => 'yes',
+                'CONTENT_TYPE' => 'application/x-www-form-urlencoded',
+            ],
+            [],
+            ['session_token' => 'abc123'],
+            ['tenant' => 'acme']
+        );
+        $original->setRouteMetadata(['name' => 'users']);
+
+        $copy = Psr7RequestAdapter::toHttpRequest(Psr7RequestAdapter::fromHttpRequest($original));
+
+        $this->assertEquals('POST', $copy->server('REQUEST_METHOD'));
+        $this->assertEquals('/api/users?page=1', $copy->server('REQUEST_URI'));
+        $this->assertEquals('10.0.0.5', $copy->getRequestIp());
+        $this->assertEquals('yes', $copy->header('X-Custom'));
+        $this->assertEquals(['page' => '1'], $copy->query());
+        $this->assertEquals(['name' => 'John'], $copy->body());
+        $this->assertEquals(['session_token' => 'abc123'], $copy->cookie());
+        $this->assertEquals('acme', $copy->attribute('tenant'));
+        $this->assertEquals(['name' => 'users'], $copy->getRouteMetadata());
     }
 }
