@@ -19,9 +19,6 @@ class UploadedFiles
         return array_keys($_FILES);
     }
 
-    /**
-     * @psalm-param 'test' $key
-     */
     public function isOk(string $key): bool
     {
         return empty($this->getErrorCode($key));
@@ -46,9 +43,6 @@ class UploadedFiles
         return $this->getFileByKey($key)['name'] ?? null;
     }
 
-    /**
-     * @psalm-param 'test' $key
-     */
     public function getFileType(string $key): int|string|null
     {
         return $this->getFileByKey($key)['type'];

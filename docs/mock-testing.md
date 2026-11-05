@@ -17,6 +17,12 @@ be generated.
 address, for instance). To serve real traffic from a PSR-7 request, use `Server::withRequestObject()`, which keeps
 them (see [PSR-7 Adapters](psr7-adapters.md#handling-a-psr-7-request)).
 
+The request goes through the same `Psr7RequestAdapter` as a real PSR-7 request, so a form body (urlencoded or
+multipart) becomes the POST data and the uploaded files. While the request is handled, `MockServer` also fills
+PHP's globals as a web server would (`$_SERVER`, `$_GET`, `$_POST`, `$_REQUEST`, `$_COOKIE`, and `$_FILES`, each
+upload in its own temporary file), for code that reads them; after the request they are restored and the temporary
+files removed.
+
 ### Basic Example
 
 ```php
@@ -45,29 +51,6 @@ $headers = $mockHandler->getPsr7Response()->getHeaders();
 $body = $mockHandler->getPsr7Response()->getBody()->getContents();
 
 // Now you can make assertions on the response
-```
-
-## Mock HTTP Request
-
-The `MockHttpRequest` class extends `HttpRequest` to allow testing with simulated parameters:
-
-```php
-<?php
-use ByJG\RestServer\MockHttpRequest;
-use Nyholm\Psr7\Request;
-
-// Create a PSR-7 request
-$psr7Request = new Request('POST', '/api/users');
-
-// Create a mock request with simulated parameters
-$mockHttpRequest = new MockHttpRequest($psr7Request, [
-    "id" => 123,
-    "name" => "John Doe",
-    "email" => "john@example.com"
-]);
-
-// Use the mock request for testing
-$id = $mockHttpRequest->attribute("id"); // Returns 123
 ```
 
 ## Mock Response

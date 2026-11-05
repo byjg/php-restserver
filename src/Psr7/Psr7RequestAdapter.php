@@ -6,6 +6,7 @@ use ByJG\RestServer\HttpRequest;
 use ByJG\Util\Uri;
 use ByJG\WebRequest\Exception\MessageException;
 use ByJG\WebRequest\Exception\RequestException;
+use ByJG\WebRequest\MultiPartItem;
 use ByJG\WebRequest\Psr7\MemoryStream;
 use ByJG\WebRequest\Psr7\ServerRequest;
 use Psr\Http\Message\ServerRequestInterface;
@@ -127,6 +128,10 @@ class Psr7RequestAdapter
      * content types, as PHP does; any body is available as the payload. The uploaded
      * files are the request's (see Psr7UploadedFiles), read only when used.
      *
+     * A form request without a parsed body (PSR-7 implementations do not parse the body, and a
+     * request built in a test was never parsed by PHP) has its body parsed here: a urlencoded
+     * body into the POST data, and a multipart body into the POST data and the uploaded files.
+     *
      * Not converted: the session (PSR-7 has none).
      *
      * @param ServerRequestInterface $request
@@ -146,12 +151,9 @@ class Psr7RequestAdapter
             $server[in_array($key, ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], true) ? $key : "HTTP_$key"] = implode(', ', $values);
         }
 
-        $post = [];
-        $contentType = strtolower($request->getHeaderLine('Content-Type'));
-        if (str_starts_with($contentType, 'application/x-www-form-urlencoded') || str_starts_with($contentType, 'multipart/form-data')) {
-            $parsedBody = $request->getParsedBody();
-            $post = is_array($parsedBody) ? $parsedBody : [];
-        }
+        $request = self::withParsedForm($request);
+        $parsedBody = $request->getParsedBody();
+        $post = self::isForm($request) && is_array($parsedBody) ? $parsedBody : [];
         // A stream's __toString() reads it from the start (PSR-7)
         $payload = (string)$request->getBody();
 
@@ -174,6 +176,44 @@ class Psr7RequestAdapter
         $httpRequest->setUploadedFiles(new Psr7UploadedFiles($request));
 
         return $httpRequest;
+    }
+
+    private static function isForm(ServerRequestInterface $request): bool
+    {
+        $contentType = strtolower($request->getHeaderLine('Content-Type'));
+        return str_starts_with($contentType, 'application/x-www-form-urlencoded')
+            || str_starts_with($contentType, 'multipart/form-data');
+    }
+
+    /**
+     * The request with the fields and the files of its form body, when nothing parsed them before: the
+     * fields when the request has no parsed body (a PSR-7 implementation that does not parse the body), the
+     * files of a multipart body when the request has none (the runtime parsed nothing, as in a worker or a test)
+     */
+    private static function withParsedForm(ServerRequestInterface $request): ServerRequestInterface
+    {
+        if (!self::isForm($request)) {
+            return $request;
+        }
+
+        $contentType = $request->getHeaderLine('Content-Type');
+        $isMultipart = str_starts_with(strtolower($contentType), 'multipart/form-data');
+        $needsFields = $request->getParsedBody() === null;
+        $needsFiles = $isMultipart && empty($request->getUploadedFiles());
+
+        if ($needsFields && !$isMultipart) {
+            parse_str((string)$request->getBody(), $fields);
+            return $request->withParsedBody($fields);
+        }
+        if (!$needsFields && !$needsFiles) {
+            return $request;
+        }
+
+        [$fields, $files] = MultiPartItem::parseBody((string)$request->getBody(), $contentType);
+        if ($needsFields) {
+            $request = $request->withParsedBody($fields);
+        }
+        return $needsFiles ? $request->withUploadedFiles($files) : $request;
     }
 
     /**
