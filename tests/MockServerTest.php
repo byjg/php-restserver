@@ -98,6 +98,66 @@ class MockServerTest extends TestCase
         $this->assertFileDoesNotExist($globals['tmp_names'][0]);
     }
 
+    /**
+     * A GET with a query string and headers: the request and $_GET have the query string (it was lost before
+     * 7.0), the headers are in the server params, and a JSON content type with no body gives no POST data
+     */
+    public function testQueryStringAndHeadersOfAGet(): void
+    {
+        $request = \ByJG\WebRequest\Psr7\Request::getInstance(new Uri('http://localhost/list?page=5&size=100&orderBy=id'))
+            ->withMethod('GET')
+            ->withHeader('Authorization', 'Bearer abc')
+            ->withHeader('Content-Type', 'application/json');
+        $routes = (new RouteList())->setRoutes([
+            Route::get('/list')->withOutputProcessor(JsonOutputProcessor::class)->withClosure(
+                function (HttpResponse $response, HttpRequest $request) {
+                    $this->seen = [
+                        'query' => $request->query(),
+                        'authorization' => $request->server('HTTP_AUTHORIZATION'),
+                        'content_type' => $request->server('CONTENT_TYPE'),
+                        'body' => $request->body(),
+                        'payload' => $request->payload(),
+                        'get' => $_GET,
+                        'post' => $_POST,
+                    ];
+                    $response->write(['ok' => true]);
+                }
+            ),
+        ]);
+
+        MockServer::mock($routes, $request);
+
+        $this->assertEquals(['page' => '5', 'size' => '100', 'orderBy' => 'id'], $this->seen['query']);
+        $this->assertEquals(['page' => '5', 'size' => '100', 'orderBy' => 'id'], $this->seen['get']);
+        $this->assertEquals('Bearer abc', $this->seen['authorization']);
+        $this->assertEquals('application/json', $this->seen['content_type']);
+        $this->assertEquals([], $this->seen['body']);
+        $this->assertEquals('', $this->seen['payload']);
+        $this->assertEquals([], $this->seen['post']);
+    }
+
+    /**
+     * A query given in the path of the URI (withPath('/list?page=2'), as php-swagger-test sends it) is the query
+     */
+    public function testQueryStringGivenInThePath(): void
+    {
+        $request = \ByJG\WebRequest\Psr7\Request::getInstance((new Uri('http://localhost/'))->withPath('/list?page=2&size=10'))
+            ->withMethod('GET');
+        $routes = (new RouteList())->setRoutes([
+            Route::get('/list')->withOutputProcessor(JsonOutputProcessor::class)->withClosure(
+                function (HttpResponse $response, HttpRequest $request) {
+                    $this->seen = ['query' => $request->query(), 'get' => $_GET];
+                    $response->write(['ok' => true]);
+                }
+            ),
+        ]);
+
+        MockServer::mock($routes, $request);
+
+        $this->assertEquals(['page' => '2', 'size' => '10'], $this->seen['query']);
+        $this->assertEquals(['page' => '2', 'size' => '10'], $this->seen['get']);
+    }
+
     public function testFormUrlEncodedAndCookie(): void
     {
         $request = RequestFormUrlEncoded::build(new Uri('http://localhost/form?foo=bar'), ['bar' => 'foo', 'test' => 'ok'])

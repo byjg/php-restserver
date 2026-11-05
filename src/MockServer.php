@@ -63,8 +63,10 @@ class MockServer extends Server
         $uri = $request->getUri();
         parse_str(preg_replace('/;\s*/', '&', $request->getHeaderLine('Cookie')) ?? '', $cookies);
 
-        // The method, URI, query, headers and body come from the request (Psr7RequestAdapter)
-        $serverRequest = (new ServerRequest(Uri::getInstance($uri), [
+        // The method, URI, query, headers and body come from the request (Psr7RequestAdapter). The URI is parsed
+        // again from its string: a query given in the path (withPath('/list?page=2'), as php-swagger-test tests
+        // do) becomes the query
+        return (new ServerRequest(Uri::getInstance($uri), [
             'REMOTE_ADDR' => '127.0.0.1',
             'SERVER_SOFTWARE' => 'Mock',
             'SERVER_PROTOCOL' => 'HTTP/' . $request->getProtocolVersion(),
@@ -77,11 +79,8 @@ class MockServer extends Server
             'REQUEST_TIME_FLOAT' => microtime(true),
         ], $cookies))
             ->withMethod($request->getMethod())
-            ->withBody($request->getBody());
-        foreach ($request->getHeaders() as $name => $values) {
-            $serverRequest = $serverRequest->withHeader($name, $values);
-        }
-        return $serverRequest;
+            ->withBody($request->getBody())
+            ->withHeaders($request->getHeaders());
     }
 
 

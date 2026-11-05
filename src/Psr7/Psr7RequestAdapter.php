@@ -151,9 +151,14 @@ class Psr7RequestAdapter
             $server[in_array($key, ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], true) ? $key : "HTTP_$key"] = implode(', ', $values);
         }
 
-        $request = self::withParsedForm($request);
-        $parsedBody = $request->getParsedBody();
-        $post = self::isForm($request) && is_array($parsedBody) ? $parsedBody : [];
+        // Only a form body is the POST data; the parsed body of another content type (JSON, XML...) is not read
+        // here: ServerRequest::getParsedBody() would parse it for nothing
+        $post = [];
+        if (self::isForm($request)) {
+            $request = self::withParsedForm($request);
+            $parsedBody = $request->getParsedBody();
+            $post = is_array($parsedBody) ? $parsedBody : [];
+        }
         // A stream's __toString() reads it from the start (PSR-7)
         $payload = (string)$request->getBody();
 
@@ -186,16 +191,13 @@ class Psr7RequestAdapter
     }
 
     /**
-     * The request with the fields and the files of its form body, when nothing parsed them before: the
-     * fields when the request has no parsed body (a PSR-7 implementation that does not parse the body), the
-     * files of a multipart body when the request has none (the runtime parsed nothing, as in a worker or a test)
+     * The request (of a form, see isForm()) with the fields and the files of its form body, when nothing parsed
+     * them before: the fields when the request has no parsed body (a PSR-7 implementation that does not parse the
+     * body), the files of a multipart body when the request has none (the runtime parsed nothing, as in a worker or
+     * a test)
      */
     private static function withParsedForm(ServerRequestInterface $request): ServerRequestInterface
     {
-        if (!self::isForm($request)) {
-            return $request;
-        }
-
         $contentType = $request->getHeaderLine('Content-Type');
         $isMultipart = str_starts_with(strtolower($contentType), 'multipart/form-data');
         $needsFields = $request->getParsedBody() === null;

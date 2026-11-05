@@ -90,6 +90,12 @@ in a worker or a test).
 fills PHP's globals from it as a web server would (each upload in its own temporary file), and
 restores them afterward, so a test no longer leaves the previous request in the globals.
 
+The conversion is cheap: `MockServer` copies the request's headers with byjg/webrequest's
+`withHeaders()` (one copy instead of one per header), and `Psr7RequestAdapter::toHttpRequest()` reads the
+parsed body only for a form body, which is the only one that becomes the POST data: for a JSON body it
+used to parse the body for nothing, and for an empty one it threw and caught an exception. About
+21 us -> 8 us per request.
+
 `Server::handle()` now starts every request with a new response and forgets the request once
 handled, so one `Server` can serve many requests. A `Server` bound as a DI singleton, as Gluo
 does, used to answer the next request with the previous one's status and body when the process
@@ -99,6 +105,10 @@ outlives the request (a persistent worker).
 
 ## Bug Fixes
 
+- **`MockServer` loses no query string**: a query given in the path of the request's URI, as
+  php-swagger-test sends it (`->withPath('/project?page=2&size=10')`), stayed in the path with the old
+  `MockHttpRequest`, so the route got no query: every list returned its first page. The URI is parsed again
+  from its string, so it is the query.
 - **Accept header negotiation**: all Accept types are now considered instead of only the
   first, so a request whose primary type is unsupported (e.g. `image/avif`) correctly falls
   back to `*/*` rather than returning 500.

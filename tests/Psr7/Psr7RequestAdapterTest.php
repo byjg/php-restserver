@@ -361,6 +361,25 @@ class Psr7RequestAdapterTest extends TestCase
     }
 
     /**
+     * A body that is not a form (JSON) is the payload, not the POST data, even with a parsed body
+     */
+    public function testToHttpRequestJsonBodyIsThePayloadNotThePost(): void
+    {
+        $psr7Request = (new ServerRequest(Uri::getInstance('http://localhost/item'), ['REMOTE_ADDR' => '127.0.0.1']))
+            ->withMethod('POST')
+            ->withHeader('Content-Type', 'application/json')
+            ->withBody(new MemoryStream('{"name":"John"}'));
+
+        $httpRequest = Psr7RequestAdapter::toHttpRequest($psr7Request);
+        $this->assertEquals([], $httpRequest->body());
+        $this->assertEquals('{"name":"John"}', $httpRequest->payload());
+
+        $httpRequest = Psr7RequestAdapter::toHttpRequest($psr7Request->withParsedBody(['name' => 'John']));
+        $this->assertEquals([], $httpRequest->body());
+        $this->assertEquals('{"name":"John"}', $httpRequest->payload());
+    }
+
+    /**
      * A multipart body no one parsed (no parsed body, no uploaded files) gives the POST data and the files
      */
     public function testToHttpRequestMultipartBody(): void
