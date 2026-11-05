@@ -81,8 +81,14 @@ It relies on the new `Psr7RequestAdapter::toHttpRequest()`, the counterpart of
 `fromHttpRequest()`, and on `HttpRequest`'s new optional `$payload` constructor argument
 (`null`, the default, still reads `php://input`). The request's uploaded files are available
 through `HttpRequest::uploadedFiles()` as the new `Psr7UploadedFiles`, read only when used (new
-`HttpRequest::setUploadedFiles()`). `MockServer::withRequestObject()` keeps simulating the request
-for tests.
+`HttpRequest::setUploadedFiles()`). What the request does not have, the adapter parses from a form
+body: the POST data when there is no parsed body (most PSR-7 implementations do not parse the body),
+and the uploaded files of a multipart body when the request has none (the runtime did not parse it, as
+in a worker or a test).
+
+`MockServer` handles its request through the same adapter. While the request is handled, it
+fills PHP's globals from it as a web server would (each upload in its own temporary file), and
+restores them afterward, so a test no longer leaves the previous request in the globals.
 
 `Server::handle()` now starts every request with a new response and forgets the request once
 handled, so one `Server` can serve many requests. A `Server` bound as a DI singleton, as Gluo
@@ -201,8 +207,9 @@ does not.
 - `BaseOutputProcessor::getFromContentType()` throws `Error406Exception` instead of
   `OperationIdInvalidException` for an unknown content type. This also applies when
   `OpenApiRouteList` generates routes for a content type with no output processor.
-- `MockHttpRequest` throws `Error400Exception` instead of `OperationIdInvalidException` for a
-  multipart part without a name.
+- `MockHttpRequest` is removed: `MockServer` converts the PSR-7 request with
+  `Psr7RequestAdapter`. A test that built a `MockHttpRequest` should send its request through
+  `MockServer`. A multipart field no longer ends with the line break the old parser kept.
 
 ### Dependency updates
 

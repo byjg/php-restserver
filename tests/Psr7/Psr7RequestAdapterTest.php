@@ -89,6 +89,29 @@ class Psr7RequestAdapterTest extends TestCase
         $this->assertEquals('books', $queryParams['category']);
     }
 
+    /**
+     * The POST data is the parsed body and the body too: a PSR-7 consumer that reads the body sees the form
+     */
+    public function testFromHttpRequestWritesTheFormBody(): void
+    {
+        $httpRequest = new HttpRequest(
+            [],
+            ['username' => 'testuser', 'tags' => ['a', 'b']],
+            [
+                'REQUEST_METHOD' => 'POST',
+                'REQUEST_URI' => '/login',
+                'SERVER_NAME' => 'localhost',
+            ],
+            [],
+            []
+        );
+
+        $psr7Request = Psr7RequestAdapter::fromHttpRequest($httpRequest);
+
+        $this->assertEquals('application/x-www-form-urlencoded', $psr7Request->getHeaderLine('Content-Type'));
+        $this->assertEquals('username=testuser&tags%5B0%5D=a&tags%5B1%5D=b', (string)$psr7Request->getBody());
+    }
+
     public function testFromHttpRequestParsedBody(): void
     {
         $httpRequest = new HttpRequest(
@@ -335,6 +358,41 @@ class Psr7RequestAdapterTest extends TestCase
         $this->assertEquals(['name' => 'John', 'tags' => ['a', 'b']], $httpRequest->body());
         $this->assertEquals('John', $httpRequest->body('name'));
         $this->assertEquals('name=John&tags%5B%5D=a&tags%5B%5D=b', $httpRequest->payload());
+    }
+
+    /**
+     * A multipart body no one parsed (no parsed body, no uploaded files) gives the POST data and the files
+     */
+    public function testToHttpRequestMultipartBody(): void
+    {
+        $body = "--b1\r\nContent-Disposition: form-data; name=\"name\"\r\n\r\nJohn\r\n"
+            . "--b1\r\nContent-Disposition: form-data; name=\"doc\"; filename=\"a.txt\"\r\nContent-Type: text/plain\r\n\r\nhello\r\n"
+            . "--b1--\r\n";
+        $psr7Request = (new ServerRequest(Uri::getInstance('http://localhost/form'), ['REMOTE_ADDR' => '127.0.0.1']))
+            ->withMethod('POST')
+            ->withHeader('Content-Type', 'multipart/form-data; boundary=b1')
+            ->withBody(new MemoryStream($body));
+
+        $httpRequest = Psr7RequestAdapter::toHttpRequest($psr7Request);
+
+        $this->assertEquals(['name' => 'John'], $httpRequest->body());
+        $this->assertEquals(['doc'], $httpRequest->uploadedFiles()->getKeys());
+        $this->assertEquals('hello', $httpRequest->uploadedFiles()->getUploadedFile('doc'));
+        $this->assertEquals('a.txt', $httpRequest->uploadedFiles()->getFileName('doc'));
+    }
+
+    /**
+     * A parsed body that was set (a runtime that parsed the form) is used as it is
+     */
+    public function testToHttpRequestUsesTheParsedBodyGiven(): void
+    {
+        $psr7Request = (new ServerRequest(Uri::getInstance('http://localhost/form'), ['REMOTE_ADDR' => '127.0.0.1']))
+            ->withMethod('POST')
+            ->withHeader('Content-Type', 'application/x-www-form-urlencoded')
+            ->withBody(new MemoryStream('name=FromBody'))
+            ->withParsedBody(['name' => 'Parsed']);
+
+        $this->assertEquals(['name' => 'Parsed'], Psr7RequestAdapter::toHttpRequest($psr7Request)->body());
     }
 
     public function testHttpRequestRoundTrip(): void
