@@ -23,6 +23,10 @@ PHP's globals as a web server would (`$_SERVER`, `$_GET`, `$_POST`, `$_REQUEST`,
 upload in its own temporary file), for code that reads them; after the request they are restored and the temporary
 files removed.
 
+The query string can be given in the URI (`new Uri('http://localhost/project?page=2')`) or in its path
+(`$uri->withPath('/project?page=2')`, as php-swagger-test sends it): either way it is the request's query
+(`$request->query()`, `$_GET`).
+
 ### Basic Example
 
 ```php

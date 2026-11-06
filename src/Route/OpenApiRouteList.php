@@ -25,11 +25,19 @@ class OpenApiRouteList extends RouteList
     const string OPENAPI_PATH = 'openapi_path';
 
     protected CacheInterface $cache;
-    protected array $schema;
+    protected string $openApiDefinition;
+    protected string $extension;
+    /**
+     * @var array|null The schema, read when it is first used (see getSchema())
+     */
+    protected ?array $schema = null;
     protected string $defaultProcessor;
     protected array $overrideOutputProcessor = [];
 
     /**
+     * The schema file is read only when the routes are generated (or getSchema() is called): with the routes in
+     * the cache (withCache()), it is not read at all.
+     *
      * @param string $openApiDefinition
      * @throws SchemaInvalidException
      * @throws SchemaNotFoundException
@@ -40,26 +48,14 @@ class OpenApiRouteList extends RouteList
         if ($ext === false) {
             throw new SchemaNotFoundException("Schema '$openApiDefinition' not found");
         }
-
-        $contents = file_get_contents($openApiDefinition);
-        if ($contents === false) {
-            throw new SchemaNotFoundException("Failed to read schema '$openApiDefinition'");
-        }
-
-        if ($ext == "json") {
-            $this->schema = Serialize::fromJson($contents)->toArray();
-        } elseif ($ext == "yaml" || $ext == "yml") {
-            $this->schema = Serialize::fromYaml($contents)->toArray();
-        } else {
+        if (!in_array($ext, ['json', 'yaml', 'yml'], true)) {
             throw new SchemaInvalidException(
                 "Cannot determine file type. Valid extensions are 'json', 'yaml' or 'yml'"
             );
         }
 
-        if (!isset($this->schema['paths'])) {
-            throw new SchemaInvalidException("Schema '$openApiDefinition' is invalid");
-        }
-
+        $this->openApiDefinition = $openApiDefinition;
+        $this->extension = $ext;
         $this->cache = new NoCacheEngine();
 
         $this->defaultProcessor = JsonOutputProcessor::class;
@@ -124,17 +120,18 @@ class OpenApiRouteList extends RouteList
      */
     protected function generateRoutes(): array
     {
-        $basePath = $this->schema["basePath"] ?? "";
-        if (empty($basePath) && isset($this->schema["servers"])) {
-            $uri = new Uri($this->schema["servers"][0]["url"]);
+        $schema = $this->getSchema();
+        $basePath = $schema["basePath"] ?? "";
+        if (empty($basePath) && isset($schema["servers"])) {
+            $uri = new Uri($schema["servers"][0]["url"]);
             $basePath = $uri->getPath();
         }
 
-        $pathList = $this->sortPaths(array_keys($this->schema['paths']));
+        $pathList = $this->sortPaths(array_keys($schema['paths']));
 
         $routes = [];
         foreach ($pathList as $path) {
-            foreach ($this->schema['paths'][$path] as $method => $properties) {
+            foreach ($schema['paths'][$path] as $method => $properties) {
                 if (!isset($properties['operationId'])) {
                     throw new OperationIdInvalidException('OperationId was not found');
                 }
@@ -228,9 +225,34 @@ class OpenApiRouteList extends RouteList
         return (count($returnOutputProcessor) === 1) ? $returnOutputProcessor[0] : $returnOutputProcessor;
     }
 
+    /**
+     * The schema, read from the file the first time
+     *
+     * @throws SchemaNotFoundException when the file cannot be read
+     * @throws SchemaInvalidException when the schema has no paths
+     * @throws \JsonException when a JSON file is not valid JSON
+     */
     public function getSchema(): array
     {
-        return $this->schema;
+        if ($this->schema !== null) {
+            return $this->schema;
+        }
+
+        $contents = file_get_contents($this->openApiDefinition);
+        if ($contents === false) {
+            throw new SchemaNotFoundException("Failed to read schema '$this->openApiDefinition'");
+        }
+
+        // A JSON file is decoded as is: Serialize::fromJson()->toArray() gave the same array, walking it again
+        $schema = $this->extension === 'json'
+            ? json_decode($contents, true, flags: JSON_THROW_ON_ERROR)
+            : Serialize::fromYaml($contents)->toArray();
+
+        if (!is_array($schema) || !isset($schema['paths'])) {
+            throw new SchemaInvalidException("Schema '$this->openApiDefinition' is invalid");
+        }
+
+        return $this->schema = $schema;
     }
 
     /**

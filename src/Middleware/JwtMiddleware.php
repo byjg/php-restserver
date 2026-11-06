@@ -52,7 +52,14 @@ class JwtMiddleware implements BeforeMiddlewareInterface
 
         $vars = [];
         try {
-            foreach ((array)$this->jwtWrapper->extractData() as $key => $value) {
+            // The token of this request. JwtWrapper::extractData() without one reads $_SERVER, which is not this
+            // request's in a PSR-7 runtime or a persistent worker (Server::withRequestObject())
+            $authorization = $request->getHeader('Authorization');
+            $bearer = is_string($authorization) ? (string)(sscanf($authorization, 'Bearer %s')[0] ?? '') : '';
+            if ($bearer === '') {
+                throw new JwtWrapperException('Absent authorization token');
+            }
+            foreach ((array)$this->jwtWrapper->extractData($bearer) as $key => $value) {
                 $vars[self::JWT_PARAM_PREFIX . '.' . $key] = $value;
             }
             $vars[self::JWT_PARAM_PARSE_STATUS] = self::JWT_SUCCESS;

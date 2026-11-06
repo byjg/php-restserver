@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use ByJG\Cache\Psr16\ArrayCacheEngine;
 use ByJG\RestServer\Exception\OperationIdInvalidException;
 use ByJG\RestServer\Exception\SchemaInvalidException;
 use ByJG\RestServer\Exception\SchemaNotFoundException;
@@ -94,6 +95,39 @@ class OpenApiRouteDefinitionTest extends TestCase
             ->withDefaultProcessor(JsonCleanOutputProcessor::class);
 
         $this->assertMime3($object);
+    }
+
+    /**
+     * The schema is read only to generate the routes: with the routes in the cache it is not read at all (a web
+     * request builds the route list again, and parsed the whole schema for nothing)
+     */
+    public function testTheSchemaIsNotReadWhenTheRoutesAreCached(): void
+    {
+        $cache = new ArrayCacheEngine();
+        $routes = (new OpenApiRouteList(__DIR__ . '/fixtures/swagger-example.json'))->withCache($cache)->getRoutes();
+
+        // A file that is not JSON: reading it would throw
+        $object = (new OpenApiRouteList(__DIR__ . '/fixtures/openapi-not-json.json'))->withCache($cache);
+
+        $this->assertEquals($routes, $object->getRoutes());
+    }
+
+    public function testASchemaWithoutPathsIsInvalid(): void
+    {
+        $this->expectException(SchemaInvalidException::class);
+        (new OpenApiRouteList(__DIR__ . '/fixtures/openapi-without-paths.json'))->getRoutes();
+    }
+
+    public function testAFileThatIsNotJsonIsInvalid(): void
+    {
+        $this->expectException(\JsonException::class);
+        (new OpenApiRouteList(__DIR__ . '/fixtures/openapi-not-json.json'))->getRoutes();
+    }
+
+    public function testAMissingSchemaIsNotFound(): void
+    {
+        $this->expectException(SchemaNotFoundException::class);
+        new OpenApiRouteList(__DIR__ . '/fixtures/missing.json');
     }
 
     public function testSortPaths(): void
