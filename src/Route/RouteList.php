@@ -21,6 +21,11 @@ class RouteList implements RouteListInterface
     protected array $routes = [];
 
     /**
+     * The dispatcher of the routes, built once: null until it is used, and again when a route is added
+     */
+    private ?Dispatcher $dispatcher = null;
+
+    /**
      * @return Route[]
      */
     #[Override]
@@ -52,6 +57,7 @@ class RouteList implements RouteListInterface
         $method = $route->getMethod();
         $methodStr = is_array($method) ? implode('|', $method) : $method;
         $this->routes[strtoupper($methodStr) . " " . strtolower($route->getPath())] = $route;
+        $this->dispatcher = null;
         return $this;
     }
 
@@ -77,26 +83,36 @@ class RouteList implements RouteListInterface
     }
 
     /**
+     * The dispatcher of the routes. It is built once, until a route is added, instead of on each request: only the
+     * method and the path of a route, which do not change, are compiled. The route metadata of a match is read from
+     * the Route when dispatched, so a route changed after (withOutputProcessor(), withMetadata()...) is dispatched as
+     * it is now.
+     *
      * @return Dispatcher
      */
     #[Override]
     public function getDispatcher(): Dispatcher
     {
-        // Generic Dispatcher for RestServer
-        return simpleDispatcher(function (RouteCollector $r) {
+        return $this->dispatcher ??= new RouteDispatcher(
+            simpleDispatcher(function (RouteCollector $r) {
+                foreach ($this->getRoutes() as $route) {
+                    $r->addRoute($route->getMethod(), $route->getPath(), $route);
+                }
+            }),
+            $this->getRouteMetadata(...)
+        );
+    }
 
-            foreach ($this->getRoutes() as $route) {
-                $r->addRoute(
-                    $route->getMethod(),
-                    $route->getPath(),
-                    array_merge([
-                        self::META_OUTPUT_PROCESSOR => $route->getOutputProcessor(),
-                        self::META_CLASS => $route->getClass(),
-                        self::META_OUTPUT_PROCESSOR_STRICT => $route->isOutputContentTypeStrict()
-                    ], $route->getMetadata())
-                );
-            }
-        });
+    /**
+     * The route metadata of a route, as a match gives it: its output processor, class and own metadata
+     */
+    protected function getRouteMetadata(Route $route): array
+    {
+        return array_merge([
+            self::META_OUTPUT_PROCESSOR => $route->getOutputProcessor(),
+            self::META_CLASS => $route->getClass(),
+            self::META_OUTPUT_PROCESSOR_STRICT => $route->isOutputContentTypeStrict()
+        ], $route->getMetadata());
     }
 
     #[Override]

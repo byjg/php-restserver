@@ -96,6 +96,15 @@ parsed body only for a form body, which is the only one that becomes the POST da
 used to parse the body for nothing, and for an empty one it threw and caught an exception. About
 21 us -> 8 us per request.
 
+### The route dispatcher is built once
+
+`RouteList::getDispatcher()` built FastRoute's dispatcher on every request (~30 us with 25 routes). It is now built
+once and kept until a route is added (`addRoute()`, `setRoutes()`, `addClass()`), for a route list that serves many
+requests (a DI singleton in a persistent worker, or in tests). It compiles only the method and the path of each
+route: a match reads the output processor, the class and the metadata from the `Route` (the new
+`RouteDispatcher`), so a route changed after a request, through `getRoute()`, is dispatched as it is now. A match
+gives the same route metadata as before.
+
 `Server::handle()` now starts every request with a new response and forgets the request once
 handled, so one `Server` can serve many requests. A `Server` bound as a DI singleton, as Gluo
 does, used to answer the next request with the previous one's status and body when the process
