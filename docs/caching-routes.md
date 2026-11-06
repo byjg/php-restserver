@@ -12,6 +12,41 @@ $routeDefinition = new OpenApiRouteList(__DIR__ . '/swagger.json');
 $routeDefinition->withCache(new FileSystemCacheEngine());
 ```
 
+`OpenApiRouteList` reads the schema file only to generate the routes: with the routes in the cache, it is not read.
+
+## Compiled routes
+
+In a web request (PHP-FPM, `php -S`) the route list is built again for each request. `CompiledRouteList` loads a
+route list from a PHP file that `CompiledRouteList::compile()` wrote: the routes and FastRoute's dispatch data as
+constant arrays, which OPcache keeps in memory. Loading the routes and the dispatcher then costs about 1 us,
+instead of reading a schema or a cache and building the dispatcher on each request.
+
+Write the file when the routes change, for example when the OpenAPI schema is generated:
+
+```php
+<?php
+use ByJG\RestServer\Route\CompiledRouteList;
+use ByJG\RestServer\Route\OpenApiRouteList;
+
+$routes = (new OpenApiRouteList(__DIR__ . '/openapi.json'))->withDefaultProcessor(JsonCleanOutputProcessor::class);
+file_put_contents(__DIR__ . '/generated/routes.php', CompiledRouteList::compile($routes));
+```
+
+and handle the requests with it:
+
+```php
+<?php
+$server->handle(new CompiledRouteList(__DIR__ . '/generated/routes.php'));
+```
+
+Any route list can be compiled (`RouteList`, `OpenApiRouteList`, routes from attributes), if each route runs a class
+method (a closure cannot be written to a file) and its metadata has only scalars and arrays. The file is the same
+for the same routes, so it can be committed and checked.
+
+A `Route` is created only for the route a request matches, or when the routes are read (`getRoutes()`,
+`getRoute()`). It is then the route: a change to it is used by the next request, and a route added with
+`addRoute()` is dispatched with the compiled ones.
+
 ## The dispatcher
 
 A route list builds its dispatcher (`getDispatcher()`) once, the first time it handles a request, and keeps it until

@@ -6,6 +6,7 @@ namespace ByJG\RestServer\Route;
 use ByJG\RestServer\Attributes\RouteDefinition;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
+use FastRoute\RouteParser\Std;
 use Override;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -54,11 +55,19 @@ class RouteList implements RouteListInterface
     #[Override]
     public function addRoute(Route $route): static
     {
-        $method = $route->getMethod();
-        $methodStr = is_array($method) ? implode('|', $method) : $method;
-        $this->routes[strtoupper($methodStr) . " " . strtolower($route->getPath())] = $route;
+        $this->routes[static::routeKey($route)] = $route;
         $this->dispatcher = null;
         return $this;
+    }
+
+    /**
+     * The key of a route in the list: its method(s) and path. A route added with the key of another replaces it.
+     */
+    protected static function routeKey(Route $route): string
+    {
+        $method = $route->getMethod();
+        $methodStr = is_array($method) ? implode('|', $method) : $method;
+        return strtoupper($methodStr) . " " . strtolower($route->getPath());
     }
 
     /**
@@ -115,25 +124,34 @@ class RouteList implements RouteListInterface
         ], $route->getMetadata());
     }
 
+    /**
+     * The route a request matches: by its method(s), and by its path as FastRoute reads it (placeholders with or
+     * without a pattern, optional segments). The path is compared in any case.
+     */
     #[Override]
     public function getRoute(string $method, string $path): ?Route
     {
-        $pathMethod = strtoupper($method) . " " . strtolower($path);
+        $method = strtoupper($method);
+        $pathMethod = $method . " " . strtolower($path);
         $route = $this->routes[$pathMethod] ?? null;
         if (!empty($route)) {
             return $route;
         }
 
-        foreach (array_keys($this->routes) as $pathItem) {
-            if (!is_string($pathItem) || !str_contains($pathItem, '{')) {
+        $parser = new Std();
+        foreach ($this->routes as $route) {
+            if (!in_array($method, array_map(strtoupper(...), (array)$route->getMethod()), true)) {
                 continue;
             }
-
-            $replacedPath = preg_replace('~{(.*?)}~', '(?<\1>[^/]+)', $pathItem);
-            $pathItemPattern = '~^' . (is_string($replacedPath) ? $replacedPath : $pathItem) . '$~';
-
-            if (preg_match($pathItemPattern, $pathMethod, $matches)) {
-                return $this->routes[$pathItem] ?? null;
+            // One variant for each optional segment; a part is text, or a placeholder [name, pattern]
+            foreach ($parser->parse($route->getPath()) as $parts) {
+                $regex = implode('', array_map(
+                    fn(string|array $part): string => is_string($part) ? preg_quote($part, '~') : "($part[1])",
+                    $parts
+                ));
+                if (preg_match("~^$regex\$~i", $path) === 1) {
+                    return $route;
+                }
             }
         }
 

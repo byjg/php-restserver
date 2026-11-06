@@ -96,6 +96,22 @@ parsed body only for a form body, which is the only one that becomes the POST da
 used to parse the body for nothing, and for an empty one it threw and caught an exception. About
 21 us -> 8 us per request.
 
+### Compiled routes: `CompiledRouteList`
+
+`CompiledRouteList::compile($routeList)` writes a route list as PHP code: the routes and FastRoute's dispatch data,
+as constant arrays that OPcache keeps in memory. `new CompiledRouteList($file)` loads it: in a web request, where
+the route list is built again for each request, the routes and the dispatcher cost ~1 us instead of reading the
+schema or the cache and building the dispatcher (~420 us for php-gluo's 25 routes, as `OpenApiRouteList` read
+them). A `Route` is created only for the route a request matches. See [Caching Routes](docs/caching-routes.md).
+
+### `OpenApiRouteList` reads the schema only to generate the routes
+
+The constructor parsed the whole schema file, with `Serialize::fromJson()->toArray()`, even when the routes came
+from the cache (`withCache()`): ~390 us per request for php-gluo's `openapi.json`. The file is now read when the
+routes are generated or `getSchema()` is called, and a JSON file with `json_decode()` (the same array). An invalid
+schema (not JSON, no `paths`) throws then, instead of in the constructor; a missing file or an unknown extension
+still throws in the constructor.
+
 ### The route dispatcher is built once
 
 `RouteList::getDispatcher()` built FastRoute's dispatcher on every request (~30 us with 25 routes). It is now built
@@ -113,6 +129,18 @@ outlives the request (a persistent worker).
 ---
 
 ## Bug Fixes
+
+- **`JwtMiddleware` reads the token from the request it handles.** It called `JwtWrapper::extractData()` without
+  the token, which reads `$_SERVER['HTTP_AUTHORIZATION']`: a PSR-7 request (`Server::withRequestObject()`, a
+  persistent worker) was never authenticated (401), and a worker that fills the globals could be authenticated with
+  another request's token. It now passes the request's `Authorization` header (`HttpRequest::getHeader()`, which
+  PHP-FPM fills from `$_SERVER` as before).
+
+- **`RouteList::getRoute()` finds every route a request matches**: it built a regex from the route key, so a
+  placeholder with a pattern (`{id:\d+}`) gave an invalid regex (a PHP warning, and no route), the methods of a
+  route with several (`PUT|PATCH`) became an alternation (`getRoute('PUT', '/anything')` matched it), and a static
+  route with several methods was not found. It now compares the method with the route's methods, and the path with
+  FastRoute's parser, as the dispatcher reads it (patterns, optional segments).
 
 - **`MockServer` loses no query string**: a query given in the path of the request's URI, as
   php-swagger-test sends it (`->withPath('/project?page=2&size=10')`), stayed in the path with the old
