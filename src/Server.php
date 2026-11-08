@@ -59,6 +59,7 @@ class Server implements ServerInterface
 
     protected ?ContainerInterface $container = null;
     protected bool $allowUnregisteredControllers = false;
+    protected ?TrustedProxies $trustedProxies = null;
 
     public function __construct(?LoggerInterface $logger = null)
     {
@@ -84,6 +85,8 @@ class Server implements ServerInterface
         if ($this->useErrorHandler) {
             ErrorHandler::getInstance()->register();
         }
+
+        $this->getHttpRequest()->setTrustedProxies($this->trustedProxies);
 
         // Get the URL parameters
         $requestMethod = $this->getHttpRequest()->server('REQUEST_METHOD');
@@ -354,6 +357,21 @@ class Server implements ServerInterface
     public function withRequestObject(ServerRequestInterface $request): static
     {
         $this->httpRequest = Psr7RequestAdapter::toHttpRequest($request);
+        return $this;
+    }
+
+    /**
+     * The proxies in front of the application (load balancer, reverse proxy, CDN): for a request whose
+     * connection comes from one of them, HttpRequest::getRequestIp() reads the client's address from
+     * their forwarding header. Without them it returns REMOTE_ADDR, as any client can send the header.
+     *
+     * @param string[] $proxies IPv4 or IPv6 addresses or CIDR ranges, e.g. ['10.0.0.0/8', '172.16.0.0/12']
+     * @param string $header TrustedProxies::X_FORWARDED_FOR (default) or TrustedProxies::FORWARDED (RFC 7239)
+     * @throws InvalidArgumentException for an entry that is not an address or a range, or another header
+     */
+    public function withTrustedProxies(array $proxies, string $header = TrustedProxies::X_FORWARDED_FOR): static
+    {
+        $this->trustedProxies = new TrustedProxies($proxies, $header);
         return $this;
     }
 

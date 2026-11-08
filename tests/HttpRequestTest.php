@@ -191,15 +191,15 @@ class HttpRequestTest extends TestCase
         // Test with preset REMOTE_ADDR
         $this->assertEquals('192.168.1.1', $this->request->getRequestIp());
 
-        // Test with HTTP_X_FORWARDED_FOR
+        // A forwarding header is not believed without trusted proxies (TrustedProxiesTest covers them)
         $requestWithForwarded = new HttpRequest(
             [],
             [],
-            ['HTTP_X_FORWARDED_FOR' => '10.0.0.1,192.168.1.1'],
+            ['REMOTE_ADDR' => '192.168.1.1', 'HTTP_X_FORWARDED_FOR' => '10.0.0.1'],
             [],
             []
         );
-        $this->assertEquals('10.0.0.1', $requestWithForwarded->getRequestIp());
+        $this->assertEquals('192.168.1.1', $requestWithForwarded->getRequestIp());
 
         // Test with no IP headers
         $requestWithNoIp = new HttpRequest([], [], [], [], []);

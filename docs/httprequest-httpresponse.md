@@ -27,7 +27,7 @@ informations to the requester.
 | input($var, $default)              | Get a value from any source (query, body, server, session, cookie merged)   |
 | attribute($var, $default)          | Get a value from the attribute bag: route placeholders, query string values and values injected by middleware |
 | payload()                          | Get the raw request body (php://input)                                      |
-| getRequestIp()                     | Get the client IP address (checks proxy headers before REMOTE_ADDR)         |
+| getRequestIp()                     | Get the client IP address: REMOTE_ADDR, or behind trusted proxies the address they forwarded (see below) |
 | getUserAgent()                     | Get the user agent                                                          |
 | getServerName()                    | Get the server name                                                         |
 | getRequestServer($port, $protocol) | Get the server name, optionally with port and/or protocol                   |
@@ -95,6 +95,33 @@ function ($response, $request) {
     $tmpFile = $files->getUploadedFile('myfile');
 }
 ```
+
+### The client IP behind a proxy
+
+`getRequestIp()` returns `REMOTE_ADDR`, the address of the connection. Behind a load balancer, a
+reverse proxy or a CDN, that is the proxy: the client's address is in the header the proxy adds,
+`X-Forwarded-For`. Any client can send that header too, so it is read only when the connection comes
+from a proxy you trust. Name your proxies on the `Server`:
+
+```php
+$server = (new Server())
+    ->withTrustedProxies(['10.0.0.0/8', '172.16.0.0/12']);   // IPv4 or IPv6 addresses or CIDR ranges
+```
+
+For a request from one of them, the header is read from the right, as each proxy appends the address it
+received the request from, and the first address that is not a trusted proxy is the client. What a client
+wrote in the header itself, on the left, is not believed:
+
+```text
+REMOTE_ADDR: 10.0.0.1                             (the proxy, trusted)
+X-Forwarded-For: 1.2.3.4, 198.51.100.20           (1.2.3.4 was sent by the client)
+getRequestIp(): 198.51.100.20
+```
+
+For proxies that write the standard `Forwarded` header (RFC 7239) instead, pass
+`TrustedProxies::FORWARDED` as the second argument. Only the header you name is read: a client could send
+the other one, and no proxy would correct it. Other headers (`Client-IP`, `CF-Connecting-IP`, ...) are
+never read; behind Cloudflare, trust its ranges and read `X-Forwarded-For`.
 
 ## HttpResponse
 
