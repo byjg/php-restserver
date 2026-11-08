@@ -206,22 +206,6 @@ class HttpRequestTest extends TestCase
         $this->assertNull($requestWithNoIp->getRequestIp());
     }
 
-    public function testStaticIpMethod(): void
-    {
-        // Save original $_SERVER
-        $originalServer = $_SERVER;
-
-        try {
-            // Set a test IP address
-            $_SERVER['REMOTE_ADDR'] = '10.0.0.5';
-            $ip = HttpRequest::ip();
-            $this->assertEquals('10.0.0.5', $ip);
-        } finally {
-            // Restore original $_SERVER
-            $_SERVER = $originalServer;
-        }
-    }
-
     public function testGetUserAgent(): void
     {
         $this->assertEquals('PHPUnit Test Browser', $this->request->getUserAgent());
@@ -229,22 +213,6 @@ class HttpRequestTest extends TestCase
         // Test with no user agent
         $requestWithNoUserAgent = new HttpRequest([], [], [], [], []);
         $this->assertNull($requestWithNoUserAgent->getUserAgent());
-    }
-
-    public function testStaticUserAgentMethod(): void
-    {
-        // Save original $_SERVER
-        $originalServer = $_SERVER;
-
-        try {
-            // Set a test user agent
-            $_SERVER['HTTP_USER_AGENT'] = 'Static Test Browser';
-            $userAgent = HttpRequest::userAgent();
-            $this->assertEquals('Static Test Browser', $userAgent);
-        } finally {
-            // Restore original $_SERVER
-            $_SERVER = $originalServer;
-        }
     }
 
     public function testGetServerName(): void

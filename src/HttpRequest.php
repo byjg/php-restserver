@@ -221,22 +221,10 @@ class HttpRequest
         return null;
     }
 
-    public static function ip(): ?string
-    {
-        $request = new HttpRequest([], [], $_SERVER, [], []);
-        return $request->getRequestIp();
-    }
-
     public function getUserAgent(): bool|array|string|null
     {
         $userAgent = $this->server('HTTP_USER_AGENT');
         return $userAgent ?: null;
-    }
-
-    public static function userAgent(): bool|array|string|null
-    {
-        $request = new HttpRequest([], [], $_SERVER, [], []);
-        return $request->getUserAgent();
     }
 
     public function getServerName(): bool|array|string|null

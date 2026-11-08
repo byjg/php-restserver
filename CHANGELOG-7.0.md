@@ -257,6 +257,10 @@ does not.
 - `MockHttpRequest` is removed: `MockServer` converts the PSR-7 request with
   `Psr7RequestAdapter`. A test that built a `MockHttpRequest` should send its request through
   `MockServer`. A multipart field no longer ends with the line break the old parser kept.
+- The static `HttpRequest::ip()` and `HttpRequest::userAgent()` are removed. They read PHP's
+  `$_SERVER`, which does not describe the request when it reaches the `Server` as a PSR-7 request
+  (`Server::withRequestObject()` in RoadRunner, Swoole, ...). Use `$request->getRequestIp()` and
+  `$request->getUserAgent()` on the `HttpRequest` the route receives.
 
 ### Dependency updates
 
