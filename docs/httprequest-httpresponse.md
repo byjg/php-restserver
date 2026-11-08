@@ -28,9 +28,7 @@ informations to the requester.
 | attribute($var, $default)          | Get a value from the attribute bag: route placeholders, query string values and values injected by middleware |
 | payload()                          | Get the raw request body (php://input)                                      |
 | getRequestIp()                     | Get the client IP address (checks proxy headers before REMOTE_ADDR)         |
-| ip()                               | Static method to get the client IP                                          |
 | getUserAgent()                     | Get the user agent                                                          |
-| userAgent()                        | Static method to get the user agent                                         |
 | getServerName()                    | Get the server name                                                         |
 | getRequestServer($port, $protocol) | Get the server name, optionally with port and/or protocol                   |
 | getHeader($header)                 | **Deprecated**, removed in 8.0: use header()                                |
