@@ -13,6 +13,7 @@ class HttpRequest
     protected array $param;
     protected array $phpRequest;
     protected array $routeMetadata = [];
+    protected ?TrustedProxies $trustedProxies = null;
 
     /**
      * @param string|null $payload The raw request body. Null reads php://input when payload() is called.
@@ -190,35 +191,26 @@ class HttpRequest
     }
 
     /**
-     * Returns the client IP address, checking common proxy headers before REMOTE_ADDR.
+     * Returns the client IP address: REMOTE_ADDR, the connection's address. Behind proxies, the
+     * Server's trusted proxies (Server::withTrustedProxies()) say whose forwarding header is believed:
+     * any client can send one, so without them it is never read.
      */
     public function getRequestIp(): ?string
     {
-        $headers = [
-            'HTTP_X_FORWARDED_FOR',
-            'HTTP_X_FORWARDED',
-            'HTTP_FORWARDED_FOR',
-            'HTTP_FORWARDED',
-            'HTTP_CF_CONNECTING_IP',
-            'HTTP_X_ORIGINAL_FORWARDED_FOR',
-            'REMOTE_ADDR',
-            'SERVER_ADDR',
-            'HTTP_CLIENT_IP',
-        ];
-        foreach ($headers as $header) {
-            if ($this->server($header, false) !== false) {
-                $value = $this->server($header);
-                if (is_array($value)) {
-                    $result = reset($value);
-                    return $result !== false ? $result : null;
-                }
-                $list = explode(",", (string)$value);
-                $result = reset($list);
-                return $result !== false ? $result : null;
-            }
+        $remoteAddr = $this->serverString('REMOTE_ADDR');
+        if ($remoteAddr === null || $this->trustedProxies === null) {
+            return $remoteAddr;
         }
+        return $this->trustedProxies->clientIp($remoteAddr, $this->serverString($this->trustedProxies->serverKey()));
+    }
 
-        return null;
+    /**
+     * The proxies in front of the application, for getRequestIp(). The Server sets them on the request it
+     * handles (Server::withTrustedProxies()).
+     */
+    public function setTrustedProxies(?TrustedProxies $trustedProxies): void
+    {
+        $this->trustedProxies = $trustedProxies;
     }
 
     public function getUserAgent(): bool|array|string|null

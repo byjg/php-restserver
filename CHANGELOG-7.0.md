@@ -112,6 +112,13 @@ routes are generated or `getSchema()` is called, and a JSON file with `json_deco
 schema (not JSON, no `paths`) throws then, instead of in the constructor; a missing file or an unknown extension
 still throws in the constructor.
 
+### Trusted proxies: `Server::withTrustedProxies()`
+
+`HttpRequest::getRequestIp()` reads the client's address from `X-Forwarded-For` (or `Forwarded`) only for a
+request whose connection comes from a proxy given to `Server::withTrustedProxies()`, and only the addresses
+those proxies added: the header is read from the right, and the first address that is not a trusted proxy is
+the client. See [The client IP behind a proxy](docs/httprequest-httpresponse.md#the-client-ip-behind-a-proxy).
+
 ### The route dispatcher is built once
 
 `RouteList::getDispatcher()` built FastRoute's dispatcher on every request (~30 us with 25 routes). It is now built
@@ -257,6 +264,14 @@ does not.
 - `MockHttpRequest` is removed: `MockServer` converts the PSR-7 request with
   `Psr7RequestAdapter`. A test that built a `MockHttpRequest` should send its request through
   `MockServer`. A multipart field no longer ends with the line break the old parser kept.
+- `HttpRequest::getRequestIp()` returns `REMOTE_ADDR` unless the `Server` has trusted proxies
+  (`Server::withTrustedProxies()`, see New Features). It returned the first address of the first of
+  `X-Forwarded-For`, `X-Forwarded`, `Forwarded-For`, `Forwarded`, `CF-Connecting-IP`,
+  `X-Original-Forwarded-For` it found, then `REMOTE_ADDR`, `SERVER_ADDR` or `Client-IP`. Any client can send
+  those headers, so it returned the address the client chose: an application using the IP for rate limits,
+  lockouts, audit logs or allow-lists could be bypassed or misled. `Forwarded` was returned unparsed
+  (`for=...;proto=...`), and without `REMOTE_ADDR` the server's own `SERVER_ADDR` was returned. An
+  application behind a proxy now gets the proxy's address until it names its proxies.
 - The static `HttpRequest::ip()` and `HttpRequest::userAgent()` are removed. They read PHP's
   `$_SERVER`, which does not describe the request when it reaches the `Server` as a PSR-7 request
   (`Server::withRequestObject()` in RoadRunner, Swoole, ...). Use `$request->getRequestIp()` and
