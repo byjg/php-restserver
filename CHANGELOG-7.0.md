@@ -153,6 +153,11 @@ outlives the request (a persistent worker).
   php-swagger-test sends it (`->withPath('/project?page=2&size=10')`), stayed in the path with the old
   `MockHttpRequest`, so the route got no query: every list returned its first page. The URI is parsed again
   from its string, so it is the query.
+- **`MockServer`'s PSR-7 response has its headers by name**: `getPsr7Response()` read the writer's
+  header lines as name ⇒ value pairs, so the response had headers named `0`, `1`... and
+  `getHeaderLine('Content-Type')` was empty. Each line is now split at its first `:`, the status line
+  is skipped, and a header sent more than once keeps every value. Gluo's `FakeApiRequester` gets the
+  same headers a real response sends.
 - **Accept header negotiation**: all Accept types are now considered instead of only the
   first, so a request whose primary type is unsupported (e.g. `image/avif`) correctly falls
   back to `*/*` rather than returning 500.

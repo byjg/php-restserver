@@ -123,9 +123,19 @@ class MockServer extends Server
             /** @psalm-suppress UndefinedInterfaceMethod Always using MemoryWriter */
             $this->psr7Response = new Response($this->writer->getStatusCode());
 
+            // The writer keeps the lines given to header(), as a real response sends them: the status
+            // line (its code is already in the response) and "Name: value" lines, a name repeated when
+            // it was sent with $replace = false
             /** @psalm-suppress UndefinedInterfaceMethod Always using MemoryWriter */
-            foreach ($this->writer->getHeaders() as $header => $value) {
-                $this->psr7Response = $this->psr7Response->withHeader($header, $value);
+            foreach ($this->writer->getHeaders() as $line) {
+                $colon = strpos($line, ':');
+                if (str_starts_with($line, 'HTTP/') || $colon === false) {
+                    continue;
+                }
+                $this->psr7Response = $this->psr7Response->withAddedHeader(
+                    trim(substr($line, 0, $colon)),
+                    trim(substr($line, $colon + 1))
+                );
             }
 
             /** @psalm-suppress UndefinedInterfaceMethod Always using MemoryWriter */
