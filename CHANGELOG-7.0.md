@@ -158,6 +158,10 @@ outlives the request (a persistent worker).
   `getHeaderLine('Content-Type')` was empty. Each line is now split at its first `:`, the status line
   is skipped, and a header sent more than once keeps every value. Gluo's `FakeApiRequester` gets the
   same headers a real response sends.
+- **A header replaces only the header with its name**: `StdoutWriter::header()` (and `MemoryWriter`)
+  replaced the first header whose name *started* with the new one, as a regex not escaped, so
+  `X-Foo` overwrote `X-Foo-Bar`. Names are now compared whole, ignoring case, and, as PHP's
+  `header()`, replacing removes every line of that name, including those sent with `$replace = false`.
 - **Accept header negotiation**: all Accept types are now considered instead of only the
   first, so a request whose primary type is unsupported (e.g. `image/avif`) correctly falls
   back to `*/*` rather than returning 500.
