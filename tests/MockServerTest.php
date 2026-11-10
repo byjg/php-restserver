@@ -213,4 +213,30 @@ class MockServerTest extends TestCase
         $this->assertEquals([], $_COOKIE);
         $this->assertEquals([], $_FILES);
     }
+
+    public function testThePsr7ResponseHasTheHeadersByName(): void
+    {
+        $routes = (new RouteList())->setRoutes([
+            Route::get('/headers')->withOutputProcessor(JsonOutputProcessor::class)->withClosure(
+                function (HttpResponse $response, HttpRequest $request): void {
+                    $response->addHeader('Location', 'http://localhost:8080/next');
+                    $response->addHeader('X-Values', ['a', 'b']);
+                    $response->write(['ok' => true]);
+                }
+            ),
+        ]);
+
+        $response = MockServer::mock($routes, \ByJG\WebRequest\Psr7\Request::getInstance(new Uri('http://localhost/headers')))
+            ->getPsr7Response();
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('application/json', $response->getHeaderLine('Content-Type'));
+        // A value with its own colons is kept whole
+        $this->assertEquals('http://localhost:8080/next', $response->getHeaderLine('Location'));
+        // A header sent more than once keeps every value
+        $this->assertEquals(['a', 'b'], $response->getHeader('X-Values'));
+        // The status line is not a header, and no header is named by its position
+        $this->assertFalse($response->hasHeader('0'));
+        $this->assertFalse($response->hasHeader('HTTP/1.1 200 OK'));
+    }
 }
