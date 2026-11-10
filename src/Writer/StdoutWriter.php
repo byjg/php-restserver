@@ -18,18 +18,22 @@ class StdoutWriter implements WriterInterface
             return;
         }
 
+        // As PHP's header(): replacing removes every line with the same name, compared whole and ignoring
+        // case, so X-Foo does not replace X-Foo-Bar
         if ($replace) {
-            $headerParts = explode(':', $header);
-            for ($i=0; $i<count($this->headerList); $i++) {
-                $headerParts[0] = strtolower($headerParts[0]);
-                if (preg_match("~^" . $headerParts[0] . "~i", $this->headerList[$i]) === 1) {
-                    $this->headerList[$i] = $header;
-                    return;
-                }
-            }
+            $name = self::headerName($header);
+            $this->headerList = array_values(array_filter(
+                $this->headerList,
+                static fn(string $line) => strcasecmp(self::headerName($line), $name) !== 0
+            ));
         }
 
         $this->headerList[] = $header;
+    }
+
+    private static function headerName(string $line): string
+    {
+        return trim(explode(':', $line, 2)[0]);
     }
 
     #[Override]
